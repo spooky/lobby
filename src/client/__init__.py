@@ -23,6 +23,8 @@
 # Initialize logging system
 import logging
 import util
+from PyQt4.QtNetwork import *
+
 logger = logging.getLogger("faf.client")
 #logger.setLevel(logging.DEBUG)
 
@@ -36,7 +38,7 @@ if not util.developer():
 
 
 # Initialize all important globals
-LOBBY_HOST = 'direct.faforever.com'
+LOBBY_HOST = 'localhost'
 LOBBY_PORT = 8001
 LOCAL_REPLAY_PORT = 15000
 GAME_PORT_DEFAULT = 6112
@@ -51,6 +53,8 @@ SUPPORT_URL = "http://www.faforever.com/forums/viewforum.php?f=3"
 TICKET_URL = "http://www.faforever.com/forums/viewforum.php?f=3"
 STEAMLINK_URL = "http://www.faforever.com/faf/steam.php"
 
+
+networkAccessManager = QNetworkAccessManager()
 
 class ClientState:
     '''

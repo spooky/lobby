@@ -33,6 +33,11 @@ from client import logger, ClientState, MUMBLE_URL, WEBSITE_URL, WIKI_URL, \
     FORUMS_URL, UNITDB_URL, SUPPORT_URL, TICKET_URL, GAME_PORT_DEFAULT, LOBBY_HOST, \
     LOBBY_PORT, LOCAL_REPLAY_PORT, STEAMLINK_URL
 
+from PyQt4.QtCore import *
+from PyQt4.QtNetwork import *
+
+from client import networkAccessManager
+
 import struct
 
 HEARTBEAT = 20000
@@ -1199,7 +1204,7 @@ class ClientWindow(FormClass, BaseClass):
         if not self.autologin or not self.password or not self.login:
             import loginwizards
             if not loginwizards.LoginWizard(self).exec_():
-                return False;
+                return False
 
         self.progress.setLabelText("Logging in...")
         self.progress.reset()
@@ -1219,7 +1224,31 @@ class ClientWindow(FormClass, BaseClass):
 
         self.send('handshake', {'server_address':LOBBY_HOST,'protocol_version':0})
 
-        self.send('login', {'username': self.login,'password': self.password})
+        req = QNetworkRequest(QUrl("http://localhost:44343/do/login"))
+
+        postData = QUrl()
+
+        postData.addQueryItem("username", self.login)
+        postData.addQueryItem("password", self.password)
+
+        rep = networkAccessManager.post(req, postData.encodedQuery())
+
+        # FIXME To be asynchronous
+        loop = QEventLoop()
+        rep.finished.connect(loop.quit)
+        loop.exec_(QEventLoop.AllEvents|QEventLoop.WaitForMoreEvents)
+
+        resData = str(rep.readAll())
+        print "Response:", rep.errorString(), resData
+        resp = json.loads(resData)
+
+        if not resp['success']:
+            self.state = ClientState.REJECTED
+        else:
+            self.state = ClientState.ACCEPTED
+            self.session_id = resp["session_id"]
+
+        self.send('login', {'username': self.login,'session_id': self.session_id})
 
         while (not self.state) and self.progress.isVisible():
             QtGui.QApplication.processEvents()
@@ -1565,6 +1594,7 @@ class ClientWindow(FormClass, BaseClass):
             self.socket.read(4)
             msg = json.loads(self.socket.read(size).decode())
 
+            print ">>",msg['id'], ': ', msg['data']
             self.dispatch(msg['id'], msg['data'])
 
 

@@ -22,6 +22,10 @@
 
 from PyQt4 import QtCore, QtGui
 
+from PyQt4.QtCore import *
+from PyQt4.QtNetwork import *
+
+import json
 import re
 import util
 
@@ -57,8 +61,9 @@ class LoginWizard(QtGui.QWizard):
 
     def accept(self):
         self.login = self.field("login").strip()
-        if (self.field("password") != "!!!password!!!"): #Not entirely nicely coded, this can go into a lambda function connected to the LineEdit                    
-            self.password = hashlib.sha256(self.field("password").strip().encode("utf-8")).hexdigest()
+        if (self.field("password") != "!!!password!!!"): #Not entirely nicely coded, this can go into a lambda function connected to the LineEdit
+            # FIXME Sheeo pass hash
+            self.password = self.field("password").strip().encode("utf-8")
 
         self.client.login = self.field("login").strip()
         self.client.password = self.password    #this is the hash, not the dummy password
@@ -371,18 +376,48 @@ class AccountCreationPage(QtGui.QWizardPage):
         
         # check if the login is okay
         login = self.loginLineEdit.text().strip()
-        
-        self.client.loginWriteToFaServer("CREATE_ACCOUNT", login, email, password1)
+
+        from client import networkAccessManager
+
+        req = QNetworkRequest(QUrl("http://localhost:44343/do/register"))
+
+        postData = QUrl()
+
+        # FIXME Sheeo
+        postData.addQueryItem("email", email)
+        postData.addQueryItem("username", login)
+        postData.addQueryItem("password", self.passwordLineEdit.text().encode("utf-8"))
+
+        rep = networkAccessManager.post(req, postData.encodedQuery())
+
+        rep.finished.connect(self.onRegisterReply)
+
+        self.register_reply = rep
+
+        # FIXME To be asynchronous
+        self.loop = loop = QEventLoop()
+        loop.exec_(QEventLoop.AllEvents|QEventLoop.WaitForMoreEvents)
+        return self.onRegisterReply()
+
+        #self.client.loginWriteToFaServer("CREATE_ACCOUNT", login, email, password1)
 
         # Wait for client state to change.
-        util.wait(lambda: self.client.state)
-                
-        if self.client.state == ClientState.REJECTED:
+        #util.wait(lambda: self.client.state)
+
+    def onRegisterReply(self):
+        resData = str(self.register_reply.readAll())
+        print "Response:", self.register_reply.errorString(), resData
+        resp = json.loads(resData)
+
+        self.loop.exit()
+
+        if not resp['success']:
+        #if self.client.state == ClientState.REJECTED:
             QtGui.QMessageBox.information(self, "Create account", "Sorry, this Login is not available, or the email address was already used.")
             return False
         else:
-            self.client.login = login
-            self.client.password = password1
+            self.client.session_id = resp["session_id"]
+            #self.client.password = password1
             return True  
 
 class GameSettings(QtGui.QWizardPage):
