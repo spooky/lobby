@@ -24,7 +24,7 @@
 import sys
 import os
 import urllib2
-from ctypes import *
+
 
 def developer():
     return os.path.basename(sys.executable).startswith('python')
@@ -143,9 +143,8 @@ if not os.path.isdir(VOICES_DIR):
 
 from PyQt4 import QtGui, uic, QtCore
 import shutil
-import hashlib, sha
+import hashlib
 import re
-import urllib
 
 
 # Dirty log rotation: Get rid of logs if larger than 1 MiB
@@ -163,7 +162,7 @@ except:
         
 # Initialize logging system
 import logging
-import traceback
+
 if not developer():
     logging.basicConfig(filename=LOG_FILE_FAF, level=logging.INFO, format='%(asctime)s %(levelname)-8s %(name)-20s %(message)s')
 else:
@@ -625,4 +624,11 @@ def now():
 from crash import CrashDialog
 from report import ReportDialog
 
-    
+from PyQt4.QtCore import QEventLoop
+
+# FIXME We should deprecate out synchronous logic.
+# Note: This wait is not that bad. It yields to any and all scheduled events.
+def waitForSignal(signal):
+    loop = QEventLoop()
+    signal.connect(loop.quit)
+    loop.exec_(QEventLoop.AllEvents | QEventLoop.WaitForMoreEvents)

@@ -26,19 +26,18 @@ Created on Dec 1, 2011
 @author: thygrrr
 '''
 
-from PyQt4 import QtCore, QtGui, QtNetwork, QtWebKit
 from types import IntType, FloatType, ListType, DictType
+import struct
+
+from PyQt4 import QtCore, QtGui, QtNetwork, QtWebKit
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 
 from client import logger, ClientState, MUMBLE_URL, WEBSITE_URL, WIKI_URL, \
     FORUMS_URL, UNITDB_URL, SUPPORT_URL, TICKET_URL, GAME_PORT_DEFAULT, LOBBY_HOST, \
     LOBBY_PORT, LOCAL_REPLAY_PORT, STEAMLINK_URL
+from client.PortTester import PortTester
 
-from PyQt4.QtCore import *
-from PyQt4.QtNetwork import *
-
-from client import networkAccessManager
-
-import struct
 
 HEARTBEAT = 20000
 
@@ -54,6 +53,8 @@ import time
 import os
 import random
 import notificatation_system as ns
+
+from LobbyServerContext import LobbyServerContext
 
 try:
     from profile import playerstats
@@ -186,11 +187,15 @@ class ClientWindow(FormClass, BaseClass):
         QtGui.QApplication.instance().aboutToQuit.connect(self.cleanup)
 
         #Init and wire the TCP Network socket to communicate with faforever.com
-        self.socket = QtNetwork.QTcpSocket()
-        self.socket.readyRead.connect(self.readFromServer)
-        self.socket.disconnected.connect(self.disconnectedFromServer)
-        self.socket.error.connect(self.socketError)
-        self.blockSize = 0
+        self.lobby_ctx = LobbyServerContext()
+
+        self.lobby_ctx.messageReceived.connect(self.dispatch)
+
+        self.lobby_ctx.connectToHost(LOBBY_HOST, LOBBY_PORT)
+
+        self.progress = QProgressDialog()
+        self.progress.setMinimum(0)
+        self.progress.setMaximum(0)
 
         self.udpTest = False
         try:
@@ -199,24 +204,11 @@ class ClientWindow(FormClass, BaseClass):
             pass
 
         self.sendFile = False
-        self.progress = QtGui.QProgressDialog()
-        self.progress.setMinimum(0)
-        self.progress.setMaximum(0)
 
         #Tray icon
         self.tray = QtGui.QSystemTrayIcon()
         self.tray.setIcon(util.icon("client/tray_icon.png"))
         self.tray.show()
-
-        self.state = ClientState.NONE
-        self.session = None
-
-        #Timer for checking connection
-        #self.heartbeatTimer = QtCore.QTimer(self)
-        #self.heartbeatTimer.timeout.connect(self.serverTimeout)
-        #self.timeout = 0
-
-        
 
         #Timer for resize events
         self.resizeTimer = QtCore.QTimer(self)
@@ -631,9 +623,9 @@ class ClientWindow(FormClass, BaseClass):
         fa.exe.close()
 
         #Terminate Lobby Server connection
-        if self.socket.state() == QtNetwork.QTcpSocket.ConnectedState:
-            self.progress.setLabelText("Closing main connection.")
-            self.socket.disconnectFromHost()
+        # if self.socket.state() == QtNetwork.QTcpSocket.ConnectedState:
+        # self.progress.setLabelText("Closing main connection.")
+        # self.socket.disconnectFromHost()
 
         # Clear UPnP Mappings...
         if self.useUPnP:
@@ -995,9 +987,18 @@ class ClientWindow(FormClass, BaseClass):
             pass
 
 
-    def processTestGameportDatagram(self):
-        self.udpTest = True
+    def udpPortTestComplete(self, testResult):
+        if not testResult['success']:
+            QMessageBox.warning(self, "UDP Port Test Failed",
+                                "FAF was unable to communicate to the server via UDP. <br><br>Possible reasons:<ul><li><b>Your firewall is blocking the UDP port {port}.</b></li><li><b>Your router is blocking or routing port {port} in a wrong way.</b></li></ul><br><font size='+2'>How to fix this : </font> <ul><li>Check your firewall and router. <b>More info in the wiki (Links -> Wiki)</li></b><li>You should also consider using <b>uPnP (Options -> Settings -> Gameport)</b></li><li>You should ask for assistance in the TechQuestions chat and/or in the <b>technical forum (Links -> Forums<b>)</li></ul><br><font size='+1'><b>FA will not be able to perform correctly until this issue is fixed.</b></font>".format(
+                                    port=self.gamePort))
 
+        else:
+            if 'alternative_port' in testResult:
+                logger.info("Using alternative port %i for FA." % testResult['alternative_port'])
+            self.udpTest = True
+
+    # # NOT USED
     def testGamePort(self):
         '''
         Here, we test with the server if the current game port set is all right.
@@ -1032,14 +1033,14 @@ class ClientWindow(FormClass, BaseClass):
 
 
 
-        self.progress.setCancelButtonText("Cancel")
-        self.progress.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint)
-        self.progress.setAutoClose(False)
-        self.progress.setAutoReset(False)
-        self.progress.setModal(1)
-        self.progress.setWindowTitle("UDP test...")
-        self.progress.setLabelText("We are waiting for an UDP answer from the server on port %i." % (self.gamePort))
-        self.progress.show()
+        # self.progress.setCancelButtonText("Cancel")
+        # self.progress.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint)
+        # self.progress.setAutoClose(False)
+        # self.progress.setAutoReset(False)
+        # self.progress.setModal(1)
+        # self.progress.setWindowTitle("UDP test...")
+        # self.progress.setLabelText("We are waiting for an UDP answer from the server on port %i." % (self.gamePort))
+        # self.progress.show()
 
         timer = time.time()
         interval = 1
@@ -1053,7 +1054,7 @@ class ClientWindow(FormClass, BaseClass):
             if time.time() - timer > 10 :
                 break
 
-        self.progress.close()
+        # self.progress.close()
 
         udpSocket.close()
         udpSocket.deleteLater()
@@ -1064,6 +1065,7 @@ class ClientWindow(FormClass, BaseClass):
 
         return True
 
+    # # NOT USED
     def doConnect(self):
 
         if not self.replayServer.doListen(LOCAL_REPLAY_PORT):
@@ -1107,6 +1109,7 @@ class ClientWindow(FormClass, BaseClass):
         else:
             return True
 
+    # # NOT USED
     def reconnect(self):
         ''' try to reconnect to the server'''
        
@@ -1158,16 +1161,6 @@ class ClientWindow(FormClass, BaseClass):
     def waitSession(self):
         self.progress.setLabelText("Setting up Session...")
 
-        self.loadSettings()
-
-        #
-        # Voice connector (This isn't supposed to be here, but I need the settings to be loaded before I can determine if we can hook in the mumbleConnector
-        #
-        if self.enableMumble:
-            self.progress.setLabelText("Setting up Mumble...")
-            import mumbleconnector
-            self.mumbleConnector = mumbleconnector.MumbleConnector(self)
-
         return True
         # self.send(dict(command="ask_session"))
         # start = time.time()
@@ -1199,6 +1192,25 @@ class ClientWindow(FormClass, BaseClass):
 
 
     def doLogin(self):
+        progress = QProgressDialog()
+        progress.setMinimum(0)
+        progress.setMaximum(0)
+
+        self.loadSettings()
+
+        if not self.replayServer.doListen(LOCAL_REPLAY_PORT):
+            return False
+
+        if not self.relayServer.doListen():
+            return False
+
+        #
+        # Voice connector (This isn't supposed to be here, but I need the settings to be loaded before I can determine if we can hook in the mumbleConnector
+        #
+        # if self.enableMumble:
+        # self.progress.setLabelText("Setting up Mumble...")
+        # import mumbleconnector
+        #     self.mumbleConnector = mumbleconnector.MumbleConnector(self)
 
         #Determine if a login wizard needs to be displayed and do so
         if not self.autologin or not self.password or not self.login:
@@ -1206,61 +1218,12 @@ class ClientWindow(FormClass, BaseClass):
             if not loginwizards.LoginWizard(self).exec_():
                 return False
 
-        self.progress.setLabelText("Logging in...")
-        self.progress.reset()
-        self.progress.show()
-
-        self.login = self.login.strip()
-        logger.info("Attempting to login as: " + str(self.login))
-        self.state = ClientState.NONE
-
-
-
-        # if not self.uniqueId :
-        #     QtGui.QMessageBox.warning(QtGui.QApplication.activeWindow(), "Unable to login", "It seems that you miss some important DLL.<br>Please install :<br><a href =\"http://www.microsoft.com/download/en/confirmation.aspx?id=8328\">http://www.microsoft.com/download/en/confirmation.aspx?id=8328</a> and <a href = \"http://www.microsoft.com/en-us/download/details.aspx?id=17851\">http://www.microsoft.com/en-us/download/details.aspx?id=17851</a><br><br>You probably have to restart your computer after installing them.<br><br>Please visit this link in case of problems : <a href=\"http://www.faforever.com/forums/viewforum.php?f=3\">http://www.faforever.com/forums/viewforum.php?f=3</a>", QtGui.QMessageBox.Close)
-        #     return False
-        # else :
-        #    self.send(dict(command="hello", version=util.VERSION, login=self.login, password=self.password, unique_id=self.uniqueId, local_ip=self.localIP))
-
-        self.send('handshake', {'server_address':LOBBY_HOST,'protocol_version':0})
-
-        req = QNetworkRequest(QUrl("http://localhost:44343/do/login"))
-
-        postData = QUrl()
-
-        postData.addQueryItem("username", self.login)
-        postData.addQueryItem("password", self.password)
-
-        rep = networkAccessManager.post(req, postData.encodedQuery())
+        self.lobby_ctx.login(self.login, self.session_id)
 
         # FIXME To be asynchronous
-        loop = QEventLoop()
-        rep.finished.connect(loop.quit)
-        loop.exec_(QEventLoop.AllEvents|QEventLoop.WaitForMoreEvents)
+        util.waitForSignal(self.lobby_ctx.loggedIn)
 
-        resData = str(rep.readAll())
-        print "Response:", rep.errorString(), resData
-        resp = json.loads(resData)
-
-        if not resp['success']:
-            self.state = ClientState.REJECTED
-        else:
-            self.state = ClientState.ACCEPTED
-            self.session_id = resp["session_id"]
-
-        self.send('login', {'username': self.login,'session_id': self.session_id})
-
-        while (not self.state) and self.progress.isVisible():
-            QtGui.QApplication.processEvents()
-
-
-        if self.progress.wasCanceled():
-            logger.warn("Login aborted by user.")
-            return False
-
-        self.progress.close()
-
-
+        self.state = ClientState.ACCEPTED
 
         if self.state == ClientState.OUTDATED :
                 logger.warn("Client is OUTDATED.")
@@ -1277,14 +1240,24 @@ class ClientWindow(FormClass, BaseClass):
             util.report.BUGREPORT_USER = self.login
             util.crash.CRASHREPORT_USER = self.login
 
-            if not self.testGamePort() :
-                return False
+            # FIXME: local adress a bit of a hack, needed for upnp
+            self.localIP = str(self.lobby_ctx.socket.localAddress().toString())
+
+            portTest = PortTester(self.login, self.localIP, self.gamePort)
+
+            # TODO: make an actual handler
+            portTest.testDone.connect(self.udpPortTestComplete)
+
+            portTest.start()
+
+            # if not self.testGamePort() :
+            # return False
 
             #success: save login data (if requested) and carry on
             self.actionSetAutoLogin.setChecked(self.autologin)
             self.updateOptions()
 
-            self.progress.close()
+            # self.progress.close()
             #This is a triumph... I'm making a note here: Huge success!
             #logger.debug("Starting heartbeat timer")
             #self.heartbeatTimer.start(HEARTBEAT)
@@ -1764,6 +1737,7 @@ class ClientWindow(FormClass, BaseClass):
         self.socket.write(data)
 
 
+    @pyqtSlot(str, dict)
     def dispatch(self, command, args):
         '''
         A fairly pythonic way to process received strings as JSON messages.
