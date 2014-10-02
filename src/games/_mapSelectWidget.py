@@ -16,36 +16,37 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
+from PyQt5.QtGui import *
 
-
-
-from PyQt4 import QtCore, QtGui
+from PyQt5.QtWidgets import *
+from PyQt5 import QtCore
 
 import util
 from fa import maps
 
-class MapItemDelegate(QtGui.QStyledItemDelegate):
+
+class MapItemDelegate(QStyledItemDelegate):
     def __init__(self, *args, **kwargs):
-        QtGui.QStyledItemDelegate.__init__(self, *args, **kwargs)
+        QStyledItemDelegate.__init__(self, *args, **kwargs)
         
     def paint(self, painter, option, index, *args, **kwargs):
         self.initStyleOption(option, index)
                 
         painter.save()
         
-        html = QtGui.QTextDocument()
+        html = QTextDocument()
         html.setHtml(option.text)
         
-        icon = QtGui.QIcon(option.icon)
+        icon = QIcon(option.icon)
         iconsize = icon.actualSize(option.rect.size())
         
         #clear icon and text before letting the control draw itself because we're rendering these parts ourselves
-        option.icon = QtGui.QIcon()        
+        option.icon = QIcon()
         option.text = ""  
-        option.widget.style().drawControl(QtGui.QStyle.CE_ItemViewItem, option, painter, option.widget)
+        option.widget.style().drawControl(QStyle.CE_ItemViewItem, option, painter, option.widget)
         
         #Shadow
-        painter.fillRect(option.rect.left()+8-1, option.rect.top()+8-1, iconsize.width(), iconsize.height(), QtGui.QColor("#202020"))
+        painter.fillRect(option.rect.left()+8-1, option.rect.top()+8-1, iconsize.width(), iconsize.height(), QColor("#202020"))
 
         #Icon
         icon.paint(painter, option.rect.adjusted(5-2, -2, 0, 0), QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
@@ -61,13 +62,13 @@ class MapItemDelegate(QtGui.QStyledItemDelegate):
     def sizeHint(self, option, index, *args, **kwargs):
         self.initStyleOption(option, index)
         
-        html = QtGui.QTextDocument()
+        html = QTextDocument()
         html.setHtml(option.text)
         html.setTextWidth(MapItem.TEXTWIDTH)
         return QtCore.QSize(MapItem.ICONSIZE + MapItem.TEXTWIDTH + MapItem.PADDING, MapItem.ICONSIZE)  
     
 
-class MapItem(QtGui.QListWidgetItem):
+class MapItem(QListWidgetItem):
     TEXTWIDTH = 150
     ICONSIZE = 64
     PADDING = 10
@@ -75,7 +76,7 @@ class MapItem(QtGui.QListWidgetItem):
     WIDTH = ICONSIZE + TEXTWIDTH
     
     def __init__(self, parent, *args, **kwargs):
-        QtGui.QListWidgetItem.__init__(self, *args, **kwargs)
+        QListWidgetItem.__init__(self, *args, **kwargs)
         
         self.parent         = parent
         self.uid            = None
@@ -108,10 +109,10 @@ class MapItem(QtGui.QListWidgetItem):
             self.setSelected(1)
 
 
-class mapSelectWidget(QtGui.QDialog):
+class mapSelectWidget(QDialog):
     def __init__(self, parent, *args, **kwargs):
         
-        QtGui.QDialog.__init__(self, *args, **kwargs)
+        QDialog.__init__(self, *args, **kwargs)
         
         self.parent = parent
         self.client = self.parent.client
@@ -123,20 +124,20 @@ class mapSelectWidget(QtGui.QDialog):
         self.setWindowTitle ( "Selection of maps for the Matchmaker")
         
         
-        self.group_layout   = QtGui.QVBoxLayout(self)
+        self.group_layout   = QVBoxLayout(self)
         
-        self.listMaps       = QtGui.QListWidget(self)
+        self.listMaps       = QListWidget(self)
         self.listMaps.setSelectionMode(2)
         self.listMaps.setWrapping(1)
         self.listMaps.setSpacing(5)
-        self.listMaps.setResizeMode(1)
+        self.listMaps.setSectionResizeMode(1)
         self.listMaps.setSortingEnabled(1)        
         
         self.listMaps.setItemDelegate(MapItemDelegate(self))
             
         self.itemList = []
         
-        label = QtGui.QLabel("Your selection will be validated when you close this window.")
+        label = QLabel("Your selection will be validated when you close this window.")
         
         self.group_layout.addWidget(self.listMaps)
         self.group_layout.addWidget(label)

@@ -28,7 +28,8 @@ patched, and all required files for a given mod are installed
 
 @author thygrrr
 '''
-from PyQt4 import QtGui, QtCore, QtNetwork
+from PyQt5 import QtCore, QtNetwork
+from PyQt5.QtWidgets import *
 
 #import _winreg
 # import bz2
@@ -73,10 +74,10 @@ def dumpHTML():
 
 # This part updates the Lobby Client by downloading the latest MSI.
 def fetchClientUpdate(url):
-    result = QtGui.QMessageBox.question(None, "Update Needed", "Your version of FAF is outdated. You need to download and install the most recent version to connect and play.<br/><br/><b>Do you want to download and install the update now?</b>", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-    if (result == QtGui.QMessageBox.Yes):
+    result = QMessageBox.question(None, "Update Needed", "Your version of FAF is outdated. You need to download and install the most recent version to connect and play.<br/><br/><b>Do you want to download and install the update now?</b>", QMessageBox.Yes, QMessageBox.No)
+    if (result == QMessageBox.Yes):
         try:
-            progress = QtGui.QProgressDialog()
+            progress = QProgressDialog()
             progress.setCancelButtonText("Cancel")
             progress.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint)
             progress.setAutoClose(True)
@@ -92,7 +93,7 @@ def fetchClientUpdate(url):
             progress.setMaximum(file_size)
             progress.setModal(1)
             progress.setWindowTitle("Downloading Update")
-            label = QtGui.QLabel()
+            label = QLabel()
             label.setOpenExternalLinks(True)
             progress.setLabel(label)
             progress.setLabelText('Downloading the latest version of <b>Forged Alliance Forever</b><br/><a href="' + url + '">' + url + '</a><br/>File size: ' + str(int(file_size / 1024 / 1024)) + ' MiB')
@@ -105,7 +106,7 @@ def fetchClientUpdate(url):
             block_sz = 4096       
 
             while progress.isVisible():
-                QtGui.QApplication.processEvents()
+                QApplication.processEvents()
                 read_buffer = msifile.read(block_sz)
                 if not read_buffer:
                     break
@@ -124,11 +125,11 @@ def fetchClientUpdate(url):
                 logger.debug(r'Running command: ' + command)
                 subprocess.Popen(command, shell=True)
             else:
-                QtGui.QMessageBox.information(None, "Aborted", "Update download not complete.")            
+                QMessageBox.information(None, "Aborted", "Update download not complete.")
                 logger.warn("MSI download not complete.")            
         except:
             logger.error("Updater error: ", exc_info = sys.exc_info())
-            QtGui.QMessageBox.information(None, "Download Failed", "The file wasn't properly sent by the server. <br/><b>Try again later.</b>")
+            QMessageBox.information(None, "Download Failed", "The file wasn't properly sent by the server. <br/><b>Try again later.</b>")
 
                             
         
@@ -368,7 +369,7 @@ class Updater(QtCore.QObject):
         self.destination = None
         
         self.silent = silent
-        self.progress = QtGui.QProgressDialog()
+        self.progress = QProgressDialog()
         if self.silent:
             self.progress.setCancelButton(None)
         else:
@@ -388,7 +389,7 @@ class Updater(QtCore.QObject):
         log("Using appdata: " + util.APPDATA_DIR)
         
         self.progress.show()
-        QtGui.QApplication.processEvents()
+        QApplication.processEvents()
 
 
         #Actual network code adapted from previous version
@@ -401,7 +402,7 @@ class Updater(QtCore.QObject):
         self.updateSocket.connectToHost(self.HOST, self.SOCKET)                         
 
         while not (self.updateSocket.state() == QtNetwork.QAbstractSocket.ConnectedState) and self.progress.isVisible():
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
                                                     
         if not self.progress.wasCanceled():
             log("Connected to update server at " + timestamp())
@@ -420,7 +421,7 @@ class Updater(QtCore.QObject):
         
     def fetchFile(self, url, toFile):
         try:
-            progress = QtGui.QProgressDialog()
+            progress = QProgressDialog()
             progress.setCancelButtonText("Cancel")
             progress.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint)
             progress.setAutoClose(True)
@@ -436,7 +437,7 @@ class Updater(QtCore.QObject):
             progress.setMaximum(file_size)
             progress.setModal(1)
             progress.setWindowTitle("Downloading Update")
-            label = QtGui.QLabel()
+            label = QLabel()
             label.setOpenExternalLinks(True)
             progress.setLabel(label)
             progress.setLabelText('Downloading FA file : <a href="' + url + '">' + url + '</a><br/>File size: ' + str(int(file_size / 1024 / 1024)) + ' MiB')
@@ -451,7 +452,7 @@ class Updater(QtCore.QObject):
 
 
             while progress.isVisible():
-                QtGui.QApplication.processEvents()
+                QApplication.processEvents()
                 read_buffer = downloadedfile.read(block_sz)
                 if not read_buffer:
                     break
@@ -470,12 +471,12 @@ class Updater(QtCore.QObject):
                 logger.debug("File downloaded successfully.")
                 return True
             else:
-                QtGui.QMessageBox.information(None, "Aborted", "Download not complete.")            
+                QMessageBox.information(None, "Aborted", "Download not complete.")
                 logger.warn("File download not complete.")          
                 return False  
         except:
             logger.error("Updater error: ", exc_info = sys.exc_info())
-            QtGui.QMessageBox.information(None, "Download Failed", "The file wasn't properly sent by the server. <br/><b>Try again later.</b>")
+            QMessageBox.information(None, "Download Failed", "The file wasn't properly sent by the server. <br/><b>Try again later.</b>")
             return False
 
         
@@ -485,7 +486,7 @@ class Updater(QtCore.QObject):
         If existing=True, the existing contents of the directory will be added to the current self.filesToUpdate
         list. 
         '''
-        QtGui.QApplication.processEvents()
+        QApplication.processEvents()
 
         self.progress.setLabelText("Updating files: " + filegroup)
         self.destination = destination
@@ -551,7 +552,7 @@ class Updater(QtCore.QObject):
             if (self.progress.wasCanceled()) : raise UpdaterCancellation("Operation aborted while waiting for sim mod path.")
             if (self.result != self.RESULT_NONE) : raise UpdaterFailure("Operation failed while waiting for sim mod path.")
             if (time.time() - self.lastData > self.TIMEOUT) : raise UpdaterTimeout("Operation timed out while waiting for sim mod path.")
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
       
 
     def waitForFileList(self):
@@ -568,7 +569,7 @@ class Updater(QtCore.QObject):
             if (self.progress.wasCanceled()) : raise UpdaterCancellation("Operation aborted while waiting for file list.")
             if (self.result != self.RESULT_NONE) : raise UpdaterFailure("Operation failed while waiting for file list.")
             if (time.time() - self.lastData > self.TIMEOUT) : raise UpdaterTimeout("Operation timed out while waiting for file list.")
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
 
         log("Files to update: [" + ', '.join(self.filesToUpdate) + "]")
 
@@ -588,7 +589,7 @@ class Updater(QtCore.QObject):
             if (self.progress.wasCanceled()) : raise UpdaterCancellation("Operation aborted while waiting for data.")
             if (self.result != self.RESULT_NONE) : raise UpdaterFailure("Operation failed while waiting for data.")
             if (time.time() - self.lastData > self.TIMEOUT) : raise UpdaterTimeout("Connection timed out while waiting for data.")
-            QtGui.QApplication.processEvents()        
+            QApplication.processEvents()
 
         log("Updates applied successfully.")
     
@@ -671,11 +672,11 @@ class Updater(QtCore.QObject):
         if (self.result == self.RESULT_CANCEL):
             pass #The user knows damn well what happened here.
         elif (self.result == self.RESULT_PASS):
-            QtGui.QMessageBox.information(QtGui.QApplication.activeWindow(), "Installation Required", "You can't play without a legal version of Forged Alliance.")
+            QMessageBox.information(QApplication.activeWindow(), "Installation Required", "You can't play without a legal version of Forged Alliance.")
         elif (self.result == self.RESULT_ILLEGAL):
             illegalDialog()
         elif (self.result == self.RESULT_BUSY):
-            QtGui.QMessageBox.information(QtGui.QApplication.activeWindow(), "Server Busy", "The Server is busy preparing new patch files.<br/>Try again later.") 
+            QMessageBox.information(QApplication.activeWindow(), "Server Busy", "The Server is busy preparing new patch files.<br/>Try again later.")
         elif (self.result == self.RESULT_FAILURE):
             failureDialog()
                 
@@ -880,7 +881,7 @@ class Updater(QtCore.QObject):
                             
             # Update our Gui at least once before proceeding (we might be receiving a huge file and this is not the first time we get here)   
             self.lastData = time.time()            
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
                              
             #We have an incoming block, wait for enough bytes to accumulate                    
             if self.updateSocket.bytesAvailable() < self.blockSize:
@@ -892,7 +893,7 @@ class Updater(QtCore.QObject):
             
             # Update our Gui at least once before proceeding (we might have to write a big file)
             self.lastData = time.time()            
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
                              
             # Find out what the server just sent us, and process it.
             action = ins.readQString()
@@ -979,20 +980,20 @@ def illegalDialog():
 
 
 
-class UpgradePage(QtGui.QWizardPage):
+class UpgradePage(QWizardPage):
     def __init__(self, parent=None):
         super(UpgradePage, self).__init__(parent)
 
         self.setTitle("Specify Forged Alliance folder")
-        self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("fa/updater/upgrade_watermark.png"))
+        self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("fa/updater/upgrade_watermark.png"))
 
-        layout = QtGui.QVBoxLayout()
+        layout = QVBoxLayout()
         
-        self.label = QtGui.QLabel("FAF needs a version of Supreme Commander: Forged Alliance to launch games and replays. <br/><br/><b>Please choose the installation you wish to use.</b><br/><br/>The following versions are <u>equally</u> supported:<ul><li>3596(Retail version)</li><li>3599 (Retail patch)</li><li>3603beta (GPGnet beta patch)</li><li>1.6.6 (Steam Version)</li></ul>FAF doesn't modify your existing files.<br/><br/>Select folder:")        
+        self.label = QLabel("FAF needs a version of Supreme Commander: Forged Alliance to launch games and replays. <br/><br/><b>Please choose the installation you wish to use.</b><br/><br/>The following versions are <u>equally</u> supported:<ul><li>3596(Retail version)</li><li>3599 (Retail patch)</li><li>3603beta (GPGnet beta patch)</li><li>1.6.6 (Steam Version)</li></ul>FAF doesn't modify your existing files.<br/><br/>Select folder:")
         self.label.setWordWrap(True)
         layout.addWidget(self.label)
 
-        self.comboBox = QtGui.QComboBox()       
+        self.comboBox = QComboBox()
         self.comboBox.setEditable(True)
         constructPathChoices(self.comboBox)
         self.comboBox.currentIndexChanged.connect(self.comboChanged)
@@ -1000,7 +1001,7 @@ class UpgradePage(QtGui.QWizardPage):
         layout.addWidget(self.comboBox)
         self.setLayout(layout)
 
-        self.browseButton = QtGui.QPushButton()
+        self.browseButton = QPushButton()
         self.browseButton.setText("Browse")       
         self.browseButton.clicked.connect(self.showChooser)
         layout.addWidget(self.browseButton )
@@ -1015,7 +1016,7 @@ class UpgradePage(QtGui.QWizardPage):
 
     @QtCore.pyqtSlot()
     def showChooser(self):
-        path = QtGui.QFileDialog.getExistingDirectory(self, "Select Forged Alliance folder", self.comboBox.currentText(), QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ShowDirsOnly)
+        path = QFileDialog.getExistingDirectory(self, "Select Forged Alliance folder", self.comboBox.currentText(), QFileDialog.DontResolveSymlinks | QFileDialog.ShowDirsOnly)
         if (path):
             self.comboBox.insertItem(0, path)
             self.comboBox.setCurrentIndex(0)
@@ -1035,20 +1036,20 @@ class UpgradePage(QtGui.QWizardPage):
         else :        
             return False
 
-class UpgradePageSC(QtGui.QWizardPage):
+class UpgradePageSC(QWizardPage):
     def __init__(self, parent=None):
         super(UpgradePageSC, self).__init__(parent)
 
         self.setTitle("Specify Supreme Commander folder")
-        self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("fa/updater/upgrade_watermark.png"))
+        self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("fa/updater/upgrade_watermark.png"))
 
-        layout = QtGui.QVBoxLayout()
+        layout = QVBoxLayout()
         
-        self.label = QtGui.QLabel("You can use any version of Supreme Commander.<br/><br/>FAF won't modify your existing files.<br/><br/>Select folder:")        
+        self.label = QLabel("You can use any version of Supreme Commander.<br/><br/>FAF won't modify your existing files.<br/><br/>Select folder:")
         self.label.setWordWrap(True)
         layout.addWidget(self.label)
 
-        self.comboBox = QtGui.QComboBox()       
+        self.comboBox = QComboBox()
         self.comboBox.setEditable(True)
         constructPathChoicesSC(self.comboBox)
         self.comboBox.currentIndexChanged.connect(self.comboChanged)
@@ -1056,7 +1057,7 @@ class UpgradePageSC(QtGui.QWizardPage):
         layout.addWidget(self.comboBox)
         self.setLayout(layout)
 
-        self.browseButton = QtGui.QPushButton()
+        self.browseButton = QPushButton()
         self.browseButton.setText("Browse")       
         self.browseButton.clicked.connect(self.showChooser)
         layout.addWidget(self.browseButton )
@@ -1071,7 +1072,7 @@ class UpgradePageSC(QtGui.QWizardPage):
 
     @QtCore.pyqtSlot()
     def showChooser(self):
-        path = QtGui.QFileDialog.getExistingDirectory(self, "Select Supreme Commander folder", self.comboBox.currentText(), QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ShowDirsOnly)
+        path = QFileDialog.getExistingDirectory(self, "Select Supreme Commander folder", self.comboBox.currentText(), QFileDialog.DontResolveSymlinks | QFileDialog.ShowDirsOnly)
         if (path):
             self.comboBox.insertItem(0, path)
             self.comboBox.setCurrentIndex(0)
@@ -1091,46 +1092,46 @@ class UpgradePageSC(QtGui.QWizardPage):
         else :        
             return False
 
-class WizardSC(QtGui.QWizard):
+class WizardSC(QWizard):
     '''
     The actual Wizard which walks the user through the install.
     '''             
     def __init__(self, client, *args, **kwargs):
-        QtGui.QWizard.__init__(self, *args, **kwargs)     
+        QWizard.__init__(self, *args, **kwargs)
         self.client = client
         self.upgrade = UpgradePageSC()
         self.addPage(self.upgrade)
         
-        self.setWizardStyle(QtGui.QWizard.ModernStyle)
+        self.setWizardStyle(QWizard.ModernStyle)
         self.setWindowTitle("Supreme Commander Install Wizard")
-        self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("fa/updater/upgrade_watermark.png"))
+        self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("fa/updater/upgrade_watermark.png"))
         
-        self.setOption(QtGui.QWizard.NoBackButtonOnStartPage, True)
+        self.setOption(QWizard.NoBackButtonOnStartPage, True)
         
     
     def accept(self):
         fa.savePathSC(self.upgrade.comboBox.currentText())        
-        QtGui.QWizard.accept(self)
+        QWizard.accept(self)
 
                 
-class Wizard(QtGui.QWizard):
+class Wizard(QWizard):
     '''
     The actual Wizard which walks the user through the install.
     '''             
     def __init__(self, client, *args, **kwargs):
-        QtGui.QWizard.__init__(self, *args, **kwargs)     
+        QWizard.__init__(self, *args, **kwargs)
         self.client = client
         self.upgrade = UpgradePage()
         self.addPage(self.upgrade)
         
-        self.setWizardStyle(QtGui.QWizard.ModernStyle)
+        self.setWizardStyle(QWizard.ModernStyle)
         self.setWindowTitle("FAF Install Wizard")
-        self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("fa/updater/upgrade_watermark.png"))
+        self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("fa/updater/upgrade_watermark.png"))
         
-        self.setOption(QtGui.QWizard.NoBackButtonOnStartPage, True)
+        self.setOption(QWizard.NoBackButtonOnStartPage, True)
         
     
     def accept(self):
         fa.savePath(self.upgrade.comboBox.currentText())        
-        QtGui.QWizard.accept(self)
+        QWizard.accept(self)
 

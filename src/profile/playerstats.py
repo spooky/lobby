@@ -25,19 +25,19 @@ THIS SHOULD BE REFACTORED BIG TIME :(
 
 '''
 
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 
 from numpy.random import randn as np
 from matplotlib.mlab import normpdf
 
 
 
-import sys, os, random
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-
 
 
 #import matplotlib
+from trueSkill.GameInfo import GameInfo
+
 try:
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
     from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
@@ -48,12 +48,9 @@ except:
 
 import datetime
 
-from trueSkill.TrueSkill.FactorGraphTrueSkillCalculator import * 
-from trueSkill.Rating import *
+from trueSkill.TrueSkill.FactorGraphTrueSkillCalculator import *
 from trueSkill.Team import *
-from trueSkill.Teams import *
 
-import client, stats
 
 class Statpage(QMainWindow):
     def __init__(self, parent=None):
@@ -392,11 +389,11 @@ class Statpage(QMainWindow):
 
         self.grid_cb = QCheckBox("Show &Grid")
         self.grid_cb.setChecked(True)
-        self.connect(self.grid_cb, SIGNAL('stateChanged(int)'), self.on_draw)
+        self.grid_cb.stateChanged.connect(self.on_draw)
 #        
 
         self.compare_cb = QCheckBox("&Compare to you")
-        self.connect(self.compare_cb, SIGNAL('stateChanged(int)'), self.on_draw)
+        self.compare_cb.stateChanged.connect(self.on_draw)
 
         hbox = QHBoxLayout()
         

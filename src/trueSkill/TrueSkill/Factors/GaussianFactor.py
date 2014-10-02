@@ -21,6 +21,7 @@
 
 
 from trueSkill.FactorGraphs.Factor import *
+from trueSkill.FactorGraphs.Message import Message
 
 from trueSkill.Numerics.GaussianDistribution import *
 class GaussianFactor(Factor) :

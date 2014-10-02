@@ -1,4 +1,4 @@
-from PyQt4 import QtGui
+from PyQt5.QtWidgets import QPushButton
 import util
 
 
@@ -6,7 +6,7 @@ class NsHook():
     def __init__(self, eventType):
         self.eventType = eventType
         self.loadSettings()
-        self.button = QtGui.QPushButton('More')
+        self.button = QPushButton('More')
         self.button.setEnabled(False)
 
     def loadSettings(self):

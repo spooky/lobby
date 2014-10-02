@@ -20,9 +20,7 @@
 
 
 
-from Factor import Factor
-from FactorGraph import FactorGraph
-from Schedule import Schedule, ScheduleStep, ScheduleSequence
+from Schedule import ScheduleSequence
 
 class FactorGraphLayer(object):
     def __init__(self, parentGraph):

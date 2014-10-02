@@ -20,9 +20,6 @@
 
 
 
-import hashlib
-
-
 class HashMap(object):
     '''
     Basic hashmap that supports object keys.

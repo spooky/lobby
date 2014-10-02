@@ -16,8 +16,6 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-from PyQt4 import QtCore, QtGui
-
 class Teams(object):
     ''' Teams object'''
     def __init__(self, parent):

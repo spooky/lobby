@@ -15,21 +15,11 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
+from trueSkill import TeamsRange, PlayersRange
 
-
-
-
-
-from trueSkill.SkillCalculator import *
-from trueSkill.GameInfo import *
 from trueSkill.SkillCalculator import *
 from trueSkill.Numerics.Matrix import *
-from trueSkill.Numerics.BasicMath import *
 
-from trueSkill.PartialPlay import *
-
-from trueSkill.Rating import *
-from trueSkill.Guard import *
 from trueSkill.RankSorter import *
 from trueSkill.TrueSkill.TrueSkillFactorGraph import *
 #/**

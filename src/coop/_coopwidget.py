@@ -20,21 +20,19 @@
 
 
 
-from PyQt4 import QtCore, QtGui
+import os
+
+from PyQt5 import QtCore
+from PyQt5.QtGui import *
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
+from PyQt5.QtWidgets import *
+
 import util
-
-from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
-
 from games.gameitem import GameItem, GameItemDelegate
 from coop.coopmapitem import CoopMapItem, CoopMapItemDelegate
 from games.hostgamewidget import HostgameWidget
-from games import logger
-from fa import Faction
-import random
 import fa
 import modvault
-import os
-
 
 
 FormClass, BaseClass = util.loadUiType("coop/coop.ui")
@@ -66,7 +64,7 @@ class CoopWidget(FormClass, BaseClass):
         self.client.showCoop.connect(self.coopChanged)
         self.client.coopInfo.connect(self.processCoopInfo)
         self.client.gameInfo.connect(self.processGameInfo)
-        self.coopList.header().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+        self.coopList.header().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.coopList.setItemDelegate(CoopMapItemDelegate(self))
         
         
@@ -131,7 +129,7 @@ class CoopWidget(FormClass, BaseClass):
             w = self.leaderBoardTextFour
 
                         
-        doc = QtGui.QTextDocument()
+        doc = QTextDocument()
         doc.addResource(3, QtCore.QUrl("style.css"), self.stylesheet )
         html = ("<html><head><link rel='stylesheet' type='text/css' href='style.css'></head><body>")
         
@@ -142,7 +140,7 @@ class CoopWidget(FormClass, BaseClass):
         formatter = self.FORMATTER_LADDER
         formatter_header = self.FORMATTER_LADDER_HEADER
         cursor = w.textCursor()
-        cursor.movePosition(QtGui.QTextCursor.End)
+        cursor.movePosition(QTextCursor.End)
         w.setTextCursor(cursor) 
         color = "lime"
         line = formatter_header.format(rank="rank", names="names", time="time", color=color)
@@ -238,7 +236,7 @@ class CoopWidget(FormClass, BaseClass):
                             gameoptions.append(option.isChecked())
             
                         if oneChecked == False :
-                            QtGui.QMessageBox.warning(None, "No option checked !", "You have to check at least one option !")
+                            QMessageBox.warning(None, "No option checked !", "You have to check at least one option !")
                             return
                     modnames = [str(moditem.text()) for moditem in hostgamewidget.modList.selectedItems()]
                     mods = [hostgamewidget.mods[modstr] for modstr in modnames]
@@ -262,7 +260,7 @@ class CoopWidget(FormClass, BaseClass):
             typeCoop = message["type"]
             
             if not typeCoop in self.cooptypes:
-                root_item = QtGui.QTreeWidgetItem()
+                root_item = QTreeWidgetItem()
                 self.coopList.addTopLevelItem(root_item)
                 root_item.setText(0, "<font color='white' size=+3>%s</font>" % typeCoop)
                 self.cooptypes[typeCoop] = root_item
@@ -310,7 +308,7 @@ class CoopWidget(FormClass, BaseClass):
 
         
     
-    @QtCore.pyqtSlot(QtGui.QListWidgetItem)
+    @QtCore.pyqtSlot(QListWidgetItem)
     def gameDoubleClicked(self, item):
         '''
         Slot that attempts to join a game.
@@ -322,7 +320,7 @@ class CoopWidget(FormClass, BaseClass):
         
         if fa.exe.check(item.mod, item.mapname, None, item.mods):
             if item.access == "password" : 
-                passw, ok = QtGui.QInputDialog.getText(self.client, "Passworded game" , "Enter password :", QtGui.QLineEdit.Normal, "")
+                passw, ok = QInputDialog.getText(self.client, "Passworded game" , "Enter password :", QLineEdit.Normal, "")
                 if ok:
                     self.client.send(dict(command="game_join", password=passw, uid=item.uid, gameport=self.client.gamePort))
             else :

@@ -20,46 +20,49 @@
 
 
 
-from PyQt4 import QtCore, QtGui
+import os
+import time
+
+from PyQt5 import QtCore
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QStyledItemDelegate, QStyle, QTreeWidgetItem
+
 from fa import maps
 import util
-import os, time
 from games.moditem import mods
 
-import client
 
-
-class ReplayItemDelegate(QtGui.QStyledItemDelegate):
+class ReplayItemDelegate(QStyledItemDelegate):
     
     def __init__(self, *args, **kwargs):
-        QtGui.QStyledItemDelegate.__init__(self, *args, **kwargs)
+        QStyledItemDelegate.__init__(self, *args, **kwargs)
         
     def paint(self, painter, option, index, *args, **kwargs):
         self.initStyleOption(option, index)
                 
         painter.save()
         
-        html = QtGui.QTextDocument()
+        html = QTextDocument()
         html.setHtml(option.text)
         
-        icon = QtGui.QIcon(option.icon)
+        icon = QIcon(option.icon)
         iconsize = icon.actualSize(option.rect.size())
         
         #clear icon and text before letting the control draw itself because we're rendering these parts ourselves
-        option.icon = QtGui.QIcon()        
+        option.icon = QIcon()
         option.text = ""  
-        option.widget.style().drawControl(QtGui.QStyle.CE_ItemViewItem, option, painter, option.widget)
+        option.widget.style().drawControl(QStyle.CE_ItemViewItem, option, painter, option.widget)
         
         #Shadow
-        #painter.fillRect(option.rect.left()+8-1, option.rect.top()+8-1, iconsize.width(), iconsize.height(), QtGui.QColor("#202020"))
+        #painter.fillRect(option.rect.left()+8-1, option.rect.top()+8-1, iconsize.width(), iconsize.height(), QColor("#202020"))
 
         #Icon
         icon.paint(painter, option.rect.adjusted(5-2, -2, 0, 0), QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         
         #Frame around the icon
-#        pen = QtGui.QPen()
+#        pen = QPen()
 #        pen.setWidth(1);
-#        pen.setBrush(QtGui.QColor("#303030"));  #FIXME: This needs to come from theme.
+#        pen.setBrush(QColor("#303030"));  #FIXME: This needs to come from theme.
 #        pen.setCapStyle(QtCore.Qt.RoundCap);
 #        painter.setPen(pen)
 #        painter.drawRect(option.rect.left()+5-2, option.rect.top()+5-2, iconsize.width(), iconsize.height())
@@ -75,7 +78,7 @@ class ReplayItemDelegate(QtGui.QStyledItemDelegate):
     def sizeHint(self, option, index, *args, **kwargs):
         clip = index.model().data(index, QtCore.Qt.UserRole)
         self.initStyleOption(option, index)
-        html = QtGui.QTextDocument()
+        html = QTextDocument()
         html.setHtml(option.text)
         html.setTextWidth(240)
         if clip :
@@ -86,14 +89,14 @@ class ReplayItemDelegate(QtGui.QStyledItemDelegate):
 
 
 
-class ReplayItem(QtGui.QTreeWidgetItem):
+class ReplayItem(QTreeWidgetItem):
 
     
     FORMATTER_REPLAY        = unicode(util.readfile("replays/formatters/replay.qthtml"))
 
     
     def __init__(self, uid, parent, *args, **kwargs):
-        QtGui.QTreeWidgetItem.__init__(self, *args, **kwargs)
+        QTreeWidgetItem.__init__(self, *args, **kwargs)
 
         
         self.uid            = uid
@@ -283,14 +286,14 @@ class ReplayItem(QtGui.QTreeWidgetItem):
 
 
     def pressed(self, item):
-        menu = QtGui.QMenu(self.parent)
-        actionDownload = QtGui.QAction("Download replay", menu)
+        menu = QMenu(self.parent)
+        actionDownload = QAction("Download replay", menu)
         actionDownload.triggered.connect(self.downloadReplay)
         menu.addAction(actionDownload)
-        menu.popup(QtGui.QCursor.pos())
+        menu.popup(QCursor.pos())
         
     def downloadReplay(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.url))
+        QDesktopServices.openUrl(QtCore.QUrl(self.url))
 
     def display(self, column):
         if column == 0 :

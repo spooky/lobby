@@ -17,9 +17,6 @@
 #-------------------------------------------------------------------------------
 
 
-
-
-
 '''
 Created on Dec 1, 2011
 
@@ -36,8 +33,7 @@ sip.setapi('QList', 2)
 sip.setapi('QProcess', 2)
 
 import sys
-from PyQt4 import QtGui
-
+from PyQt5.QtWidgets import *
 
 
 #Set up a robust logging system
@@ -57,12 +53,12 @@ def excepthook(excType, excValue, tracebackobj):
     dialog = util.CrashDialog((excType, excValue, tracebackobj))
     answer = dialog.exec_()
 
-    if (answer == QtGui.QDialog.Rejected):
+    if (answer == QDialog.Rejected):
         # Shut it down as nicely as possible.
         sys.excepthook = excepthook_original
-        QtGui.QApplication.closeAllWindows()
+        QApplication.closeAllWindows()
         util.stopLogging()
-        QtGui.QApplication.quit()
+        QApplication.quit()
         sys.exit(1)
 
 
@@ -88,7 +84,7 @@ def runFAF():
     faf_client.show()
 
     # Main update loop
-    QtGui.QApplication.exec_()
+    QApplication.exec_()
 
 #Actual "main" method 
 if __name__ == '__main__':
@@ -100,7 +96,7 @@ if __name__ == '__main__':
 
     #init application framework    
     logger.info(">>> --------------------------- Application Launch")
-    app = QtGui.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     app.setWindowIcon(util.icon("window_icon.png", True))
     #Set application icon to nicely stack in the system task bar    
     # if getattr(ctypes.windll.shell32, "SetCurrentProcessExplicitAppUserModelID", None) is not None:

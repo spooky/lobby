@@ -15,9 +15,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
+from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QColorDialog
 
-
-from PyQt4 import QtGui, QtCore
 from galacticWar import logger
 from galacticWar import FACTIONS
 import util
@@ -88,7 +88,7 @@ class GWOptions(FormClass, BaseClass):
             util.settings.endGroup()        
             
     def pickColor(self, faction, button):
-        color = QtGui.QColorDialog.getColor(self.parent.COLOR_FACTIONS[faction], self)
+        color = QColorDialog.getColor(self.parent.COLOR_FACTIONS[faction], self)
         if color.isValid(): 
             qss = "background-color: %s" % color.name()
             button.setStyleSheet(qss) 
@@ -102,10 +102,10 @@ class GWOptions(FormClass, BaseClass):
             self.parent.OGLdisplay.createZones()
 
     def resetColors(self):
-        self.parent.COLOR_FACTIONS[0] = QtGui.QColor(0,0,255)
-        self.parent.COLOR_FACTIONS[1] = QtGui.QColor(0,255,0)
-        self.parent.COLOR_FACTIONS[2] = QtGui.QColor(255,0,0)
-        self.parent.COLOR_FACTIONS[3] = QtGui.QColor(255,255,0)
+        self.parent.COLOR_FACTIONS[0] = QColor(0,0,255)
+        self.parent.COLOR_FACTIONS[1] = QColor(0,255,0)
+        self.parent.COLOR_FACTIONS[2] = QColor(255,0,0)
+        self.parent.COLOR_FACTIONS[3] = QColor(255,255,0)
         
             
         util.settings.beginGroup("GalacticWar")
@@ -131,10 +131,10 @@ class GWOptions(FormClass, BaseClass):
         util.settings.beginGroup("GalacticWar")
         self.parent.mapTransparency = int(util.settings.value("map/transparency", 10))
         self.parent.stars = int(util.settings.value("map/stars", 25))
-        self.parent.COLOR_FACTIONS[0] = (util.settings.value("factionColors/uef", QtGui.QColor(0,0,255)))
-        self.parent.COLOR_FACTIONS[1] = (util.settings.value("factionColors/aeon", QtGui.QColor(0,255,0)))
-        self.parent.COLOR_FACTIONS[2] = (util.settings.value("factionColors/cybran", QtGui.QColor(255,0,0)))
-        self.parent.COLOR_FACTIONS[3] = (util.settings.value("factionColors/seraphim", QtGui.QColor(255,255,0)))
+        self.parent.COLOR_FACTIONS[0] = (util.settings.value("factionColors/uef", QColor(0,0,255)))
+        self.parent.COLOR_FACTIONS[1] = (util.settings.value("factionColors/aeon", QColor(0,255,0)))
+        self.parent.COLOR_FACTIONS[2] = (util.settings.value("factionColors/cybran", QColor(255,0,0)))
+        self.parent.COLOR_FACTIONS[3] = (util.settings.value("factionColors/seraphim", QColor(255,255,0)))
         self.parent.AA = (util.settings.value("display/AA", "true") == "true")
         self.parent.rotation = (util.settings.value("map/planetRotation", "true") == "true")
         

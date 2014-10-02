@@ -19,10 +19,13 @@
 
 
 
-from PyQt4 import QtGui, QtCore, QtNetwork
 import time
 import json
 import logging
+from types import ListType, FloatType, IntType
+
+from PyQt5 import QtCore, QtNetwork
+from PyQt5.QtWidgets import QProgressDialog, QApplication
 
 
 logger = logging.getLogger("faf.secondaryServer")
@@ -97,7 +100,7 @@ class SecondaryServer(QtCore.QObject):
         self.command = None
         self.message = None
         
-        self.progress = QtGui.QProgressDialog()        
+        self.progress = QProgressDialog()
         self.progress.setCancelButtonText(None)
         self.progress.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint)
         self.progress.setAutoClose(False)
@@ -115,7 +118,7 @@ class SecondaryServer(QtCore.QObject):
 
         if not self.invisible:
             while not (self.serverSocket.state() == QtNetwork.QAbstractSocket.ConnectedState) and self.progress.isVisible():                
-                QtGui.QApplication.processEvents()
+                QApplication.processEvents()
             if not self.progress.wasCanceled():
                 self.doCommand(command)                     
             else:
@@ -127,7 +130,7 @@ class SecondaryServer(QtCore.QObject):
             started = time.time()
             cancelled = False
             while not (self.serverSocket.state() == QtNetwork.QAbstractSocket.ConnectedState):
-                QtGui.QApplication.processEvents()
+                QApplication.processEvents()
                 if time.time() - started > 5:
                     cancelled = True
                     self.result = self.RESULT_CANCEL
@@ -154,7 +157,7 @@ class SecondaryServer(QtCore.QObject):
             if not self.invisible:
                 if (self.progress.wasCanceled()) : logger.error("Operation aborted while waiting for info.")
                 if (time.time() - self.lastData > self.TIMEOUT) : logger.error("Operation timed out while waiting for info.")
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
         logger.debug("Finishing request")
         self.result = self.RESULT_NONE
         

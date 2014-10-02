@@ -20,16 +20,12 @@
 
 
 
-from PyQt4 import QtCore, QtNetwork, QtGui
-
-import os
 import logging
-import util
-import fa
-import time
 import json
-
 import struct
+
+from PyQt5 import QtCore, QtNetwork
+from PyQt5.QtWidgets import *
 
 
 FAF_SERVER_HOST = "direct.faforever.com"
@@ -422,8 +418,8 @@ class RelayServer(QtNetwork.QTcpServer):
                 self.__logger.info("relay listening on address " + self.serverAddress().toString() + ":" + str(self.serverPort()))
             else:
                 self.__logger.error("cannot listen, port probably used by another application: " + str(self.serverPort()))
-                answer = QtGui.QMessageBox.warning(None, "Port Occupied", "FAF couldn't start its local relay server, which is needed to play Forged Alliance online. Possible reasons:<ul><li><b>FAF is already running</b> (most likely)</li><li>another program is listening on port {port}</li></ul>".format(port=str(self.serverPort())), QtGui.QMessageBox.Retry, QtGui.QMessageBox.Abort)
-                if answer == QtGui.QMessageBox.Abort:
+                answer = QMessageBox.warning(None, "Port Occupied", "FAF couldn't start its local relay server, which is needed to play Forged Alliance online. Possible reasons:<ul><li><b>FAF is already running</b> (most likely)</li><li>another program is listening on port {port}</li></ul>".format(port=str(self.serverPort())), QMessageBox.Retry, QMessageBox.Abort)
+                if answer == QMessageBox.Abort:
                     return False
         return True
               

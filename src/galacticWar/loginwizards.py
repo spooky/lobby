@@ -16,14 +16,16 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-from PyQt4 import QtCore, QtGui, QtWebKit
+from PyQt5 import QtCore, QtWebKit
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 VIDEO = QtCore.QUrl('http://91.121.153.175/faf/intro.mp4')
 
 import util
 
 
-class gwSelectFaction(QtGui.QWizard):
+class gwSelectFaction(QWizard):
     def __init__(self, parent=None):
         
         super(gwSelectFaction, self).__init__(parent)
@@ -42,16 +44,16 @@ class gwSelectFaction(QtGui.QWizard):
 
         #self.cleanupPage.connect(self.cleaningPage)
 
-        self.setWizardStyle(QtGui.QWizard.ModernStyle)
+        self.setWizardStyle(QWizard.ModernStyle)
 
-        self.setPixmap(QtGui.QWizard.BannerPixmap,
-                QtGui.QPixmap('client/banner.png'))
-        self.setPixmap(QtGui.QWizard.BackgroundPixmap,
-                QtGui.QPixmap('client/background.png'))
+        self.setPixmap(QWizard.BannerPixmap,
+                QPixmap('client/banner.png'))
+        self.setPixmap(QWizard.BackgroundPixmap,
+                QPixmap('client/background.png'))
 
         self.setWindowTitle("Create Account")
 
-class IntroPage(QtGui.QWizardPage):
+class IntroPage(QWizardPage):
     def __init__(self, parent=None):
         super(IntroPage, self).__init__(parent)
         self.setTitle("Introduction")
@@ -59,7 +61,7 @@ class IntroPage(QtGui.QWizardPage):
         
         self.parent = parent
         self.parent.webview.setUrl(VIDEO)
-        layout = QtGui.QVBoxLayout()
+        layout = QVBoxLayout()
         layout.addWidget(self.parent.webview)
         
         self.setLayout(layout)      
@@ -67,7 +69,7 @@ class IntroPage(QtGui.QWizardPage):
     def validatePage(self):
         return True
 
-class selectFactionPage(QtGui.QWizardPage):
+class selectFactionPage(QWizardPage):
     def __init__(self, parent=None):
         super(selectFactionPage, self).__init__(parent)
         
@@ -76,16 +78,16 @@ class selectFactionPage(QtGui.QWizardPage):
 
         self.setTitle("Faction selection")
         
-        layout = QtGui.QVBoxLayout()
-        label = QtGui.QLabel("Hi commander. <br><br>The war is raging through the galaxy.<br>You have to pick a side !")
+        layout = QVBoxLayout()
+        label = QLabel("Hi commander. <br><br>The war is raging through the galaxy.<br>You have to pick a side !")
         
         
-        layoutFactions = QtGui.QHBoxLayout()
+        layoutFactions = QHBoxLayout()
         
-        Aeon = QtGui.QPushButton()
-        Cybran = QtGui.QPushButton()
-        Seraphim = QtGui.QPushButton()
-        UEF = QtGui.QPushButton()
+        Aeon = QPushButton()
+        Cybran = QPushButton()
+        Seraphim = QPushButton()
+        UEF = QPushButton()
 
         Aeon.setIconSize(QtCore.QSize(60,60))
         Cybran.setIconSize(QtCore.QSize(60,60))
@@ -122,7 +124,7 @@ class selectFactionPage(QtGui.QWizardPage):
         Cybran.pressed.connect(self.cybran)
         Seraphim.pressed.connect(self.seraphim)
 
-        label2 = QtGui.QLabel("Be careful ! Once you have confirmed your allegiance to a faction, you won't be able to change it !")
+        label2 = QLabel("Be careful ! Once you have confirmed your allegiance to a faction, you won't be able to change it !")
         label2.setWordWrap(True)
 
         layout.addWidget(label)
@@ -152,7 +154,7 @@ class selectFactionPage(QtGui.QWizardPage):
             return False
         return True
         
-class factionSelected(QtGui.QWizardPage):
+class factionSelected(QWizardPage):
     def __init__(self, parent=None):
         super(factionSelected, self).__init__(parent)
         
@@ -162,16 +164,16 @@ class factionSelected(QtGui.QWizardPage):
     def initializePage(self):
         if self.parent.selectedFaction == 0 :
             self.setTitle("Welcome to the United Earth Federation Army !<br><br>You can still alter your choice.<br>Once you've clicked finished, there is no going back !")
-            self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("client/account_watermark_intro.png"))
+            self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("client/account_watermark_intro.png"))
         elif self.parent.selectedFaction == 1 :
             self.setTitle("You have embraced the Way.<br><br>You can still alter your choice.<br>Once you've clicked finished, there is no going back !")
-            self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("client/account_watermark_created.png"))
+            self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("client/account_watermark_created.png"))
         elif self.parent.selectedFaction == 2 :
             self.setTitle("You have been integrated to the symbiont network.<br><br>You can still alter your choice.<br>Once you've clicked finished, there is no going back !")
-            self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("client/account_watermark_input.png"))
+            self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("client/account_watermark_input.png"))
         elif self.parent.selectedFaction == 3 :
             self.setTitle("[Language Not Recognized]<br><br>You can still alter your choice.<br>Once you've clicked finished, there is no going back !")
-            self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("client/account_seraphim.png"))
+            self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("client/account_seraphim.png"))
 
     def validatePage(self):    
         self.parent.parent.faction = self.parent.selectedFaction

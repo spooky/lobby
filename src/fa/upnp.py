@@ -27,7 +27,7 @@ Created on Mar 22, 2012
 '''
 import logging
 import sys
-import util
+
 logger= logging.getLogger("faf.fa.upnp")
 logger.setLevel(logging.INFO)
 

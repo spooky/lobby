@@ -20,11 +20,11 @@
 
 
 
-from math import exp
 from trueSkill.FactorGraphs.FactorGraph import *
 from trueSkill.FactorGraphs.FactorList import *
+from trueSkill.FactorGraphs.VariableFactory import VariableFactory
+from trueSkill.Rating import Rating
 from trueSkill.TrueSkill.Layers.PlayerPriorValuesToSkillsLayer import *
-from trueSkill.Numerics.GaussianDistribution import *
 from trueSkill.TrueSkill.Layers.PlayerSkillsToPerformancesLayer import *
 from trueSkill.TrueSkill.Layers.TeamPerformancesToTeamPerformanceDifferencesLayer import *
 from trueSkill.TrueSkill.Layers.PlayerPerformancesToTeamPerformancesLayer import  *

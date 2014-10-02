@@ -20,19 +20,19 @@
 
 
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtNetwork import QNetworkRequest
+from PyQt5 import QtCore
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtNetwork import QNetworkRequest
+
 from chat._avatarWidget import avatarWidget
-
-
 from chat import user2name
 import util
-
 import fa
 import client
 
 
-class Chatter(QtGui.QTableWidgetItem):
+class Chatter(QTableWidgetItem):
     SORT_COLUMN = 2
     AVATAR_COLUMN = 1
     RANK_COLUMN = 0
@@ -43,7 +43,7 @@ class Chatter(QtGui.QTableWidgetItem):
     There can be multiple chatters for every Player in the Client.
     '''
     def __init__(self, parent, user, lobby, *args, **kwargs):
-        QtGui.QTableWidgetItem.__init__(self, *args, **kwargs)
+        QTableWidgetItem.__init__(self, *args, **kwargs)
                 
         #TODO: for now, userflags and ranks aren't properly interpreted :-/ This is impractical if an operator reconnects too late.
         self.parent = parent
@@ -76,15 +76,15 @@ class Chatter(QtGui.QTableWidgetItem):
         
         self.parent.setItem(row, Chatter.SORT_COLUMN, self)
         
-        self.avatarItem = QtGui.QTableWidgetItem()
+        self.avatarItem = QTableWidgetItem()
         self.avatarItem.setFlags(QtCore.Qt.ItemIsEnabled)
         self.avatarItem.setTextAlignment(QtCore.Qt.AlignHCenter)
         
-        self.rankItem = QtGui.QTableWidgetItem()
+        self.rankItem = QTableWidgetItem()
         self.rankItem.setFlags(QtCore.Qt.ItemIsEnabled)
         self.rankItem.setTextAlignment(QtCore.Qt.AlignHCenter)
 
-        self.statusItem = QtGui.QTableWidgetItem()
+        self.statusItem = QTableWidgetItem()
         self.statusItem.setFlags(QtCore.Qt.ItemIsEnabled)
         self.statusItem.setTextAlignment(QtCore.Qt.AlignHCenter)
 
@@ -147,14 +147,14 @@ class Chatter(QtGui.QTableWidgetItem):
             avatarPix = util.respix(url) 
                     
             if avatarPix :
-                self.avatarItem.setIcon(QtGui.QIcon(avatarPix))            
+                self.avatarItem.setIcon(QIcon(avatarPix))
                 self.avatarItem.setToolTip(self.avatarTip)
             else:                           
                 if util.addcurDownloadAvatar(url, self.name) :                
                     self.lobby.nam.get(QNetworkRequest(QtCore.QUrl(url)))            
         else:
             # No avatar set.
-            self.avatarItem.setIcon(QtGui.QIcon()) 
+            self.avatarItem.setIcon(QIcon())
             self.avatarItem.setToolTip(None)
             
                         
@@ -183,12 +183,12 @@ class Chatter(QtGui.QTableWidgetItem):
 
         # Color handling
         if self.elevation in self.lobby.OPERATOR_COLORS:            
-            self.setTextColor(QtGui.QColor(self.lobby.OPERATOR_COLORS[self.elevation]))
+            self.setForeground(QColor(self.lobby.OPERATOR_COLORS[self.elevation]))
         else:
             if self.name in self.lobby.client.colors :
-                self.setTextColor(QtGui.QColor(self.lobby.client.getColor(self.name)))
+                self.setForeground(QColor(self.lobby.client.getColor(self.name)))
             else :
-                self.setTextColor(QtGui.QColor(self.lobby.client.getUserColor(self.name)))
+                self.setForeground(QColor(self.lobby.client.getUserColor(self.name)))
 
         rating = self.rating
 
@@ -203,7 +203,7 @@ class Chatter(QtGui.QTableWidgetItem):
                     self.statusItem.setIcon(util.icon("chat/status/playing.png"))
                     self.statusItem.setToolTip("Playing Game<br/>"+url.toString())
         else:
-                self.statusItem.setIcon(QtGui.QIcon())
+                self.statusItem.setIcon(QIcon())
                 self.statusItem.setToolTip("Idle")
             
 
@@ -240,7 +240,7 @@ class Chatter(QtGui.QTableWidgetItem):
                 self.rankItem.setToolTip("IRC User")
             
     def joinChannel(self):
-        channel, ok = QtGui.QInputDialog.getText(self.lobby.client, "QInputDialog.getText()", "Channel :", QtGui.QLineEdit.Normal, "#tournament")
+        channel, ok = QInputDialog.getText(self.lobby.client, "QInputDialog.getText()", "Channel :", QLineEdit.Normal, "#tournament")
         if ok and channel != '':
             self.lobby.client.joinChannel(self.name, channel)
 
@@ -281,7 +281,7 @@ class Chatter(QtGui.QTableWidgetItem):
         if item == self:
             if self.lobby.client.login != self.name:
                 if "Ze_PilOt" in self.name :
-                    QtGui.QMessageBox.critical(None, "Message to the admin", "You are going to send a private message to the admin.<br><br>Be aware that :<ul><li><b>The admin is not a moderator.</b> Send a message to another 'white nickname' or send a message to the moderator group in the forum.</li><li>The admin <b>is not an online (technical) support</b>. If you have question or a problem, ask in the chat.</li><li><b>Reporting a problem to the admin in the chat is useless</b>. The admin won't necessary read them, and as the messages are not kept, problems are forgotten.</li></ul><br><b>If you need to report something, go to the HELP menu then Tech Support.</b><br>Be sure to read the red wall of text first.<br><br>The admin is usually receiving a lot of private message when online. That can be overwhelming or even irritating (<b>the admin goes to the chat for chilling</b> or debugging).<br><br>If your message doesn't fit in the previous categories, you may proceed.<br>You can also send him a PM in the forum!<br><br>Thanks for your understanding.", QtGui.QMessageBox.Close)
+                    QMessageBox.critical(None, "Message to the admin", "You are going to send a private message to the admin.<br><br>Be aware that :<ul><li><b>The admin is not a moderator.</b> Send a message to another 'white nickname' or send a message to the moderator group in the forum.</li><li>The admin <b>is not an online (technical) support</b>. If you have question or a problem, ask in the chat.</li><li><b>Reporting a problem to the admin in the chat is useless</b>. The admin won't necessary read them, and as the messages are not kept, problems are forgotten.</li></ul><br><b>If you need to report something, go to the HELP menu then Tech Support.</b><br>Be sure to read the red wall of text first.<br><br>The admin is usually receiving a lot of private message when online. That can be overwhelming or even irritating (<b>the admin goes to the chat for chilling</b> or debugging).<br><br>If your message doesn't fit in the previous categories, you may proceed.<br>You can also send him a PM in the forum!<br><br>Thanks for your understanding.", QMessageBox.Close)
                 self.lobby.openQuery(self.name, True) #open and activate query window        
 
         elif item == self.statusItem:                                          
@@ -296,19 +296,19 @@ class Chatter(QtGui.QTableWidgetItem):
 
         
     def pressed(self, item):        
-        menu = QtGui.QMenu(self.parent)
+        menu = QMenu(self.parent)
 
         # Actions for stats
         
-        actionStats         = QtGui.QAction("View Player statistics", menu)
+        actionStats         = QAction("View Player statistics", menu)
         
-        actionSelectAvatar  = QtGui.QAction("Select Avatar", menu)
+        actionSelectAvatar  = QAction("Select Avatar", menu)
         
         # Actions for Games and Replays
-        actionReplay = QtGui.QAction("View Live Replay", menu)
-        actionVaultReplay = QtGui.QAction("View Replays in Vault", menu)
-        actionJoin = QtGui.QAction("Join in Game", menu)
-        #actionInvite = QtGui.QAction("Invite to Game", menu)
+        actionReplay = QAction("View Live Replay", menu)
+        actionVaultReplay = QAction("View Replays in Vault", menu)
+        actionJoin = QAction("Join in Game", menu)
+        #actionInvite = QAction("Invite to Game", menu)
 
         
         # Default is all disabled, we figure out what we can do after this
@@ -343,25 +343,25 @@ class Chatter(QtGui.QTableWidgetItem):
         # power menu
         if self.lobby.client.power > 1 :
             # admin and mod menus
-            actionAddAvatar = QtGui.QAction("Assign avatar", menu)
+            actionAddAvatar = QAction("Assign avatar", menu)
             menu.addAction(actionAddAvatar)
             actionAddAvatar.triggered.connect(self.addAvatar)
             
-            actionJoinChannel = QtGui.QAction("Join Channel", menu)
+            actionJoinChannel = QAction("Join Channel", menu)
             menu.addAction(actionJoinChannel)
             actionJoinChannel.triggered.connect(self.joinChannel)
 
-            actionKick = QtGui.QAction("Kick", menu)
+            actionKick = QAction("Kick", menu)
             menu.addAction(actionKick)
             actionKick.triggered.connect(self.kick)
             actionKick.setDisabled(1)
 
             if self.lobby.client.power == 2 :
-                actionCloseFA = QtGui.QAction("Close FA", menu)
+                actionCloseFA = QAction("Close FA", menu)
                 menu.addAction(actionCloseFA)
                 actionCloseFA.triggered.connect(self.closeFA)
 
-                actionCloseLobby = QtGui.QAction("Kick from Lobby", menu)
+                actionCloseLobby = QAction("Kick from Lobby", menu)
                 menu.addAction(actionCloseLobby)
                 actionCloseLobby.triggered.connect(self.closeLobby)                
       
@@ -380,18 +380,18 @@ class Chatter(QtGui.QTableWidgetItem):
         
             
         # Actions for teams
-        # actionInviteToTeam = QtGui.QAction("Invite to Team", menu)
+        # actionInviteToTeam = QAction("Invite to Team", menu)
         # actionInviteToTeam.triggered.connect(self.invite)
         # menu.addAction(actionInviteToTeam)
         # menu.addSeparator()
 
         # Actions for the Friends List
-        actionAddFriend = QtGui.QAction("Add friend", menu)
-        actionRemFriend = QtGui.QAction("Remove friend", menu)
+        actionAddFriend = QAction("Add friend", menu)
+        actionRemFriend = QAction("Remove friend", menu)
 
         # Actions for the Foes List
-        actionAddFoe = QtGui.QAction("Add foe", menu)
-        actionRemFoe = QtGui.QAction("Remove foe", menu)
+        actionAddFoe = QAction("Add foe", menu)
+        actionRemFoe = QAction("Remove foe", menu)
         
         # Don't allow self to be added or removed from friends or foes
         if self.lobby.client.login == self.name:
@@ -432,7 +432,7 @@ class Chatter(QtGui.QTableWidgetItem):
 
 
         #Finally: Show the popup
-        menu.popup(QtGui.QCursor.pos())
+        menu.popup(QCursor.pos())
             
     @QtCore.pyqtSlot()
     def viewStats(self):

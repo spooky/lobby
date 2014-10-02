@@ -20,8 +20,6 @@
 
 
 
-import time
-
 class Variable(object):
     def __init__(self, name, prior):
         

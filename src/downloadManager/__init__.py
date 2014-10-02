@@ -16,13 +16,15 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
-from PyQt4 import QtGui, QtCore
 import urllib2
 import logging
 import os
+
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
+from PyQt5 import QtCore
+
 import util
-import warnings
+
 
 logger= logging.getLogger("faf.downloader")
 logger.setLevel(logging.DEBUG)
@@ -60,7 +62,7 @@ class downloadManager(QtCore.QObject):
                 #Create alpha-mapped preview image
                 try:
                     pass # the server already sends 100x100 pic
-#                    img = QtGui.QImage(pathimg).scaled(100,100)
+#                    img = QImage(pathimg).scaled(100,100)
 #                    img.save(pathimg)
                 except:
                     pathimg = "games/unknown_map.png"

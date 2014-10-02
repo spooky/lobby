@@ -20,8 +20,6 @@
 
 
 
-from Factor import Factor
-
 class Schedule(object):
     def __init__(self, name):
         self._name = name

@@ -20,20 +20,21 @@
 
 
 
-from PyQt4 import QtCore, QtGui
 import os
+import json
+
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QProgressDialog, QApplication, QMessageBox
+
 import util
 import fa
 import modvault
-
-
 from fa import logger, writeFAPathLua, savePath
 from replayparser import replayParser
 from main import sys
-import json
 
 
-class Process(QtCore.QProcess):    
+class Process(QtCore.QProcess):
     def __init__(self, mod=None, uid=None, *args, **kwargs):        
         QtCore.QProcess.__init__(self, *args, **kwargs)
         self.info = None
@@ -69,7 +70,7 @@ def running():
     
 def available():
     if running():
-        QtGui.QMessageBox.warning(QtGui.QApplication.activeWindow(), "ForgedAlliance.exe", "<b>Forged Alliance is already running.</b><br/>You can only run one instance of the game.")
+        QMessageBox.warning(QApplication.activeWindow(), "ForgedAlliance.exe", "<b>Forged Alliance is already running.</b><br/>You can only run one instance of the game.")
         return False
     return True
     
@@ -77,7 +78,7 @@ def available():
     
 def close():
     if running():            
-        progress = QtGui.QProgressDialog()
+        progress = QProgressDialog()
         progress.setCancelButtonText("Terminate")
         progress.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint)
         progress.setAutoClose(False)
@@ -91,7 +92,7 @@ def close():
         progress.show()    
                 
         while running() and progress.isVisible():                
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
                             
         progress.close()
               
@@ -128,7 +129,7 @@ def __run(info, arguments, detach = False):
                 instance.startDetached(executable, arguments, util.BIN_DIR)
             return True
         else:
-            QtGui.QMessageBox.warning(None, "ForgedAlliance.exe", "Another instance of FA is already running.")
+            QMessageBox.warning(None, "ForgedAlliance.exe", "Another instance of FA is already running.")
             return False
 
 def replay(source, detach = False):
@@ -155,7 +156,7 @@ def replay(source, detach = False):
                     
                     if binary.size() == 0:
                         logger.info("Invalid replay")
-                        QtGui.QMessageBox.critical(None, "FA Forever Replay", "Sorry, this replay is corrupted.")
+                        QMessageBox.critical(None, "FA Forever Replay", "Sorry, this replay is corrupted.")
                         return False
                         
                     scfa_replay = QtCore.QFile(os.path.join(util.CACHE_DIR, "temp.scfareplay"))
@@ -196,7 +197,7 @@ def replay(source, detach = False):
                     parser = replayParser(arg_string)
                     version = parser.getVersion()
                 else:
-                    QtGui.QMessageBox.critical(None, "FA Forever Replay", "Sorry, FAF has no idea how to replay this file:<br/><b>" + source + "</b>")        
+                    QMessageBox.critical(None, "FA Forever Replay", "Sorry, FAF has no idea how to replay this file:<br/><b>" + source + "</b>")
                 
                 logger.info("Replaying " + str(arg_string) + " with mod " + str(mod) + " on map " + str(mapname))
             else:
@@ -215,12 +216,12 @@ def replay(source, detach = False):
                 arg_url.setEncodedQuery(QtCore.QByteArray())
                 arg_string = arg_url.toString()
             else:
-                QtGui.QMessageBox.critical(None, "FA Forever Replay", "App doesn't know how to play replays from that scheme:<br/><b>" + url.scheme() + "</b>")        
+                QMessageBox.critical(None, "FA Forever Replay", "App doesn't know how to play replays from that scheme:<br/><b>" + url.scheme() + "</b>")
                 return False                        
 
         # We couldn't construct a decent argument format to tell ForgedAlliance for this replay
         if not arg_string:
-            QtGui.QMessageBox.critical(None, "FA Forever Replay", "App doesn't know how to play replays from that source:<br/><b>" + str(source) + "</b>")
+            QMessageBox.critical(None, "FA Forever Replay", "App doesn't know how to play replays from that source:<br/><b>" + str(source) + "</b>")
             return False
             
         # Launch preparation: Start with an empty arguments list
@@ -319,8 +320,8 @@ def checkMap(mapname, force = False, silent=False):
     if force:        
         return fa.maps.downloadMap(mapname, silent=silent)
         
-    result = QtGui.QMessageBox.question(None, "Download Map", "Seems that you don't have the map. Do you want to download it?<br/><b>" + mapname + "</b>", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-    if result == QtGui.QMessageBox.Yes :
+    result = QMessageBox.question(None, "Download Map", "Seems that you don't have the map. Do you want to download it?<br/><b>" + mapname + "</b>", QMessageBox.Yes, QMessageBox.No)
+    if result == QMessageBox.Yes :
         if not fa.maps.downloadMap(mapname, silent=silent):
             return False
     else:
@@ -342,8 +343,8 @@ def checkMods(mods): #mods is a dictionary of uid-name pairs
             to_download.append(uid)
 
     for uid in to_download:
-        result = QtGui.QMessageBox.question(None, "Download Mod", "Seems that you don't have this mod. Do you want to download it?<br/><b>" + mods[uid] + "</b>", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-        if result == QtGui.QMessageBox.Yes:
+        result = QMessageBox.question(None, "Download Mod", "Seems that you don't have this mod. Do you want to download it?<br/><b>" + mods[uid] + "</b>", QMessageBox.Yes, QMessageBox.No)
+        if result == QMessageBox.Yes:
             # Spawn an update for the required mod
             updater = fa.updater.Updater(uid, sim=True)
             result = updater.run()
@@ -360,7 +361,7 @@ def checkMods(mods): #mods is a dictionary of uid-name pairs
         uids[mod.uid] = mod
     for uid in mods:
         if uid not in uids:
-            QtGui.QMessageBox.warning(None, "Mod not Found", "%s was apparently not installed correctly. Please check this." % mods[uid])
+            QMessageBox.warning(None, "Mod not Found", "%s was apparently not installed correctly. Please check this." % mods[uid])
             return
         actual_mods.append(uids[uid])
     if not modvault.setActiveMods(actual_mods):
@@ -376,7 +377,7 @@ def check(mod, mapname = None, version = None, modVersions = None, sim_mods = No
     logger.info("Checking FA for: " + str(mod) + " and map " + str(mapname))
     
     if not mod:
-        QtGui.QMessageBox.warning(None, "No Mod Specified", "The application didn't specify which mod to update.")
+        QMessageBox.warning(None, "No Mod Specified", "The application didn't specify which mod to update.")
         return False
         
     if not fa.gamepath:
@@ -407,7 +408,7 @@ def check(mod, mapname = None, version = None, modVersions = None, sim_mods = No
         writeFAPathLua()
     except:
         logger.error("fa_path.lua can't be written: ", exc_info=sys.exc_info())
-        QtGui.QMessageBox.critical(None, "Cannot write fa_path.lua", "This is a  rare error and you should report it!<br/>(open Menu BETA, choose 'Report a Bug')")             
+        QMessageBox.critical(None, "Cannot write fa_path.lua", "This is a  rare error and you should report it!<br/>(open Menu BETA, choose 'Report a Bug')")
         return False
         
 

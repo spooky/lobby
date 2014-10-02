@@ -16,38 +16,38 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-from PyQt4 import QtCore, QtGui
-from fa import maps
+from PyQt5 import QtCore
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
 import util
-import os
-import client
 
 
-class CoopMapItemDelegate(QtGui.QStyledItemDelegate):
+class CoopMapItemDelegate(QStyledItemDelegate):
     
     def __init__(self, *args, **kwargs):
-        QtGui.QStyledItemDelegate.__init__(self, *args, **kwargs)
+        QStyledItemDelegate.__init__(self, *args, **kwargs)
         
     def paint(self, painter, option, index, *args, **kwargs):
         self.initStyleOption(option, index)
                 
         painter.save()
         
-        html = QtGui.QTextDocument()
-        textOption = QtGui.QTextOption()
-        textOption.setWrapMode(QtGui.QTextOption.WordWrap)
+        html = QTextDocument()
+        textOption = QTextOption()
+        textOption.setWrapMode(QTextOption.WordWrap)
         html.setDefaultTextOption(textOption)
 
         html.setTextWidth(option.rect.width())
         html.setHtml(option.text)
         
-        icon = QtGui.QIcon(option.icon)
+        icon = QIcon(option.icon)
         iconsize = icon.actualSize(option.rect.size())
 #        
 #        #clear icon and text before letting the control draw itself because we're rendering these parts ourselves
-#        option.icon = QtGui.QIcon()        
+#        option.icon = QIcon()
         option.text = ""  
-        option.widget.style().drawControl(QtGui.QStyle.CE_ItemViewItem, option, painter, option.widget)
+        option.widget.style().drawControl(QStyle.CE_ItemViewItem, option, painter, option.widget)
 #        
 #        #Icon
 #        icon.paint(painter, option.rect.adjusted(5-2, -2, 0, 0), QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
@@ -63,9 +63,9 @@ class CoopMapItemDelegate(QtGui.QStyledItemDelegate):
 
     def sizeHint(self, option, index, *args, **kwargs):
         self.initStyleOption(option, index)
-        html = QtGui.QTextDocument()
-        textOption = QtGui.QTextOption()
-        textOption.setWrapMode(QtGui.QTextOption.WordWrap)
+        html = QTextDocument()
+        textOption = QTextOption()
+        textOption.setWrapMode(QTextOption.WordWrap)
         html.setTextWidth(option.rect.width())
         html.setDefaultTextOption(textOption)
         html.setHtml(option.text)
@@ -74,14 +74,14 @@ class CoopMapItemDelegate(QtGui.QStyledItemDelegate):
         
 
 
-class CoopMapItem(QtGui.QTreeWidgetItem):
+class CoopMapItem(QTreeWidgetItem):
 
     
     FORMATTER_COOP        = unicode(util.readfile("coop/formatters/coop.qthtml"))
 
     
     def __init__(self, uid, parent, *args, **kwargs):
-        QtGui.QTreeWidgetItem.__init__(self, *args, **kwargs)
+        QTreeWidgetItem.__init__(self, *args, **kwargs)
 
         
         self.uid            = uid

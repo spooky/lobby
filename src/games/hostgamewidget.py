@@ -16,18 +16,15 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
+import logging
 
+from PyQt5.QtWidgets import *
+from PyQt5 import QtCore
 
-import os
-
-from PyQt4 import QtCore, QtGui
 from games.gameitem import GameItem, GameItemDelegate
 import modvault
-
 from fa import maps
 import util
-
-import logging
 logger = logging.getLogger("faf.hostgamewidget")
 logger.setLevel(logging.DEBUG)
 
@@ -51,11 +48,11 @@ class HostgameWidget(FormClass, BaseClass):
         if len(item.options) == 0 :   
             self.optionGroup.setVisible(False)
         else :
-            group_layout = QtGui.QVBoxLayout()
+            group_layout = QVBoxLayout()
             self.optionGroup.setLayout(group_layout)
             
             for option in item.options :
-                checkBox = QtGui.QCheckBox(self)
+                checkBox = QCheckBox(self)
                 checkBox.setText(option)
                 checkBox.setChecked(True)
                 group_layout.addWidget(checkBox)
@@ -147,7 +144,7 @@ class HostgameWidget(FormClass, BaseClass):
         self.message['mapname'] = self.parent.gamemap
         self.game.update(self.message, self.parent.client)
 
-    @QtCore.pyqtSlot(QtGui.QListWidgetItem)
+    @QtCore.pyqtSlot(QListWidgetItem)
     def modclicked(self, item):
         #item.setSelected(not item.isSelected())
         logger.debug("mod %s clicked." % str(item.text()))

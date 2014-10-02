@@ -16,9 +16,8 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-
-
-
+from PyQt5.QtGui import *
+from PyQt5.QtMultimedia import *
 
 # Developer mode flag
 import sys
@@ -141,7 +140,7 @@ if not os.path.isdir(SOUND_DIR):
 if not os.path.isdir(VOICES_DIR):
     os.makedirs(VOICES_DIR)   
 
-from PyQt4 import QtGui, uic, QtCore
+from PyQt5 import uic, QtCore
 import shutil
 import hashlib
 import re
@@ -184,11 +183,11 @@ def stopLogging():
 def clearDirectory(directory, confirm = True):
     if (os.path.isdir(directory)):        
         if (confirm):
-            result = QtGui.QMessageBox.question(None, "Clear Directory", "Are you sure you wish to clear the following directory:<br/><b>&nbsp;&nbsp;" + directory + "</b>", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+            result = QMessageBox.question(None, "Clear Directory", "Are you sure you wish to clear the following directory:<br/><b>&nbsp;&nbsp;" + directory + "</b>", QMessageBox.Yes, QMessageBox.No)
         else:
-            result = QtGui.QMessageBox.Yes
+            result = QMessageBox.Yes
                         
-        if (result == QtGui.QMessageBox.Yes):
+        if (result == QMessageBox.Yes):
             shutil.rmtree(directory)
             return True
         else:
@@ -238,8 +237,8 @@ def setTheme(theme, restart = True):
                 __themedir = test_dir
                 __theme = theme
             else:
-                result = QtGui.QMessageBox.question(QtGui.QApplication.activeWindow(), "Incompatible Theme", "The following theme is not the right version:<br/><b>" + theme + "</b><br/><i>Contact the maker of the theme for an update!</i><br/><br/><b>Reset to default, or apply theme anyway?</b>", QtGui.QMessageBox.Apply, QtGui.QMessageBox.Reset)
-                if result == QtGui.QMessageBox.Apply:
+                result = QMessageBox.question(QApplication.activeWindow(), "Incompatible Theme", "The following theme is not the right version:<br/><b>" + theme + "</b><br/><i>Contact the maker of the theme for an update!</i><br/><br/><b>Reset to default, or apply theme anyway?</b>", QMessageBox.Apply, QMessageBox.Reset)
+                if result == QMessageBox.Apply:
                     logger.info("Using theme: " + theme + " in directory " + test_dir)
                     __themedir = test_dir
                     __theme = theme
@@ -255,8 +254,8 @@ def setTheme(theme, restart = True):
     settings.sync()
     
     if restart:
-        QtGui.QMessageBox.information(None, "Restart Needed", "FAF will quit now.")
-        QtGui.QApplication.quit()
+        QMessageBox.information(None, "Restart Needed", "FAF will quit now.")
+        QApplication.quit()
 
             
             
@@ -313,11 +312,11 @@ def pixmap(filename, themed=True):
     except:
         if themed:
             if __themedir and os.path.isfile(os.path.join(__themedir, filename)):
-                pix = QtGui.QPixmap(os.path.join(__themedir, filename))
+                pix = QPixmap(os.path.join(__themedir, filename))
             else:
-                pix = QtGui.QPixmap(os.path.join(COMMON_DIR, filename))
+                pix = QPixmap(os.path.join(COMMON_DIR, filename))
         else:
-            pix = QtGui.QPixmap(filename) #Unthemed means this can come from any location
+            pix = QPixmap(filename) #Unthemed means this can come from any location
                             
         __pixmapcache[filename] = pix
         return pix
@@ -471,21 +470,21 @@ def icon(filename, themed=True, pix = False):
     if pix :
         return pixmap(filename, themed)
     else :
-        icon = QtGui.QIcon()
-        icon.addPixmap(pixmap(filename, themed), QtGui.QIcon.Normal)
+        icon = QIcon()
+        icon.addPixmap(pixmap(filename, themed), QIcon.Normal)
         splitExt = os.path.splitext(filename)
         if len(splitExt) == 2:
             pixDisabled = pixmap(splitExt[0] + "_disabled" + splitExt[1], themed) 
             if  pixDisabled != None:
-                icon.addPixmap(pixDisabled,QtGui.QIcon.Disabled, QtGui.QIcon.On)
+                icon.addPixmap(pixDisabled,QIcon.Disabled, QIcon.On)
             
             pixActive = pixmap(splitExt[0] + "_active" + splitExt[1], themed)
             if  pixActive != None:
-                icon.addPixmap(pixActive,QtGui.QIcon.Active, QtGui.QIcon.On)        
+                icon.addPixmap(pixActive,QIcon.Active, QIcon.On)
             
             pixSelected = pixmap(splitExt[0] + "_selected" + splitExt[1], themed)
             if  pixSelected != None:
-                icon.addPixmap(pixSelected,QtGui.QIcon.Selected, QtGui.QIcon.On)   
+                icon.addPixmap(pixSelected,QIcon.Selected, QIcon.On)
         
         return  icon
  
@@ -496,11 +495,11 @@ def sound(filename, themed = True):
     '''
     if themed:
         if __themedir and os.path.isfile(os.path.join(__themedir, filename)):
-            QtGui.QSound.play(os.path.join(__themedir, filename))
+            QSound.play(os.path.join(__themedir, filename))
         else:
-            QtGui.QSound.play(os.path.join(COMMON_DIR, filename))
+            QSound.play(os.path.join(COMMON_DIR, filename))
     else:
-        QtGui.QSound.play(filename)
+        QSound.play(filename)
 
 
 
@@ -508,11 +507,11 @@ def wait(until):
     '''
     Super-simple wait function that takes a callable and waits until the callable returns true or the user aborts.
     '''
-    progress = QtGui.QProgressDialog()
+    progress = QProgressDialog()
     progress.show()
     
     while not until() and progress.isVisible():
-        QtGui.QApplication.processEvents()
+        QApplication.processEvents()
         
     progress.close()
     
@@ -624,7 +623,7 @@ def now():
 from crash import CrashDialog
 from report import ReportDialog
 
-from PyQt4.QtCore import QEventLoop
+from PyQt5.QtCore import QEventLoop
 
 # FIXME We should deprecate out synchronous logic.
 # Note: This wait is not that bad. It yields to any and all scheduled events.

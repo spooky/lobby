@@ -16,11 +16,16 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-from PyQt4 import QtGui, QtCore, QtNetwork
+import json
+import os
+from types import IntType, FloatType, ListType, DictType
+
+from PyQt5 import QtCore, QtNetwork
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
+from PyQt5.QtWidgets import QProgressDialog
+
 from galacticWar import logger, LOBBY_PORT, LOBBY_HOST, TEXTURE_SERVER, RANKS, FACTIONS
 from galaxy import Galaxy
-from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
-
 from client import ClientState
 from options import GWOptions
 from gwchannel import gwChannel
@@ -28,16 +33,9 @@ from teams.teams import Teams
 import util
 import util.slpp
 import fa
-
-import zipfile
-import StringIO
-
 from util import GW_TEXTURE_DIR
-import json
-import os
-
-from types import IntType, FloatType, ListType, DictType
 import loginwizards
+
 
 FormClass, BaseClass = util.loadUiType("galacticwar/galacticwar.ui")
 
@@ -120,7 +118,7 @@ class LobbyWidget(FormClass, BaseClass):
         self.blockSize = 0     
 
 
-        self.progress = QtGui.QProgressDialog()
+        self.progress = QProgressDialog()
         self.progress.setMinimum(0)
         self.progress.setMaximum(0)
 
@@ -197,7 +195,7 @@ class LobbyWidget(FormClass, BaseClass):
             
             
             while (self.socket.state() != QtNetwork.QAbstractSocket.ConnectedState) and self.progress.isVisible():
-                QtGui.QApplication.processEvents()                                        
+                QApplication.processEvents()
     
     #        #Perform Version Check first        
             if not self.socket.state() == QtNetwork.QAbstractSocket.ConnectedState:
@@ -229,7 +227,7 @@ class LobbyWidget(FormClass, BaseClass):
         self.send(dict(command="hello", version=util.VERSION_STRING, port= self.client.gamePort, login=self.client.login, session = self.client.session))
         
         while (not self.state) and self.progress.isVisible():
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
             
 
         if self.progress.wasCanceled():
@@ -412,7 +410,7 @@ class LobbyWidget(FormClass, BaseClass):
         self.progress.close()
         result = message["result"]
         if result == "won" :
-            QtGui.QMessageBox.information(self, "War report", "You win !" , QtGui.QMessageBox.Close)
+            QMessageBox.information(self, "War report", "You win !" , QMessageBox.Close)
             
             
     def handle_attack_proposal(self, message):
@@ -501,7 +499,7 @@ class LobbyWidget(FormClass, BaseClass):
                 self.send(dict(command = "account_creation", action = 0, faction = self.faction))
             else :
                 self.client.mainTabs.setCurrentIndex(0)
-                QtGui.QMessageBox.warning(self, "No faction :(", "You need to pledge allegiance to a faction in order to play Galactic War !")
+                QMessageBox.warning(self, "No faction :(", "You need to pledge allegiance to a faction in order to play Galactic War !")
 
         elif message["action"] == 1 :
             name = message["name"]
@@ -509,8 +507,8 @@ class LobbyWidget(FormClass, BaseClass):
 
             self.rank = message["rank"]
             
-            question = QtGui.QMessageBox.question(self, "Avatar name generation", "Your avatar name will be : <br><br>" + self.get_rank(self.faction, self.rank) + " " + name + ".<br><br>Press Reset to generate another, Ok to accept.", QtGui.QMessageBox.Reset, QtGui.QMessageBox.Ok)
-            if question ==  QtGui.QMessageBox.Reset :
+            question = QMessageBox.question(self, "Avatar name generation", "Your avatar name will be : <br><br>" + self.get_rank(self.faction, self.rank) + " " + name + ".<br><br>Press Reset to generate another, Ok to accept.", QMessageBox.Reset, QMessageBox.Ok)
+            if question ==  QMessageBox.Reset :
                 self.send(dict(command = "account_creation", action = 1))
             else :
                 self.name = name
@@ -603,7 +601,7 @@ class LobbyWidget(FormClass, BaseClass):
         logger.warn("Disconnected from lobby server.")
         
         if self.state == ClientState.ACCEPTED:
-            QtGui.QMessageBox.warning(QtGui.QApplication.activeWindow(), "Disconnected from Galactic War", "The lobby lost the connection to the Galactic War server.<br/><b>You might still be able to chat.<br/>To play, try reconnecting a little later!</b>", QtGui.QMessageBox.Close)
+            QMessageBox.warning(QApplication.activeWindow(), "Disconnected from Galactic War", "The lobby lost the connection to the Galactic War server.<br/><b>You might still be able to chat.<br/>To play, try reconnecting a little later!</b>", QMessageBox.Close)
             self.initDone   = False
             self.client.mainTabs.setCurrentIndex(0)
 
@@ -672,4 +670,4 @@ class LobbyWidget(FormClass, BaseClass):
     def socketError(self, error):
         logger.error("TCP Socket Error: " + self.socket.errorString())
         if self.state > ClientState.NONE:   # Positive client states deserve user notification.
-            QtGui.QMessageBox.critical(None, "TCP Error", "A TCP Connection Error has occurred:<br/><br/><b>" + self.socket.errorString()+"</b>", QtGui.QMessageBox.Close)        
+            QMessageBox.critical(None, "TCP Error", "A TCP Connection Error has occurred:<br/><br/><b>" + self.socket.errorString()+"</b>", QMessageBox.Close)

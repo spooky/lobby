@@ -17,11 +17,16 @@
 #-------------------------------------------------------------------------------
 
 
-from PyQt4 import QtGui, QtCore
+import cPickle
+
+from PyQt5 import QtCore
+from PyQt5.QtGui import QDrag
+from PyQt5.QtWidgets import QMessageBox
+
 from galacticWar import logger
 import util
 from planetaryReinforcementItem import PlanetaryItem, PlanetaryReinforcementDelegate
-import cPickle
+
 
 FormClass, BaseClass = util.loadUiType("galacticwar/planetaryItems.ui")
 
@@ -56,7 +61,7 @@ class PlanetaryWidget(FormClass, BaseClass):
         mimeData = QtCore.QMimeData()
         mimeData.setData("application/x-building-reinforcement", bstream)
 
-        drag = QtGui.QDrag(self)
+        drag = QDrag(self)
         drag.setMimeData(mimeData)
         
         drag.setPixmap(self.planetaryDefenseListWidget.itemAt(event.pos()).icon().pixmap(50,50))
@@ -70,8 +75,8 @@ class PlanetaryWidget(FormClass, BaseClass):
 
     def buyItem(self, item):
         '''buy an item'''
-        question = QtGui.QMessageBox.question(self,item.description, "Buy this item?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-        if question == QtGui.QMessageBox.Yes :
+        question = QMessageBox.question(self,item.description, "Buy this item?", QMessageBox.Yes, QMessageBox.No)
+        if question == QMessageBox.Yes :
             self.parent.send(dict(command="buy_temporary_item", uid=item.uid))        
 
     def updateCreditsCheck(self, credits):

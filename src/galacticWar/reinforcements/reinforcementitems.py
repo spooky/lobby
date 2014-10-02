@@ -17,19 +17,23 @@
 #-------------------------------------------------------------------------------
 
 
-from PyQt4 import QtGui, QtCore
+import cPickle
+import pickle
+
+from PyQt5 import QtCore
+from PyQt5.QtGui import *
+
 from galacticWar import logger
 import util
 from reinforcementItem import ReinforcementItem, ReinforcementDelegate, ReinforcementGroupDelegate
-import cPickle
-import pickle
+
 
 FormClass, BaseClass = util.loadUiType("galacticwar/reinforcementItems.ui")
 
 
-class groupListWidget(QtGui.QListWidget):
+class groupListWidget(QListWidget):
     def __init__(self, parent, group, *args, **kwargs):
-        QtGui.QListWidget.__init__(self, *args, **kwargs)
+        QListWidget.__init__(self, *args, **kwargs)
         self.parent = parent
         self.group = group
         self.setMouseTracking(1)
@@ -59,7 +63,7 @@ class groupListWidget(QtGui.QListWidget):
         mimeData = QtCore.QMimeData()
         mimeData.setData("application/x-ownedunit-reinforcement", bstream)
 
-        drag = QtGui.QDrag(self)
+        drag = QDrag(self)
         drag.setMimeData(mimeData)
         
         drag.setPixmap(self.itemAt(event.pos()).icon().pixmap(50,50))
@@ -89,7 +93,7 @@ class groupListWidget(QtGui.QListWidget):
                     return
 
                 elif infos["owned"] != 1:
-                    i, ok = QtGui.QInputDialog.getInteger(self,
+                    i, ok = QInputDialog.getInteger(self,
                 "Amount", "How many units do you want in this group?", infos["owned"], 1, infos["owned"], 1)
                     if ok:
                         infos["owned"] = i
@@ -182,7 +186,7 @@ class ReinforcementWidget(FormClass, BaseClass):
     def updatePlayerList(self, players):
         ''' update the player list for offering units'''
         if self.waitingForPlayerList:
-            player, ok = QtGui.QInputDialog.getItem(self, "Select a player",
+            player, ok = QInputDialog.getItem(self, "Select a player",
                 "Give to:", sorted(players.keys()), 0, False)
             
             if ok and player:
@@ -218,16 +222,16 @@ class ReinforcementWidget(FormClass, BaseClass):
 
     def itemPressed(self, item):
         '''buy or unbuy an item'''
-        if QtGui.QApplication.mouseButtons() == QtCore.Qt.LeftButton:
+        if QApplication.mouseButtons() == QtCore.Qt.LeftButton:
             if not item.disabled:
-                if QtGui.QApplication.keyboardModifiers() == QtCore.Qt.ShiftModifier :
+                if QApplication.keyboardModifiers() == QtCore.Qt.ShiftModifier :
                     if self.currentMoneyCost + (item.price * 5) <= self.parent.credits:
                         item.add(5)
                 else: 
                     if self.currentMoneyCost + item.price <= self.parent.credits:
                         item.add(1)        
         else:
-            if QtGui.QApplication.keyboardModifiers() == QtCore.Qt.ShiftModifier :
+            if QApplication.keyboardModifiers() == QtCore.Qt.ShiftModifier :
                 item.remove(5)
             else: 
                 item.remove(1)              

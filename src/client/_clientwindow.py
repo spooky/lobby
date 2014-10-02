@@ -29,9 +29,10 @@ Created on Dec 1, 2011
 from types import IntType, FloatType, ListType, DictType
 import struct
 
-from PyQt4 import QtCore, QtGui, QtNetwork, QtWebKit
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5 import QtCore, QtNetwork, QtWebKit
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 from client import logger, ClientState, MUMBLE_URL, WEBSITE_URL, WIKI_URL, \
     FORUMS_URL, UNITDB_URL, SUPPORT_URL, TICKET_URL, GAME_PORT_DEFAULT, LOBBY_HOST, \
@@ -107,7 +108,7 @@ class ClientWindow(FormClass, BaseClass):
     Its UI also houses all the other UIs for the sub-modules.
     '''
 
-    topWidget = QtGui.QWidget()
+    topWidget = QWidget()
 
 
     #These signals are emitted when the client is connected or disconnected from FAF
@@ -184,7 +185,7 @@ class ClientWindow(FormClass, BaseClass):
         logger.debug("Client instantiating")
 
         # Hook to Qt's application management system
-        QtGui.QApplication.instance().aboutToQuit.connect(self.cleanup)
+        QApplication.instance().aboutToQuit.connect(self.cleanup)
 
         #Init and wire the TCP Network socket to communicate with faforever.com
         self.lobby_ctx = LobbyServerContext()
@@ -206,7 +207,7 @@ class ClientWindow(FormClass, BaseClass):
         self.sendFile = False
 
         #Tray icon
-        self.tray = QtGui.QSystemTrayIcon()
+        self.tray = QSystemTrayIcon()
         self.tray.setIcon(util.icon("client/tray_icon.png"))
         self.tray.show()
 
@@ -237,7 +238,7 @@ class ClientWindow(FormClass, BaseClass):
         self.setupUi(self)
         self.setStyleSheet(util.readstylesheet("client/client.css"))
 
-        self.windowsTitleLabel = QtGui.QLabel(self)
+        self.windowsTitleLabel = QLabel(self)
         self.windowsTitleLabel.setText("FA Forever " + util.VERSION_STRING)
         self.windowsTitleLabel.setProperty("titleLabel", True)
 
@@ -247,19 +248,19 @@ class ClientWindow(FormClass, BaseClass):
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowMinimizeButtonHint)
 
 
-        self.rubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle)
+        self.rubberBand = QRubberBand(QRubberBand.Rectangle)
 
 
         self.mousePosition = mousePosition(self)
         self.installEventFilter(self)
 
-        self.minimize = QtGui.QToolButton(self)
+        self.minimize = QToolButton(self)
         self.minimize.setIcon(util.icon("client/minimize-button.png"))
 
-        self.maximize = QtGui.QToolButton(self)
+        self.maximize = QToolButton(self)
         self.maximize.setIcon(util.icon("client/maximize-button.png"))
 
-        close = QtGui.QToolButton(self)
+        close = QToolButton(self)
         close.setIcon(util.icon("client/close-button.png"))
 
         self.minimize.setMinimumHeight(10)
@@ -282,7 +283,7 @@ class ClientWindow(FormClass, BaseClass):
         self.topLayout.addWidget(close)
         self.topLayout.insertStretch(1, 500)
         self.topLayout.setSpacing(0)
-        self.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.maxNormal = False
 
         close.clicked.connect(self.close);
@@ -295,7 +296,7 @@ class ClientWindow(FormClass, BaseClass):
         self.offset = None
         self.curSize = None
 
-        sizeGrip = QtGui.QSizeGrip(self)
+        sizeGrip = QSizeGrip(self)
         self.mainGridLayout.addWidget(sizeGrip, 2, 2)
 
 
@@ -383,7 +384,7 @@ class ClientWindow(FormClass, BaseClass):
         else:
             self.maxNormal = True
             self.curSize = self.geometry()
-            self.setGeometry(QtGui.QDesktopWidget().availableGeometry(self))
+            self.setGeometry(QDesktopWidget().availableGeometry(self))
 
 
     def mouseDoubleClickEvent(self, event):
@@ -415,7 +416,7 @@ class ClientWindow(FormClass, BaseClass):
             self.resizeWidget(event.globalPos())
 
         elif self.moving and self.offset != None:
-            desktop = QtGui.QDesktopWidget().availableGeometry(self)
+            desktop = QDesktopWidget().availableGeometry(self)
             if event.globalPos().y() == 0:
                 self.rubberBand.setGeometry(desktop)
                 self.rubberBand.show()
@@ -438,7 +439,7 @@ class ClientWindow(FormClass, BaseClass):
 
     def resizeWidget(self, globalMousePos):
         if globalMousePos.y() == 0:
-                self.rubberBand.setGeometry(QtGui.QDesktopWidget().availableGeometry(self))
+                self.rubberBand.setGeometry(QDesktopWidget().availableGeometry(self))
                 self.rubberBand.show()
         else:
                 self.rubberBand.hide()
@@ -494,7 +495,7 @@ class ClientWindow(FormClass, BaseClass):
         import vault
         import games
         import tutorials
-        import featuredmods
+        #import featuredmods
         #import galacticWar
         import downloadManager
         import modvault
@@ -523,25 +524,26 @@ class ClientWindow(FormClass, BaseClass):
         self.actionNsEnabled.setChecked(self.notificationSystem.settings.enabled)
 
         # Other windows
-        self.featuredMods = featuredmods.FeaturedMods(self)
+        # FIXME: Featured mods
+        #self.featuredMods = featuredmods.FeaturedMods(self)
         self.avatarAdmin = self.avatarSelection = avatarWidget(self, None)
 
 
         # warning setup
-        self.warning = QtGui.QHBoxLayout()
+        self.warning = QHBoxLayout()
 
-        self.warnPlayer = QtGui.QLabel(self)
+        self.warnPlayer = QLabel(self)
         self.warnPlayer.setText("A player of your skill level is currently searching for a 1v1 game. Click a faction to join him! ")
         self.warnPlayer.setAlignment(QtCore.Qt.AlignHCenter)
         self.warnPlayer.setAlignment(QtCore.Qt.AlignVCenter)
 
         self.warnPlayer.setProperty("warning", True)
 
-        self.rankedAeon = QtGui.QToolButton(self)
-        self.rankedCybran = QtGui.QToolButton(self)
-        self.rankedSeraphim = QtGui.QToolButton(self)
-        self.rankedUEF = QtGui.QToolButton(self)
-        self.rankedRandom = QtGui.QToolButton(self)
+        self.rankedAeon = QToolButton(self)
+        self.rankedCybran = QToolButton(self)
+        self.rankedSeraphim = QToolButton(self)
+        self.rankedUEF = QToolButton(self)
+        self.rankedRandom = QToolButton(self)
 
 #        self.rankedAeon.setAutoRaise(0)
 #        self.rankedCybran.setAutoRaise(0)
@@ -670,11 +672,11 @@ class ClientWindow(FormClass, BaseClass):
         self.saveWindow()
 
         if (fa.exe.running()):
-            if QtGui.QMessageBox.question(self, "Are you sure?", "Seems like you still have Forged Alliance running!<br/><b>Close anyway?</b>", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No) == QtGui.QMessageBox.No:
+            if QMessageBox.question(self, "Are you sure?", "Seems like you still have Forged Alliance running!<br/><b>Close anyway?</b>", QMessageBox.Yes, QMessageBox.No) == QMessageBox.No:
                 event.ignore()
                 return
 
-        return QtGui.QMainWindow.closeEvent(self, event)
+        return QMainWindow.closeEvent(self, event)
 
 
     def resizeEvent(self, size):
@@ -775,7 +777,7 @@ class ClientWindow(FormClass, BaseClass):
 
     @QtCore.pyqtSlot()
     def linkToSteam(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(STEAMLINK_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(STEAMLINK_URL))
 
     @QtCore.pyqtSlot()
     def setMumbleOptions(self):
@@ -784,13 +786,13 @@ class ClientWindow(FormClass, BaseClass):
 
     @QtCore.pyqtSlot()
     def clearSettings(self):
-        result = QtGui.QMessageBox.question(None, "Clear Settings", "Are you sure you wish to clear all settings, login info, etc. used by this program?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-        if (result == QtGui.QMessageBox.Yes):
+        result = QMessageBox.question(None, "Clear Settings", "Are you sure you wish to clear all settings, login info, etc. used by this program?", QMessageBox.Yes, QMessageBox.No)
+        if (result == QMessageBox.Yes):
 
             util.settings.clear()
             util.settings.sync()
-            QtGui.QMessageBox.information(None, "Restart Needed", "FAF will quit now.")
-            QtGui.QApplication.quit()
+            QMessageBox.information(None, "Restart Needed", "FAF will quit now.")
+            QApplication.quit()
 
     @QtCore.pyqtSlot()
     def clearGameFiles(self):
@@ -801,39 +803,39 @@ class ClientWindow(FormClass, BaseClass):
     def clearCache(self):
         changed = util.clearDirectory(util.CACHE_DIR)
         if changed:
-            QtGui.QMessageBox.information(None, "Restart Needed", "FAF will quit now.")
-            QtGui.QApplication.quit()
+            QMessageBox.information(None, "Restart Needed", "FAF will quit now.")
+            QApplication.quit()
 
 
     @QtCore.pyqtSlot()
     def linkMumble(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(MUMBLE_URL.format(login=self.login)))
+        QDesktopServices.openUrl(QtCore.QUrl(MUMBLE_URL.format(login=self.login)))
 
     @QtCore.pyqtSlot()
     def linkWebsite(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(WEBSITE_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(WEBSITE_URL))
 
     @QtCore.pyqtSlot()
     def linkWiki(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(WIKI_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(WIKI_URL))
 
     @QtCore.pyqtSlot()
     def linkForums(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(FORUMS_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(FORUMS_URL))
 
     @QtCore.pyqtSlot()
     def linkUnitDB(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(UNITDB_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(UNITDB_URL))
 
     @QtCore.pyqtSlot()
     def linkReportBug(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(TICKET_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(TICKET_URL))
         #from util.report import ReportDialog
         #ReportDialog(self).show()
 
     @QtCore.pyqtSlot()
     def linkTechSupport(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(SUPPORT_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(SUPPORT_URL))
 
     @QtCore.pyqtSlot()
     def linkShowLogs(self):
@@ -947,7 +949,7 @@ class ClientWindow(FormClass, BaseClass):
 
         if util.settings.value("app/mumble", "firsttime") == "firsttime":
             # The user has never configured mumble before. Be a little intrusive and ask him if he wants to use it.
-            if QtGui.QMessageBox.question(self, "Enable Voice Connector?", "FA Forever can connect with <a href=\"http://mumble.sourceforge.net/\">Mumble</a> to support the automatic setup of voice connections between you and your team mates. Would you like to enable this feature? You can change the setting at any time by going to options -> settings -> Voice", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
+            if QMessageBox.question(self, "Enable Voice Connector?", "FA Forever can connect with <a href=\"http://mumble.sourceforge.net/\">Mumble</a> to support the automatic setup of voice connections between you and your team mates. Would you like to enable this feature? You can change the setting at any time by going to options -> settings -> Voice", QMessageBox.Yes, QMessageBox.No) == QMessageBox.Yes:
                 util.settings.setValue("app/mumble", "true")
             else:
                 util.settings.setValue("app/mumble", "false")
@@ -1014,8 +1016,8 @@ class ClientWindow(FormClass, BaseClass):
 
         if udpSocket.localPort() != self.gamePort :
             logger.error("The game port set (%i) is not available." % self.gamePort)
-            answer = QtGui.QMessageBox.warning(None, "Port Occupied", "FAF has detected that the gameport you choose is not available. Possible reasons:<ul><li><b>FAF is already running</b> (most likely)</li><li>another program is listening on port {port}</li></ul><br>If you click Apply, FAF will port {port2} for this session.".format(port=self.gamePort, port2=udpSocket.localPort()), QtGui.QMessageBox.Apply, QtGui.QMessageBox.Abort)
-            if answer == QtGui.QMessageBox.Apply:
+            answer = QMessageBox.warning(None, "Port Occupied", "FAF has detected that the gameport you choose is not available. Possible reasons:<ul><li><b>FAF is already running</b> (most likely)</li><li>another program is listening on port {port}</li></ul><br>If you click Apply, FAF will port {port2} for this session.".format(port=self.gamePort, port2=udpSocket.localPort()), QMessageBox.Apply, QMessageBox.Abort)
+            if answer == QMessageBox.Apply:
                 self.gamePort = udpSocket.localPort()
 
             else :
@@ -1029,7 +1031,7 @@ class ClientWindow(FormClass, BaseClass):
 
         if udpSocket.writeDatagram(self.login, QtNetwork.QHostAddress(QtNetwork.QHostInfo.fromName(LOBBY_HOST).addresses ()[0]), 30351) == -1 :
             logger.info("Unable to send UDP Packet")
-            QtGui.QMessageBox.critical(self, "UDP Packet not sent !", "We are not able to send a UDP packet. <br><br>Possible reasons:<ul><li><b>Your firewall is blocking the UDP port {port}.</b></li><li><b>Your router is blocking or routing port {port} in a wrong way.</b></li></ul><br><font size='+2'>How to fix this : </font> <ul><li>Check your firewall and router. <b>More info in the wiki (Links -> Wiki)</li></b><li>You should also consider using <b>uPnP (Options -> Settings -> Gameport)</b></li><li>You should ask for assistance in the TechQuestions chat and/or in the <b>technical forum (Links -> Forums<b>)</li></ul><br><font size='+1'><b>FA will not be able to perform correctly until this issue is fixed.</b></font>".format(port=self.gamePort))
+            QMessageBox.critical(self, "UDP Packet not sent !", "We are not able to send a UDP packet. <br><br>Possible reasons:<ul><li><b>Your firewall is blocking the UDP port {port}.</b></li><li><b>Your router is blocking or routing port {port} in a wrong way.</b></li></ul><br><font size='+2'>How to fix this : </font> <ul><li>Check your firewall and router. <b>More info in the wiki (Links -> Wiki)</li></b><li>You should also consider using <b>uPnP (Options -> Settings -> Gameport)</b></li><li>You should ask for assistance in the TechQuestions chat and/or in the <b>technical forum (Links -> Forums<b>)</li></ul><br><font size='+1'><b>FA will not be able to perform correctly until this issue is fixed.</b></font>".format(port=self.gamePort))
 
 
 
@@ -1046,7 +1048,7 @@ class ClientWindow(FormClass, BaseClass):
         interval = 1
 
         while self.udpTest == False :
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
             if time.time() - timer > interval :
                 udpSocket.writeDatagram(self.login, QtNetwork.QHostAddress("91.236.254.74"), 30351)
                 interval = interval + 1
@@ -1061,7 +1063,7 @@ class ClientWindow(FormClass, BaseClass):
 
         if self.udpTest == False :
             logger.info("Unable to receive UDP Packet")
-            QtGui.QMessageBox.critical(self, "UDP Packet not received !", "We didn't received any answer from the server. <br><br>Possible reasons:<ul><li><b>Your firewall is blocking the UDP port {port}.</b></li><li><b>Your router is blocking or routing port {port} in a wrong way/to the wrong computer.</b></li></ul><br><font size='+2'>How to fix this : </font> <ul><li>Check your firewall and router. <b>More info in the wiki (Links -> Wiki)</li></b><li>You should also consider using <b>uPnP (Options -> Settings -> Gameport)</b></li><li>You should ask for assistance in the TechQuestions chat and/or in the <b>technical forum (Links -> Forums<b>)</li></ul><br><font size='+1'><b>FA will not be able to perform correctly until this issue is fixed.</b></font>".format(port=self.gamePort))
+            QMessageBox.critical(self, "UDP Packet not received !", "We didn't received any answer from the server. <br><br>Possible reasons:<ul><li><b>Your firewall is blocking the UDP port {port}.</b></li><li><b>Your router is blocking or routing port {port} in a wrong way/to the wrong computer.</b></li></ul><br><font size='+2'>How to fix this : </font> <ul><li>Check your firewall and router. <b>More info in the wiki (Links -> Wiki)</li></b><li>You should also consider using <b>uPnP (Options -> Settings -> Gameport)</b></li><li>You should ask for assistance in the TechQuestions chat and/or in the <b>technical forum (Links -> Forums<b>)</li></ul><br><font size='+1'><b>FA will not be able to perform correctly until this issue is fixed.</b></font>".format(port=self.gamePort))
 
         return True
 
@@ -1090,7 +1092,7 @@ class ClientWindow(FormClass, BaseClass):
 
 
         while (self.socket.state() != QtNetwork.QAbstractSocket.ConnectedState) and self.progress.isVisible():
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
 
         self.state = ClientState.NONE
         self.localIP = str(self.socket.localAddress().toString())
@@ -1134,7 +1136,7 @@ class ClientWindow(FormClass, BaseClass):
 
 
         while (self.socket.state() != QtNetwork.QAbstractSocket.ConnectedState) and self.progress.isVisible():
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
 
         self.state = ClientState.NONE
         self.localIP = str(self.socket.localAddress().toString())
@@ -1165,7 +1167,7 @@ class ClientWindow(FormClass, BaseClass):
         # self.send(dict(command="ask_session"))
         # start = time.time()
         # while self.session == None and self.progress.isVisible() :
-        #     QtGui.QApplication.processEvents()
+        #     QApplication.processEvents()
         #     if time.time() - start > 15 :
         #         break
         #
@@ -1175,7 +1177,7 @@ class ClientWindow(FormClass, BaseClass):
         #         logger.warn("waitSession() aborted by user.")
         #     else :
         #         logger.error("waitSession() failed with clientstate " + str(self.state) + ", socket errorstring: " + self.socket.errorString())
-        #         QtGui.QMessageBox.critical(self, "Notice from Server", "Unable to get a session : <br> Server under maintenance.<br><br>Please retry in some minutes.")
+        #         QMessageBox.critical(self, "Notice from Server", "Unable to get a session : <br> Server under maintenance.<br><br>Please retry in some minutes.")
         #     return False
         #
         # self.uniqueId = util.uniqueID(self.login, self.session)
@@ -1213,15 +1215,34 @@ class ClientWindow(FormClass, BaseClass):
         #     self.mumbleConnector = mumbleconnector.MumbleConnector(self)
 
         #Determine if a login wizard needs to be displayed and do so
+        if self.autologin and self.password and self.login:
+            from AuthService import AuthService
+
+            reply = AuthService.Login(self.login, self.password)
+
+            def onError():
+                self.password = None
+                QMessageBox.information("Auto-login failed", "Did you nickname or password change?")
+
+            def onSuccess(resp):
+                self.session_id = resp['session_id']
+                self._onLoggedIn()
+
+            reply.error.connect(onError)
+            reply.done.connect(onSuccess)
+
         if not self.autologin or not self.password or not self.login:
             import loginwizards
             if not loginwizards.LoginWizard(self).exec_():
                 return False
+            self._onLoggedIn()
+            return True
+        # self.lobby_ctx.login(self.login, self.session_id)
+        #
+        # # FIXME To be asynchronous
+        # util.waitForSignal(self.lobby_ctx.loggedIn)
 
-        self.lobby_ctx.login(self.login, self.session_id)
-
-        # FIXME To be asynchronous
-        util.waitForSignal(self.lobby_ctx.loggedIn)
+    def _onLoggedIn(self):
 
         self.state = ClientState.ACCEPTED
 
@@ -1438,13 +1459,13 @@ class ClientWindow(FormClass, BaseClass):
         '''
         if error_code == 0:
             logger.error("FA has failed to start")
-            QtGui.QMessageBox.critical(self, "Error from FA", "FA has failed to start.")
+            QMessageBox.critical(self, "Error from FA", "FA has failed to start.")
         elif error_code == 1:
             logger.error("FA has crashed or killed after starting")
         else:
             text = "FA has failed to start with error code: " + str(error_code)
             logger.error(text)
-            QtGui.QMessageBox.critical(self, "Error from FA", text)
+            QMessageBox.critical(self, "Error from FA", text)
         self.send(dict(command="fa_state", state="off"))
         self.gameExit.emit()
 
@@ -1537,7 +1558,7 @@ class ClientWindow(FormClass, BaseClass):
         out.device().seek(0)
         out.writeUInt32(block.size() - 4)
         self.socket.write(block)
-        QtGui.QApplication.processEvents()
+        QApplication.processEvents()
 
 
     def serverTimeout(self):
@@ -1576,7 +1597,7 @@ class ClientWindow(FormClass, BaseClass):
         logger.warn("Disconnected from lobby server.")
 
         if self.state == ClientState.ACCEPTED:
-            QtGui.QMessageBox.warning(QtGui.QApplication.activeWindow(), "Disconnected from FAF", "The lobby lost the connection to the FAF server.<br/><b>You might still be able to chat.<br/>To play, try reconnecting a little later!</b>", QtGui.QMessageBox.Close)
+            QMessageBox.warning(QApplication.activeWindow(), "Disconnected from FAF", "The lobby lost the connection to the FAF server.<br/><b>You might still be able to chat.<br/>To play, try reconnecting a little later!</b>", QMessageBox.Close)
 
             # stop hearbeat
             #self.heartbeatTimer.stop()
@@ -1602,7 +1623,7 @@ class ClientWindow(FormClass, BaseClass):
     def socketError(self, error):
         logger.error("TCP Socket Error: " + self.socket.errorString())
         if self.state > ClientState.NONE:   # Positive client states deserve user notification.
-            QtGui.QMessageBox.critical(None, "TCP Error", "A TCP Connection Error has occurred:<br/><br/><b>" + self.socket.errorString() + "</b>", QtGui.QMessageBox.Close)
+            QMessageBox.critical(None, "TCP Error", "A TCP Connection Error has occurred:<br/><br/><b>" + self.socket.errorString() + "</b>", QMessageBox.Close)
             self.progress.cancel()
 
 
@@ -1624,7 +1645,7 @@ class ClientWindow(FormClass, BaseClass):
             if self.modMenu == None :
                 self.modMenu = self.menu.addMenu("Administration")
 
-            actionAvatar = QtGui.QAction("Avatar manager", self.modMenu)
+            actionAvatar = QAction("Avatar manager", self.modMenu)
             actionAvatar.triggered.connect(self.avatarManager)
             self.modMenu.addAction(actionAvatar)
 
@@ -1920,8 +1941,8 @@ class ClientWindow(FormClass, BaseClass):
         '''
         Performs a running of ForgedAlliance.exe for testing that everything is okay
         '''
-        result = QtGui.QMessageBox.question(None, "Testing Proxies", "This will test if your computer is able to use the proxy server.<br>The proxy server is there to solve connections problems that can't be resolved otherwise.<br>Having it running correctly is extremely important.<br><br>FA will launch AND close automatically.<br><b>Please don't close it yourself.</b><br><br>The test can take up to 60 seconds!<br><br>If all you see when FA is launched is a black screen, you have an incorrect mod. The solution is to check your mods. <br><br>Launch the test?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-        if result != QtGui.QMessageBox.Yes:
+        result = QMessageBox.question(None, "Testing Proxies", "This will test if your computer is able to use the proxy server.<br>The proxy server is there to solve connections problems that can't be resolved otherwise.<br>Having it running correctly is extremely important.<br><br>FA will launch AND close automatically.<br><b>Please don't close it yourself.</b><br><br>The test can take up to 60 seconds!<br><br>If all you see when FA is launched is a black screen, you have an incorrect mod. The solution is to check your mods. <br><br>Launch the test?", QMessageBox.Yes, QMessageBox.No)
+        if result != QMessageBox.Yes:
             return
 
         self.progress.setWindowTitle("FAF is testing the proxy server")
@@ -1940,7 +1961,7 @@ class ClientWindow(FormClass, BaseClass):
         success = True
 
         while self.progress.isVisible():
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
             if time.time() - started > 60:
                 success = False
                 self.progress.close()
@@ -1949,23 +1970,23 @@ class ClientWindow(FormClass, BaseClass):
         fa.exe.kill()
 
         if success:
-            QtGui.QMessageBox.information(self, "Testing Proxy", "Proxy Server is running correctly!")
+            QMessageBox.information(self, "Testing Proxy", "Proxy Server is running correctly!")
         else:
             if len(self.proxyServer.testedPorts) != 11:
                 nonreported = list(set(self.proxyServer.proxies).difference(self.proxyServer.testedPorts))
                 errorport = []
                 for port in nonreported:
                     errorport.append(self.proxyServer.proxies[port].localPort())
-                QtGui.QMessageBox.warning(self, "Testing Proxy Failed", "FA was unable to communicate locally with these ports :<br><br>" + "<br>".join(str(x) for x in errorport) + "<br><br>This is most likely due to your firewall blocking these port locally.<br>Please allow these UDP ports for IP 127.0.0.1")
+                QMessageBox.warning(self, "Testing Proxy Failed", "FA was unable to communicate locally with these ports :<br><br>" + "<br>".join(str(x) for x in errorport) + "<br><br>This is most likely due to your firewall blocking these port locally.<br>Please allow these UDP ports for IP 127.0.0.1")
 
             elif len(self.proxyServer.testedLoopback) != 11:
                 nonreported = list(set(self.proxyServer.proxies).difference(self.proxyServer.testedLoopback))
                 errorport = []
                 for port in nonreported:
                     errorport.append(self.proxyServer.proxies[port].localPort())
-                QtGui.QMessageBox.warning(self, "Testing Proxy Failed", "The lobby didn't received any data from the proxy server for these ports :<br><br>" + "<br>".join(str(x) for x in errorport) + "<br><br>This is most likely due to your firewall blocking the proxy connection, or the proxy is offline.<br>")
+                QMessageBox.warning(self, "Testing Proxy Failed", "The lobby didn't received any data from the proxy server for these ports :<br><br>" + "<br>".join(str(x) for x in errorport) + "<br><br>This is most likely due to your firewall blocking the proxy connection, or the proxy is offline.<br>")
             else:
-                QtGui.QMessageBox.warning(self, "Testing Proxy Failed", "FA was unable to communicate locally with UDP ports 12001 to 12011.<br><br>This is most likely due to your firewall blocking these port locally.<br>Please allow these UDP ports for IP 127.0.0.1")
+                QMessageBox.warning(self, "Testing Proxy Failed", "FA was unable to communicate locally with UDP ports 12001 to 12011.<br><br>This is most likely due to your firewall blocking these port locally.<br>Please allow these UDP ports for IP 127.0.0.1")
     def handle_coop_info(self, message):
         self.coopInfo.emit(message)
 
@@ -2060,7 +2081,7 @@ class ClientWindow(FormClass, BaseClass):
             mods = message["mods"]
             modMenu = self.menu.addMenu("Featured Mods Manager")
             for mod in mods :
-                action = QtGui.QAction(mod, modMenu)
+                action = QAction(mod, modMenu)
                 action.triggered.connect(functools.partial(self.featuredMod, mod))
                 modMenu.addAction(action)
 
@@ -2080,18 +2101,18 @@ class ClientWindow(FormClass, BaseClass):
         if "text" in message:
             if message["style"] == "error" :
                 if self.state != ClientState.NONE :
-                    QtGui.QMessageBox.critical(self, "Error from Server", message["text"])
+                    QMessageBox.critical(self, "Error from Server", message["text"])
                 else :
-                    QtGui.QMessageBox.critical(self, "Login Failed", message["text"])
+                    QMessageBox.critical(self, "Login Failed", message["text"])
                     self.state = ClientState.REJECTED
 
             elif message["style"] == "warning":
-                QtGui.QMessageBox.warning(self, "Warning from Server", message["text"])
+                QMessageBox.warning(self, "Warning from Server", message["text"])
             elif message["style"] == "scores":
-                self.tray.showMessage("Scores", message["text"], QtGui.QSystemTrayIcon.Information, 3500)
+                self.tray.showMessage("Scores", message["text"], QSystemTrayIcon.Information, 3500)
                 self.localBroadcast.emit("Scores", message["text"])
             else:
-                QtGui.QMessageBox.information(self, "Notice from Server", message["text"])
+                QMessageBox.information(self, "Notice from Server", message["text"])
 
         if message["style"] == "kill":
             logger.info("Server has killed your Forged Alliance Process.")

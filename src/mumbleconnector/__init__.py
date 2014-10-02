@@ -20,7 +20,6 @@
 
 
 
-from PyQt4 import QtCore
 import logging
 
 logger = logging.getLogger("faf.mumbleconnector")

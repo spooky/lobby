@@ -23,7 +23,10 @@
 # Initialize logging system
 import logging
 import util
-from PyQt4.QtNetwork import *
+
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtNetwork import *
 
 logger = logging.getLogger("faf.client")
 #logger.setLevel(logging.DEBUG)
@@ -55,6 +58,20 @@ STEAMLINK_URL = "http://www.faforever.com/faf/steam.php"
 
 
 networkAccessManager = QNetworkAccessManager()
+
+class Banana(QObject):
+    def __init__(self):
+        super(Banana, self).__init__()
+
+    def onSSLError(self, reply, errors):
+
+        ret = QMessageBox.warning( 'SSL Error', errors[0].errorString(), QMessageBox.Ignore, QMessageBox.Cancel)
+
+        if ret == QMessageBox.Ignore:
+            reply.ignoreSslErrors()
+
+banana = Banana()
+networkAccessManager.sslErrors.connect(banana.onSSLError)
 
 class ClientState:
     '''

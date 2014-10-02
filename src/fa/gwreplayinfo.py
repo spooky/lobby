@@ -19,11 +19,15 @@
 
 
 
-from PyQt4 import QtGui, QtCore, QtNetwork
 import time
+from types import ListType, FloatType, IntType
+
+from PyQt5 import QtCore, QtNetwork
+
 #import util
 import json
 import logging
+from PyQt5.QtWidgets import QProgressDialog, QApplication
 import fa
 
 logger = logging.getLogger("faf.gwinfo")
@@ -77,7 +81,7 @@ class GWReplayInfo(QtCore.QObject):
         self.gwInfoSocket.setSocketOption(QtNetwork.QTcpSocket.KeepAliveOption, 1)
         self.gwInfoSocket.setSocketOption(QtNetwork.QTcpSocket.LowDelayOption, 1)
 
-        self.progress = QtGui.QProgressDialog()        
+        self.progress = QProgressDialog()
         self.progress.setCancelButtonText("Cancel")
         self.progress.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint)
         self.progress.setAutoClose(False)
@@ -88,7 +92,7 @@ class GWReplayInfo(QtCore.QObject):
     def run(self, *args, **kwargs):
         ''' actually do the settings'''
         self.progress.show()
-        QtGui.QApplication.processEvents() 
+        QApplication.processEvents()
 
         self.progress.setLabelText("Connecting to server...")
         self.gwInfoSocket.error.connect(self.handleServerError)
@@ -99,7 +103,7 @@ class GWReplayInfo(QtCore.QObject):
         self.gwInfoSocket.connectToHost(self.HOST, self.SOCKET)                         
 
         while not (self.gwInfoSocket.state() == QtNetwork.QAbstractSocket.ConnectedState) and self.progress.isVisible():
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
                                                     
         if not self.progress.wasCanceled():
             
@@ -134,7 +138,7 @@ class GWReplayInfo(QtCore.QObject):
             if (self.progress.wasCanceled()) : raise GwInfoCancellation("Operation aborted while waiting for info.")
             if (self.result != self.RESULT_NONE) : raise GwInfoFailure("Operation failed while waiting for info.")
             if (time.time() - self.lastData > self.TIMEOUT) : raise GwInfoTimeout("Operation timed out while waiting for info.")
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
             
     def send(self, message):
         data = json.dumps(message)

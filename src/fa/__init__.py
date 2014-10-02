@@ -22,7 +22,7 @@
 
 # Initialize logging system
 import logging
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 import os
 import util
 logger= logging.getLogger("faf.fa")

@@ -16,25 +16,30 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore
+from PyQt5.QtGui import QTextDocument, QIcon
+from PyQt5.QtWidgets import QStyledItemDelegate, QStyle, QListWidgetItem
+
 import util
-class ReinforcementDelegate(QtGui.QStyledItemDelegate):
+
+
+class ReinforcementDelegate(QStyledItemDelegate):
     
     def __init__(self, *args, **kwargs):
-        QtGui.QStyledItemDelegate.__init__(self, *args, **kwargs)
+        QStyledItemDelegate.__init__(self, *args, **kwargs)
         
     def paint(self, painter, option, index, *args, **kwargs):
         self.initStyleOption(option, index)       
         painter.save()
-        html = QtGui.QTextDocument()
+        html = QTextDocument()
         html.setHtml(option.text)
         
-        icon = QtGui.QIcon(option.icon)
+        icon = QIcon(option.icon)
         iconsize = icon.actualSize(option.rect.size())
         #clear icon and text before letting the control draw itself because we're rendering these parts ourselves
-        option.icon = QtGui.QIcon()        
+        option.icon = QIcon()
         option.text = ""  
-        option.widget.style().drawControl(QtGui.QStyle.CE_ItemViewItem, option, painter, option.widget)
+        option.widget.style().drawControl(QStyle.CE_ItemViewItem, option, painter, option.widget)
         
         if index.model().flags(index) == QtCore.Qt.NoItemFlags:
             icon.paint(painter, option.rect.adjusted(5-2, -2, 0, 0), QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter, mode=1)
@@ -51,29 +56,29 @@ class ReinforcementDelegate(QtGui.QStyledItemDelegate):
     def sizeHint(self, option, index, *args, **kwargs):
         self.initStyleOption(option, index)        
         item = index.model().data(index, QtCore.Qt.UserRole)
-        html = QtGui.QTextDocument()
+        html = QTextDocument()
         html.setHtml(option.text)
         html.setTextWidth(item.TEXTWIDTH)
         
         return QtCore.QSize(item.ICONSIZE + item.TEXTWIDTH + item.PADDING, item.HEIGHT)  
 
-class ReinforcementGroupDelegate(QtGui.QStyledItemDelegate):
+class ReinforcementGroupDelegate(QStyledItemDelegate):
     
     def __init__(self, *args, **kwargs):
-        QtGui.QStyledItemDelegate.__init__(self, *args, **kwargs)
+        QStyledItemDelegate.__init__(self, *args, **kwargs)
         
     def paint(self, painter, option, index, *args, **kwargs):
         self.initStyleOption(option, index)       
         painter.save()
-        html = QtGui.QTextDocument()
+        html = QTextDocument()
         html.setHtml(option.text)
         item = index.model().data(index, QtCore.Qt.UserRole)
-        icon = QtGui.QIcon(option.icon)
+        icon = QIcon(option.icon)
         iconsize = icon.actualSize(option.rect.size())
         #clear icon and text before letting the control draw itself because we're rendering these parts ourselves
-        option.icon = QtGui.QIcon()        
+        option.icon = QIcon()
         option.text = ""  
-        option.widget.style().drawControl(QtGui.QStyle.CE_ItemViewItem, option, painter, option.widget)
+        option.widget.style().drawControl(QStyle.CE_ItemViewItem, option, painter, option.widget)
         
         if index.model().flags(index) == QtCore.Qt.NoItemFlags:
             icon.paint(painter, option.rect.adjusted(5-2, -2, 0, 0), QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter, mode=1)
@@ -87,7 +92,7 @@ class ReinforcementGroupDelegate(QtGui.QStyledItemDelegate):
         #amount
         painter.restore()
         painter.save()
-        amountText = QtGui.QTextDocument()
+        amountText = QTextDocument()
         amountText.setHtml("<font color='red'><h2>%i</font></h2>" % item.owned)
         clip = QtCore.QRectF(0,0, amountText.size().width(), amountText.size().height())
         painter.translate(option.rect.left() + iconsize.width()-15, option.rect.top() + iconsize.height()-15)
@@ -99,15 +104,15 @@ class ReinforcementGroupDelegate(QtGui.QStyledItemDelegate):
     def sizeHint(self, option, index, *args, **kwargs):
         self.initStyleOption(option, index)        
         item = index.model().data(index, QtCore.Qt.UserRole)
-        html = QtGui.QTextDocument()
+        html = QTextDocument()
         html.setHtml(option.text)
         html.setTextWidth(item.TEXTWIDTH)
         
         return QtCore.QSize(item.ICONSIZE + item.TEXTWIDTH + item.PADDING, item.HEIGHT)  
 
-class ReinforcementItem(QtGui.QListWidgetItem):
+class ReinforcementItem(QListWidgetItem):
     def __init__(self, uid, small = False, *args, **kwargs):
-        QtGui.QListWidgetItem.__init__(self, *args, **kwargs)
+        QListWidgetItem.__init__(self, *args, **kwargs)
         self.uid            = uid
         self.name           = None
         self.price          = None

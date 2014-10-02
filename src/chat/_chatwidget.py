@@ -20,17 +20,20 @@
 
 
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
+import sys
+
+from PyQt5 import QtCore
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtNetwork import QNetworkAccessManager
 
 from chat.irclib import SimpleIRCClient
 import util
 import fa
-
-import sys
 from chat import logger, user2name
 from chat.channel import Channel
 import notificatation_system as ns
+
 
 IRC_PORT = 8167
 IRC_SERVER = "direct.faforever.com"
@@ -141,23 +144,23 @@ class ChatWidget(FormClass, BaseClass, SimpleIRCClient):
 
     def finishDownloadAvatar(self, reply):
         ''' this take care of updating the avatars of players once they are downloaded '''
-        img = QtGui.QImage()
+        img = QImage()
         img.loadFromData(reply.readAll())
         pix = util.respix(reply.url().toString())
         if pix :
-            pix = QtGui.QIcon(QtGui.QPixmap(img))
+            pix = QIcon(QPixmap(img))
         else :
-            util.addrespix(reply.url().toString(), QtGui.QPixmap(img))
+            util.addrespix(reply.url().toString(), QPixmap(img))
 
         for player in util.curDownloadAvatar(reply.url().toString()) :
             for channel in self.channels :
                 if player in self.channels[channel].chatters :
-                    self.channels[channel].chatters[player].avatarItem.setIcon(QtGui.QIcon(util.respix(reply.url().toString())))
+                    self.channels[channel].chatters[player].avatarItem.setIcon(QIcon(util.respix(reply.url().toString())))
                     self.channels[channel].chatters[player].avatarItem.setToolTip(self.channels[channel].chatters[player].avatarTip)
 
             # if self.client.GalacticWar.channel != None :
             #     if player in self.client.GalacticWar.channel.chatters :
-            #         self.client.GalacticWar.channel.chatters[player].avatarItem.setIcon(QtGui.QIcon(util.respix(reply.url().toString())))
+            #         self.client.GalacticWar.channel.chatters[player].avatarItem.setIcon(QIcon(util.respix(reply.url().toString())))
             #         self.client.GalacticWar.channel.chatters[player].avatarItem.setToolTip(self.client.GalacticWar.channel.chatters[player].avatarTip)
 
 
@@ -311,7 +314,7 @@ class ChatWidget(FormClass, BaseClass, SimpleIRCClient):
             # if self.client.GalacticWar.channel and channel == self.client.GalacticWar.channel.name :
             #     self.client.GalacticWar.channel.addChatter(user)
 
-            QtGui.QApplication.processEvents()      #Added by thygrrr to improve application responsiveness on large IRC packets
+            QApplication.processEvents()      #Added by thygrrr to improve application responsiveness on large IRC packets
 
         logger.debug("Added " + str(len(listing)) + " Chatters")
 
@@ -347,7 +350,7 @@ class ChatWidget(FormClass, BaseClass, SimpleIRCClient):
 
             if channel.lower() in self.crucialChannels: #Make the crucial channels not closeable, and make the last one the active one
                 self.setCurrentWidget(self.channels[channel])
-                self.tabBar().setTabButton(self.currentIndex(), QtGui.QTabBar.RightSide, None)
+                self.tabBar().setTabButton(self.currentIndex(), QTabBar.RightSide, None)
             else:
                 self.channels[channel].joinLabel.hide()
                 self.channels[channel].channelsComboBox.hide()

@@ -5,18 +5,16 @@
 #
 # - Start mumble minimized in tray
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-
-import os
-import sys
-import win32api
 import time
 import re
+
+from PyQt5 import QtCore
+
 import _winreg
 
 # Link-dll to interface with the mumble client
 import mumble_link
+from PyQt5.QtGui import QDesktopServices
 
 from mumbleconnector import logger
 
@@ -70,7 +68,7 @@ class mumbleConnector():
 
         logger.info("Opening " + url.toString())
         
-        if QtGui.QDesktopServices.openUrl(url):
+        if QDesktopServices.openUrl(url):
             logger.debug("Lauching Mumble successful")
             return 1
 

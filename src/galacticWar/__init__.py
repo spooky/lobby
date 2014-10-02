@@ -20,7 +20,8 @@
 
 # Initialize logging system
 import logging
-from PyQt4 import QtGui
+from PyQt5.QtGui import QColor
+
 logger = logging.getLogger("faf.galacticWar")
 logger.setLevel(logging.DEBUG)
 
@@ -36,7 +37,7 @@ RANKS = {0:["Private", "Corporal", "Sergeant", "Captain", "Major", "Colonel", "G
          }
 
 FACTIONS = {0:"UEF", 1:"Aeon",2:"Cybran",3:"Seraphim"}
-COLOR_FACTIONS = {0:QtGui.QColor(0,0,255), 1:QtGui.QColor(0,255,0),2:QtGui.QColor(255,0,0),3:QtGui.QColor(255,255,0)}
+COLOR_FACTIONS = {0:QColor(0,0,255), 1:QColor(0,255,0),2:QColor(255,0,0),3:QColor(255,255,0)}
 
 from _gwlobby import LobbyWidget as Lobby
 

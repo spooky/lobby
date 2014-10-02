@@ -21,7 +21,7 @@
 
 
 import logging
-from fa import Faction
+
 logger = logging.getLogger("faf.games")
 logger.setLevel(logging.DEBUG)
 

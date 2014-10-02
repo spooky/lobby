@@ -1,11 +1,11 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore
+from PyQt5.QtGui import QPainter, QColor
+from PyQt5.QtWidgets import *
 
-import sys
-import copy
 
-class NewsTicker(QtGui.QWidget):
+class NewsTicker(QWidget):
     def __init__(self, *args, **kwargs):
-        QtGui.QWidget.__init__(self, *args, **kwargs)
+        QWidget.__init__(self, *args, **kwargs)
         
         self.news = []
         
@@ -25,8 +25,8 @@ class NewsTicker(QtGui.QWidget):
                 self.news.append(new)
     
     def paintEvent(self, event):
-        painter = QtGui.QPainter(self)
-        painter.setPen(QtGui.QColor("lightGray"))
+        painter = QPainter(self)
+        painter.setPen(QColor("lightGray"))
         
         
         if len(self.news) == 0  :

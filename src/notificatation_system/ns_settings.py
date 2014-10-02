@@ -1,8 +1,9 @@
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QHeaderView
+
 import util
 import notificatation_system as ns
 from notificatation_system.hook_useronline import NsHookUserOnline
-from notificatation_system.ns_hook import NsHook
 from notificatation_system.hook_newgame import NsHookNewGame
 from notificatation_system.hook_teaminvite import NsHookTeamInvite
 
@@ -28,7 +29,7 @@ class NsSettingsDialog(FormClass2, BaseClass2):
         model = NotificationHooks(self, self.hooks.values())
         self.tableView.setModel(model)
         # stretch first column
-        self.tableView.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.Stretch)
+        self.tableView.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
 
         for row in range(0, model.rowCount(None)):
             self.tableView.setIndexWidget(model.createIndex(row, 3), model.getHook(row).settings())

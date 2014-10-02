@@ -3,10 +3,9 @@ import json
 from datetime import datetime
 import logging
 
-from PyQt4.QtCore import *
+from PyQt5.QtCore import *
 
-from PyQt4.QtNetwork import *
-
+from PyQt5.QtNetwork import *
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +14,6 @@ PROTOCOL_VERSION = 0
 STATE_HANDSHAKE = 0
 STATE_LOGIN = 1
 STATE_LOBBY = 2
-
 
 class ProtocolError(Exception):
     def __init__(self, message):
@@ -58,6 +56,7 @@ class LobbyServerContext(QObject):
         self.sendMessage('login', {'username': username, 'session_id': session_id})
 
     def _send(self, command_id, message):
+        return
         data = json.dumps({'id': command_id, 'data': message}).encode()
         self.socket.write(struct.pack('=l', len(data)))
         self.socket.write(data)
@@ -109,6 +108,7 @@ class LobbyServerContext(QObject):
 
     def _onError(self):
         logger.warning("Error with lobby socket: %s.", self.socket.errorString())
+        pass
 
     def _onDisconnected(self):
         logger.info("Disconnected from server.")

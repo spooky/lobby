@@ -20,9 +20,7 @@
 
 
 
-from copy import copy 
-
-from math import sqrt
+from copy import copy
 
 from trueSkill.TrueSkill.Factors.GaussianFactor import *
 from trueSkill.TrueSkill.TruncatedGaussianCorrectionFunctions import *

@@ -1,9 +1,9 @@
-from PyQt4 import QtCore, QtGui
-
-import util, time
-from fa import maps
-from games.gameitem import GameItemDelegate
 from multiprocessing import Lock
+
+from PyQt5 import QtCore
+
+import util
+from fa import maps
 from notificatation_system.ns_dialog import NotficationDialog
 from notificatation_system.ns_settings import NsSettingsDialog
 

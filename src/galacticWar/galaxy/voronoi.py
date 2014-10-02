@@ -28,10 +28,6 @@
 #
 #############################################################################
 
-from PyQt4 import QtCore, QtGui
-
-from galacticWar import FACTIONS
-
 def usage():
     print """
 voronoi - compute Voronoi diagram or Delaunay triangulation
@@ -98,8 +94,7 @@ Algorithmica 2, 153-174.
 #
 #############################################################################
 import math
-import sys
-import getopt
+
 TOLERANCE = 1e-9
 BIG_FLOAT = 1e38
 
@@ -725,7 +720,7 @@ class Site(object):
         self.size = size
         self.texture = None
         self.texname = texture
-        self.pos3d = QtGui.QVector3D(self.x, self.y, 0.0)
+        self.pos3d = QVector3D(self.x, self.y, 0.0)
         
         self.sector = sector
         self.aeon   = aeon
@@ -733,7 +728,7 @@ class Site(object):
         self.uef    = uef
         self.sera   = sera
         
-        self.color = QtGui.QColor(0,0,0)
+        self.color = QColor(0,0,0)
         
         self.display = display
 
@@ -801,7 +796,7 @@ class Site(object):
         b = (self.parent.COLOR_FACTIONS[0].blueF() * self.uef + self.parent.COLOR_FACTIONS[1].blueF() * self.aeon + self.parent.COLOR_FACTIONS[2].blueF() * self.cybran+ self.parent.COLOR_FACTIONS[3].blueF()* self.sera)
         
         if r > 1 or g > 1 or b > 1 :
-            vectorRGB = QtGui.QVector3D(r,b,g)
+            vectorRGB = QVector3D(r,b,g)
             vectorRGB.normalize()
             
             r = vectorRGB.x()

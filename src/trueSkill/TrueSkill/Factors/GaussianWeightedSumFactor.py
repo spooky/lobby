@@ -20,10 +20,10 @@
 
 
 
-from math import fabs
+from copy import copy
 
-from copy import copy 
 from GaussianFactor import *
+
 
 class GaussianWeightedSumFactor(GaussianFactor) :
     def __init__(self, sumVariable, variablesToSum, variableWeights = None):

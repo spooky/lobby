@@ -1,7 +1,10 @@
+import logging
+
+from PyQt5 import QtCore, QtOpenGL
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QMessageBox
 
 from galacticWar import logger
-import logging
-from PyQt4 import QtCore, QtGui, QtOpenGL
 
 
 logger.setLevel(logging.DEBUG)
@@ -74,16 +77,16 @@ class GLWidget(QtOpenGL.QGLWidget):
         
         self.zoomMin = 4500
         self.zoomMax = 70
-        self.cameraPos  = QtGui.QVector3D(0,0,self.zoomMin)
-        self.vectorMove = QtGui.QVector3D(0,0,self.zoomMin)
+        self.cameraPos  = QVector3D(0,0,self.zoomMin)
+        self.vectorMove = QVector3D(0,0,self.zoomMin)
         
         self.zooming = False
         
         self.starField()
      
         
-        self.cursor = QtGui.QVector3D(0,0,0)
-        self.destination = QtGui.QVector3D(0,0,0)
+        self.cursor = QVector3D(0,0,0)
+        self.destination = QVector3D(0,0,0)
 
         self.r = 0
         self.ir = 0
@@ -145,7 +148,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.cameraPos.setY(self.destination.y() )
         self.cameraPos.setZ(self.destination.z() )
         self.createCamera()
-        self.camOriginPos = QtGui.QVector3D(self.cameraPos.x(),self.cameraPos.y(), self.cameraPos.z())
+        self.camOriginPos = QVector3D(self.cameraPos.x(),self.cameraPos.y(), self.cameraPos.z())
         pass
         
     
@@ -159,8 +162,8 @@ class GLWidget(QtOpenGL.QGLWidget):
         raydirection = in_raydirection.normalized()  
         planenormal = in_planenormal.normalized()  
         
-        distanceToPlane = QtGui.QVector3D.dotProduct(rayorigin-planeorigin, planenormal)
-        triangleHeight = QtGui.QVector3D.dotProduct(raydirection, -planenormal)   
+        distanceToPlane = QVector3D.dotProduct(rayorigin-planeorigin, planenormal)
+        triangleHeight = QVector3D.dotProduct(raydirection, -planenormal)
         if not distanceToPlane:  
             return rayorigin-planeorigin  
         if not triangleHeight:  
@@ -178,18 +181,18 @@ class GLWidget(QtOpenGL.QGLWidget):
         x = self.galaxy.control_points[uid].x
         y = self.galaxy.control_points[uid].y
         
-        self.destination = QtGui.QVector3D(x,y,self.zoomMax)
+        self.destination = QVector3D(x,y,self.zoomMax)
 
         # compute camera deviation
         ir = 1.0 - (self.zoomMax)/ (self.zoomMin - self.zoomMax)       
-        lookat = QtGui.QVector3D(self.destination.x(), self.destination.y(), self.destination.z())
+        lookat = QVector3D(self.destination.x(), self.destination.y(), self.destination.z())
         lookat.setZ(lookat.z() - 1.0) 
         lookat.setY(lookat.y() + pow(ir, 5.0))
 
-        inter = self.rayPlaneIntersect(self.destination, self.destination-lookat, QtGui.QVector3D(0,0,0),QtGui.QVector3D(0,0,1))
+        inter = self.rayPlaneIntersect(self.destination, self.destination-lookat, QVector3D(0,0,0),QVector3D(0,0,1))
         self.destination.setY(self.destination.y() - inter.y())
-        self.camOriginPos = QtGui.QVector3D(self.cameraPos.x(),self.cameraPos.y(), self.cameraPos.z())
-        self.vectorMove = QtGui.QVector3D(self.destination.x() - self.cameraPos.x(), self.destination.y() - self.cameraPos.y(), (self.destination.z() -self.cameraPos.z()) )
+        self.camOriginPos = QVector3D(self.cameraPos.x(),self.cameraPos.y(), self.cameraPos.z())
+        self.vectorMove = QVector3D(self.destination.x() - self.cameraPos.x(), self.destination.y() - self.cameraPos.y(), (self.destination.z() -self.cameraPos.z()) )
 
         self.animCamMove.start()
     
@@ -228,15 +231,15 @@ class GLWidget(QtOpenGL.QGLWidget):
         for uid in self.galaxy.control_points :
             site = self.galaxy.control_points[uid]
             if site.isVisible():
-                site.texture = self.bindTexture(QtGui.QPixmap(os.path.join(GW_TEXTURE_DIR,'%s.png' % site.texname)), GL.GL_TEXTURE_2D)   
+                site.texture = self.bindTexture(QPixmap(os.path.join(GW_TEXTURE_DIR,'%s.png' % site.texname)), GL.GL_TEXTURE_2D)
 
         
-        self.backGroundTexId    = self.bindTexture(QtGui.QPixmap(os.path.join(GW_TEXTURE_DIR,'background.png')), GL.GL_TEXTURE_2D)
-        self.starTexId          = self.bindTexture(QtGui.QPixmap(os.path.join(GW_TEXTURE_DIR,'star.png')), GL.GL_TEXTURE_2D)
-        self.starTex2Id         = self.bindTexture(QtGui.QPixmap(os.path.join(GW_TEXTURE_DIR,'star.png')), GL.GL_TEXTURE_2D)        
-        self.selectionId        = self.bindTexture(QtGui.QPixmap(os.path.join(GW_TEXTURE_DIR,'star.png')), GL.GL_TEXTURE_2D)
-        self.attackId           = self.bindTexture(QtGui.QPixmap(os.path.join(GW_TEXTURE_DIR,'attack.png')), GL.GL_TEXTURE_2D)
-        self.depotTexId         = self.bindTexture(QtGui.QPixmap(os.path.join(GW_TEXTURE_DIR,'depot.png')), GL.GL_TEXTURE_2D)
+        self.backGroundTexId    = self.bindTexture(QPixmap(os.path.join(GW_TEXTURE_DIR,'background.png')), GL.GL_TEXTURE_2D)
+        self.starTexId          = self.bindTexture(QPixmap(os.path.join(GW_TEXTURE_DIR,'star.png')), GL.GL_TEXTURE_2D)
+        self.starTex2Id         = self.bindTexture(QPixmap(os.path.join(GW_TEXTURE_DIR,'star.png')), GL.GL_TEXTURE_2D)
+        self.selectionId        = self.bindTexture(QPixmap(os.path.join(GW_TEXTURE_DIR,'star.png')), GL.GL_TEXTURE_2D)
+        self.attackId           = self.bindTexture(QPixmap(os.path.join(GW_TEXTURE_DIR,'attack.png')), GL.GL_TEXTURE_2D)
+        self.depotTexId         = self.bindTexture(QPixmap(os.path.join(GW_TEXTURE_DIR,'depot.png')), GL.GL_TEXTURE_2D)
 
 
         
@@ -518,7 +521,7 @@ class GLWidget(QtOpenGL.QGLWidget):
                 if uid in self.galaxy.control_points :
                     
                     if self.parent.attacks[useruid][planetuid]["onHold"] == True :
-                        color = QtGui.QColor(255,255,255)
+                        color = QColor(255,255,255)
                     else :
                         color = self.COLOR_FACTIONS[int(self.parent.attacks[useruid][planetuid]["faction"])]
                     self.programSwirl.bind()
@@ -767,8 +770,8 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         GL.glCallList(self.galaxyStarsFront)
 
-        painter = QtGui.QPainter(self)
-        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
 
         GL.glDisable(GL.GL_DEPTH_TEST)
         GL.glDisable( GL.GL_TEXTURE_2D )
@@ -873,7 +876,7 @@ class GLWidget(QtOpenGL.QGLWidget):
                                 text += "<font color='green'><h2>Planet is currently defended!</font></h2>"
             
             painter.save()
-            html = QtGui.QTextDocument()
+            html = QTextDocument()
             html.setHtml(text)
             html.setTextWidth(width)
             height = html.size().height() + 10
@@ -895,7 +898,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
             mapSize = 100
             painter.translate(posx, posy)
-            painter.fillRect(QtCore.QRect(0, 0, width+5, height+mapSize), QtGui.QColor(36, 61, 75, 150))
+            painter.fillRect(QtCore.QRect(0, 0, width+5, height+mapSize), QColor(36, 61, 75, 150))
             clip = QtCore.QRectF(0, 0, width, height)
             html.drawContents(painter, clip)
             if icon :
@@ -942,7 +945,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.moveBoundaries()
         
         
-        orig = QtGui.QVector3D(self.cameraPos.x(), self.cameraPos.y(), self.cameraPos.z())
+        orig = QVector3D(self.cameraPos.x(), self.cameraPos.y(), self.cameraPos.z())
         orig.setZ(orig.z() - 1.0) 
         orig.setY(orig.y() + pow(self.ir, 5.0))  
         
@@ -1001,7 +1004,7 @@ class GLWidget(QtOpenGL.QGLWidget):
                 if self.zooming == False :
                     self.zooming = True
                     
-                    pos = self.mapFromGlobal(QtGui.QCursor.pos())
+                    pos = self.mapFromGlobal(QCursor.pos())
                     self.computeZoomPosition(pos.x(), pos.y())
             else :
                 if self.zooming :
@@ -1064,8 +1067,8 @@ class GLWidget(QtOpenGL.QGLWidget):
             if selected in self.parent.planetaryItems.planetaryReinforcements:
                 item = self.parent.planetaryItems.planetaryReinforcements[selected]
             
-                question = QtGui.QMessageBox.question(self,"Defense system", "Build %s on %s ?" % (item.description, planet.name), QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-                if question == QtGui.QMessageBox.Yes :
+                question = QMessageBox.question(self,"Defense system", "Build %s on %s ?" % (item.description, planet.name), QMessageBox.Yes, QMessageBox.No)
+                if question == QMessageBox.Yes :
                     self.parent.send(dict(command="buy_building", planetuid=site, uid=item.uid))        
 
         
@@ -1183,7 +1186,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             z = self.zorig
         mouseWorldSpace = GLU.gluUnProject( float(x), float(y), z, modelview, projection, viewport)
 
-        return QtGui.QVector3D(mouseWorldSpace[0], mouseWorldSpace[1], 0)
+        return QVector3D(mouseWorldSpace[0], mouseWorldSpace[1], 0)
 
 
     def computeZoomPosition(self, x=0, y=0, origin = False):
@@ -1194,7 +1197,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             self.cursor.setY(cursor.y())            
     
             self.destination = self.cursor
-            self.camOriginPos = QtGui.QVector3D(self.cameraPos.x(),self.cameraPos.y(), self.cameraPos.z()) 
+            self.camOriginPos = QVector3D(self.cameraPos.x(),self.cameraPos.y(), self.cameraPos.z())
     
             maxSteps = self.zoomMin - self.zoomMax
             curStep = self.cameraPos.z() - self.zoomMax
@@ -1203,14 +1206,14 @@ class GLWidget(QtOpenGL.QGLWidget):
             if mult == 0 :
                 mult = 0.001
     
-            self.vectorMove = QtGui.QVector3D(self.destination.x() - self.cameraPos.x(), self.destination.y() - self.cameraPos.y(), (self.zoomMax -self.cameraPos.z()) )
+            self.vectorMove = QVector3D(self.destination.x() - self.cameraPos.x(), self.destination.y() - self.cameraPos.y(), (self.zoomMax -self.cameraPos.z()) )
             self.vectorMove = self.vectorMove * mult
     
             self.currentStep = mult        
 
         else :
-            self.camOriginPos = QtGui.QVector3D(self.cameraPos.x(),self.cameraPos.y(), self.cameraPos.z())
-            self.destination = QtGui.QVector3D(0,0,self.zoomMin)
+            self.camOriginPos = QVector3D(self.cameraPos.x(),self.cameraPos.y(), self.cameraPos.z())
+            self.destination = QVector3D(0,0,self.zoomMin)
             maxSteps = self.zoomMin - self.zoomMax
             curStep = self.cameraPos.z() - self.zoomMax
     
@@ -1218,7 +1221,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             if mult == 0 :
                 mult = 0.001
     
-            self.vectorMove = QtGui.QVector3D( self.cameraPos.x(),  self.cameraPos.y(), (self.zoomMax -self.cameraPos.z()) )
+            self.vectorMove = QVector3D( self.cameraPos.x(),  self.cameraPos.y(), (self.zoomMax -self.cameraPos.z()) )
             self.vectorMove = self.vectorMove * mult
     
             self.currentStep = mult        
@@ -1330,7 +1333,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             points = self.galaxy.finalPolys[uid]
 
             hull = self.galaxy.monotone_chain(points)
-            center = QtGui.QVector3D(float(site.x), float(site.y), 0)   
+            center = QVector3D(float(site.x), float(site.y), 0)
             color  = site.color             
 
             self.programConstant.bind()
@@ -1342,7 +1345,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             #hull.reverse()
             GL.glBegin(GL.GL_POLYGON)
             for line in hull :
-                vectorOffset = QtGui.QVector3D((line[0] - center.x()) * bevel  , (line[1] - center.y()) * bevel, 0) 
+                vectorOffset = QVector3D((line[0] - center.x()) * bevel  , (line[1] - center.y()) * bevel, 0)
                 vectorOffset.normalize()
                 vectorOffset = vectorOffset * bevel
                 GL.glVertex3f(line[0] - vectorOffset.x(), line[1] - vectorOffset.y(), origin)

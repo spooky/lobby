@@ -20,11 +20,14 @@
 
 
 
-import util
-from PyQt4 import QtGui, QtCore
-import json
 import datetime
+
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import *
+
+import util
 from fa import maps
+
 
 FormClass, BaseClass = util.loadUiType("stats/mapstat.ui")
 
@@ -179,7 +182,7 @@ class LadderMapStat(FormClass, BaseClass):
         self.mapid = item.data(32)[0]
         realmap = item.data(32)[1].split("/")[1][:-4]
 
-        self.mapstats.document().addResource(QtGui.QTextDocument.ImageResource,  QtCore.QUrl("map.png"), maps.preview(realmap, True, force=True))
+        self.mapstats.document().addResource(QTextDocument.ImageResource,  QtCore.QUrl("map.png"), maps.preview(realmap, True, force=True))
 
         self.mapstats.insertHtml("<img src=\"map.png\" /><br><font size='+5'>" + item.text() + "</font><br><br>")
         self.client.statsServer.send(dict(command="stats", type="ladder_map_stat", mapid = self.mapid))
@@ -205,7 +208,7 @@ class LadderMapStat(FormClass, BaseClass):
             name  = mp["mapname"]
             realname = mp["maprealname"]
             
-            item = QtGui.QListWidgetItem (name)
+            item = QListWidgetItem (name)
             item.setData(32, (mapid, realname))
             self.maplist.addItem(item)
             

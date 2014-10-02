@@ -20,12 +20,7 @@
 
 
 
-from GameInfo import *
-from PlayersRange import *
-from TeamsRange import *
-
-
-#/** 
+#/**
 # * Base class for all skill calculator implementations.
 # */
 class SkillCalculator(object):

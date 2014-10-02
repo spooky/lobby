@@ -16,11 +16,13 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-from PyQt4 import QtCore, QtGui
-
-import util
 import copy
 import logging
+
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QMessageBox
+
+import util
 
 logger = logging.getLogger("gw.teamwidget")
 logger.setLevel(logging.DEBUG)
@@ -96,9 +98,9 @@ class TeamWidget(FormClass, BaseClass):
         ''' accept a proposal '''
         if item.text() in self.proposals:
 
-            question = QtGui.QMessageBox.question(self, "Squad proposal from %s" % item.text(), "This team leader want you in his squad, do you want to be in?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+            question = QMessageBox.question(self, "Squad proposal from %s" % item.text(), "This team leader want you in his squad, do you want to be in?", QMessageBox.Yes, QMessageBox.No)
 
-            if question == QtGui.QMessageBox.Yes :
+            if question == QMessageBox.Yes :
                 self.client.send(dict(command="accept_team_proposal", uid=self.proposals[item.text()]))
             
             del self.proposals[item.text()]

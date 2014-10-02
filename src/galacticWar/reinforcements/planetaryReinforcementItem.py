@@ -16,26 +16,30 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QStyledItemDelegate, QListWidgetItem
+
 import util
 
-class PlanetaryReinforcementDelegate(QtGui.QStyledItemDelegate):
+
+class PlanetaryReinforcementDelegate(QStyledItemDelegate):
     
     def __init__(self, *args, **kwargs):
-        QtGui.QStyledItemDelegate.__init__(self, *args, **kwargs)
+        QStyledItemDelegate.__init__(self, *args, **kwargs)
         
     def paint(self, painter, option, index, *args, **kwargs):
         self.initStyleOption(option, index)       
         painter.save()
-        html = QtGui.QTextDocument()
+        html = QTextDocument()
         html.setHtml(option.text)
         
-        icon = QtGui.QIcon(option.icon)
+        icon = QIcon(option.icon)
         iconsize = icon.actualSize(option.rect.size())
         #clear icon and text before letting the control draw itself because we're rendering these parts ourselves
-        option.icon = QtGui.QIcon()        
+        option.icon = QIcon()
         option.text = ""  
-        option.widget.style().drawControl(QtGui.QStyle.CE_ItemViewItem, option, painter, option.widget)
+        option.widget.style().drawControl(QStyle.CE_ItemViewItem, option, painter, option.widget)
         
         if index.model().flags(index) == QtCore.Qt.NoItemFlags:
             icon.paint(painter, option.rect.adjusted(5-2, -2, 0, 0), QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter, mode=1)
@@ -51,12 +55,12 @@ class PlanetaryReinforcementDelegate(QtGui.QStyledItemDelegate):
 
     def sizeHint(self, option, index, *args, **kwargs):
         self.initStyleOption(option, index)        
-        html = QtGui.QTextDocument()
+        html = QTextDocument()
         html.setHtml(option.text)
         html.setTextWidth(PlanetaryItem.TEXTWIDTH)
         return QtCore.QSize(PlanetaryItem.ICONSIZE + PlanetaryItem.TEXTWIDTH + PlanetaryItem.PADDING, PlanetaryItem.ICONSIZE)  
 
-class PlanetaryItem(QtGui.QListWidgetItem):
+class PlanetaryItem(QListWidgetItem):
     TEXTWIDTH = 370
     ICONSIZE = 64
     PADDING = 10
@@ -65,7 +69,7 @@ class PlanetaryItem(QtGui.QListWidgetItem):
     FORMATTER_REINFORCEMENT       = unicode(util.readfile("galacticwar/formatters/planetarydefenses.qthtml"))   
     
     def __init__(self, uid, *args, **kwargs):
-        QtGui.QListWidgetItem.__init__(self, *args, **kwargs)
+        QListWidgetItem.__init__(self, *args, **kwargs)
         self.uid            = uid
         self.structure      = None
         self.price          = None

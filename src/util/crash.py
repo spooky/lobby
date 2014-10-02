@@ -21,13 +21,16 @@
 
 
 # Bug Reporting
+from PyQt5.QtGui import QFont, QDesktopServices
 import fa
 
 CRASHREPORT_USER = "pre-login"
 
 from util import APPDATA_DIR, PERSONAL_DIR, VERSION_STRING, LOG_FILE_FAF,\
     readlines
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import *
+
 import traceback
 import hashlib
 
@@ -36,22 +39,22 @@ import hashlib
 HELP_URL = "http://www.faforever.com/forums/viewforum.php?f=3"
 TICKET_URL = "http://bitbucket.org/thepilot/falobby/issues"
 
-class CrashDialog(QtGui.QDialog):
+class CrashDialog(QDialog):
     def __init__(self, exc_info, *args, **kwargs):
-        QtGui.QDialog.__init__(self, *args, **kwargs)
+        QDialog.__init__(self, *args, **kwargs)
         
         excType, excValue, tracebackobj = exc_info
         
         dialog = self
         
         
-        dialog.setLayout(QtGui.QVBoxLayout())
-        label = QtGui.QLabel()
+        dialog.setLayout(QVBoxLayout())
+        label = QLabel()
         label.setText("An Error has occurred in FAF.<br><br>You can report it by clicking the ticket button. <b>Please check if that error is new first !</b>")
         label.setWordWrap(True)
         dialog.layout().addWidget(label)
 
-        label = QtGui.QLabel()
+        label = QLabel()
         label.setText("<b>This is what happened (but please add your own explanation !)</b>")
         label.setWordWrap(False)
         dialog.layout().addWidget(label)
@@ -63,10 +66,10 @@ class CrashDialog(QtGui.QDialog):
         
         dialog.setWindowTitle(self.title)
         
-        self.box = QtGui.QTextEdit()
+        self.box = QTextEdit()
         box = self.box
         try:
-            box.setFont(QtGui.QFont("Lucida Console", 8))
+            box.setFont(QFont("Lucida Console", 8))
             box.append(u"\n**FAF Username:** " + CRASHREPORT_USER)
             box.append(u"\n**FAF Version:** " + VERSION_STRING)
             box.append(u"\n**FAF Directory:** " + APPDATA_DIR)
@@ -92,20 +95,20 @@ class CrashDialog(QtGui.QDialog):
         box.append(u"")
 
         dialog.layout().addWidget(box)
-        self.sendButton = QtGui.QPushButton("\nOpen ticket system.\n")
+        self.sendButton = QPushButton("\nOpen ticket system.\n")
         self.sendButton.pressed.connect(self.postReport) 
         dialog.layout().addWidget(self.sendButton)
         
-        label = QtGui.QLabel()
+        label = QLabel()
         label.setText("<b></b><br/><i>(please note that the error may be fatal and continue won't work in that case)</i>")
         label.setWordWrap(False)
         dialog.layout().addWidget(label)
         
-        self.buttons = QtGui.QDialogButtonBox()
+        self.buttons = QDialogButtonBox()
         buttons = self.buttons        
-        buttons.addButton("Continue", QtGui.QDialogButtonBox.AcceptRole)
-        buttons.addButton("Close FAF", QtGui.QDialogButtonBox.RejectRole)
-        buttons.addButton("Help", QtGui.QDialogButtonBox.HelpRole)
+        buttons.addButton("Continue", QDialogButtonBox.AcceptRole)
+        buttons.addButton("Close FAF", QDialogButtonBox.RejectRole)
+        buttons.addButton("Help", QDialogButtonBox.HelpRole)
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
         buttons.helpRequested.connect(dialog.techSupport)
@@ -114,12 +117,12 @@ class CrashDialog(QtGui.QDialog):
     
     @QtCore.pyqtSlot()
     def techSupport(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(HELP_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(HELP_URL))
 
 
     @QtCore.pyqtSlot()
     def postReport(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(TICKET_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(TICKET_URL))
 
 
         

@@ -20,8 +20,8 @@
 
 
 
-from PyQt4 import QtCore
-from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
+from PyQt5 import QtCore
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
 import util
 import os
 import fa

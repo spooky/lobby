@@ -1,4 +1,4 @@
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 import util
 from notificatation_system.ns_hook import NsHook
 import notificatation_system as ns

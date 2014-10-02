@@ -36,7 +36,11 @@ logger.setLevel(logging.INFO)
 
 
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore
+
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
 import cStringIO
 import util
 import os, stat
@@ -321,9 +325,9 @@ def genPrevFromDDS(sourcename, destname,small=False):
 
         size = int((len(img)/3) ** (1.0/2))
         if small:
-            imageFile = QtGui.QImage(img,size,size,QtGui.QImage.Format_RGB888).rgbSwapped().scaled(100,100,transformMode = QtCore.Qt.SmoothTransformation)
+            imageFile = QImage(img,size,size,QImage.Format_RGB888).rgbSwapped().scaled(100,100,transformMode = QtCore.Qt.SmoothTransformation)
         else:
-            imageFile = QtGui.QImage(img,size,size,QtGui.QImage.Format_RGB888).rgbSwapped()
+            imageFile = QImage(img,size,size,QImage.Format_RGB888).rgbSwapped()
         imageFile.save(destname)
     except IOError:
         pass # cant open the
@@ -455,13 +459,13 @@ def __exportPreviewFromMap(mapname, positions=None):
             logger.debug("Icon positions were not passed or they were wrong for: " + mapname)
             return previews
         genPrevFromDDS(previewddsname,previewlargename,small=False)
-        mapimage = QtGui.QPixmap(previewlargename)
-        armyicon = QtGui.QPixmap(os.path.join(os.getcwd(), ur"_res\vault\map_icons\army.png")).scaled(8, 9, 1, 1)
-        massicon = QtGui.QPixmap(os.path.join(os.getcwd(), ur"_res\vault\map_icons\mass.png")).scaled(8, 8, 1, 1)
-        hydroicon = QtGui.QPixmap(os.path.join(os.getcwd(), ur"_res\vault\map_icons\hydro.png")).scaled(10, 10, 1, 1)
+        mapimage = QPixmap(previewlargename)
+        armyicon = QPixmap(os.path.join(os.getcwd(), ur"_res\vault\map_icons\army.png")).scaled(8, 9, 1, 1)
+        massicon = QPixmap(os.path.join(os.getcwd(), ur"_res\vault\map_icons\mass.png")).scaled(8, 8, 1, 1)
+        hydroicon = QPixmap(os.path.join(os.getcwd(), ur"_res\vault\map_icons\hydro.png")).scaled(10, 10, 1, 1)
         
         
-        painter = QtGui.QPainter()
+        painter = QPainter()
         
         painter.begin(mapimage)
         #icons should be drawn in certain order: first layer is hydros, second - mass, and army on top. made so that previews not look messed up.
@@ -515,7 +519,7 @@ def __downloadPreviewFromWeb(name):
                 fp.close()
                 
                 #Create alpha-mapped preview image
-                im = QtGui.QImage(img) #.scaled(100,100)
+                im = QImage(img) #.scaled(100,100)
                 im.save(img)
                 logger.debug("Web Preview " + extension + " used for: " + name)
                 return img
@@ -567,7 +571,7 @@ def downloadMap(name, silent=False):
     url = VAULT_DOWNLOAD_ROOT + link
     logger.debug("Getting map from: " + url)
 
-    progress = QtGui.QProgressDialog()
+    progress = QProgressDialog()
     if not silent:
         progress.setCancelButtonText("Cancel")
     else:
@@ -636,10 +640,10 @@ def downloadMap(name, silent=False):
         logger.warn("Map download or extraction failed for: " + url)        
         if sys.exc_type is HTTPError:
             logger.warning("Vault download failed with HTTPError, map probably not in vault (or broken).")
-            QtGui.QMessageBox.information(None, "Map not downloadable", "<b>This map was not found in the vault (or is broken).</b><br/>You need to get it from somewhere else in order to use it." )
+            QMessageBox.information(None, "Map not downloadable", "<b>This map was not found in the vault (or is broken).</b><br/>You need to get it from somewhere else in order to use it." )
         else:                
             logger.error("Download Exception", exc_info=sys.exc_info())
-            QtGui.QMessageBox.information(None, "Map installation failed", "<b>This map could not be installed (please report this map or bug).</b>" )
+            QMessageBox.information(None, "Map installation failed", "<b>This map could not be installed (please report this map or bug).</b>" )
         return False
 
     #Count the map downloads

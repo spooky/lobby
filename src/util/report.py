@@ -16,9 +16,7 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-
-
-
+from PyQt5.QtGui import QFont, QDesktopServices
 
 import fa
 #BUGREPORT_URL = 'http://thygrrr.de/faforward.php'
@@ -26,17 +24,17 @@ BUGREPORT_USER = 'pre-login'
 
 from util import VERSION_STRING, APPDATA_DIR, PERSONAL_DIR, LOG_FILE_GAME, LOG_FILE_FAF, readfile,\
     readlines
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import *
+
 import hashlib
-import sys
-from util import logger
 
 HELP_URL = "http://www.faforever.com/forums/viewforum.php?f=3"
 TICKET_URL = "http://bitbucket.org/thepilot/modular-client/issues"
 
-class ReportDialog(QtGui.QDialog):
+class ReportDialog(QDialog):
     def __init__(self, *args, **kwargs):
-        QtGui.QDialog.__init__(self, *args, **kwargs)
+        QDialog.__init__(self, *args, **kwargs)
         
         dialog = self
                 
@@ -44,31 +42,31 @@ class ReportDialog(QtGui.QDialog):
         self.hash = hashlib.md5(self.title)
         
         dialog.setWindowTitle(self.title)
-        dialog.setLayout(QtGui.QVBoxLayout())
-        label = QtGui.QLabel()
+        dialog.setLayout(QVBoxLayout())
+        label = QLabel()
         label.setText("<b>Send us logs to help us find bugs!</b><br/><br/>Thanks for opting to report a bug.<br/><br/>")
         label.setWordWrap(True)
         dialog.layout().addWidget(label)
 
-#        label = QtGui.QLabel()
+#        label = QLabel()
 #        label.setText("<b>This is what happened</b> (explain what happened, and how)")
 #        label.setWordWrap(False)
 #        dialog.layout().addWidget(label)
 
-#        self.report = QtGui.QTextEdit()
+#        self.report = QTextEdit()
 #        report = self.report
 #        report.append("type here")
 #        dialog.layout().addWidget(report)
         
-        label = QtGui.QLabel()
+        label = QLabel()
         label.setText("<b>These are the partial logs</b>")
         label.setWordWrap(False)
         dialog.layout().addWidget(label)
-        self.box = QtGui.QTextEdit()
+        self.box = QTextEdit()
         box = self.box
         box.setReadOnly(True)
         try:
-            box.setFont(QtGui.QFont("Lucida Console", 8))
+            box.setFont(QFont("Lucida Console", 8))
             box.append(u"\n**FAF Username:** " + BUGREPORT_USER)
             box.append(u"\n**FAF Version:** " + VERSION_STRING)
             box.append(u"\n**FAF Directory:** " + APPDATA_DIR)
@@ -99,19 +97,19 @@ class ReportDialog(QtGui.QDialog):
             pass
 
         dialog.layout().addWidget(box)
-        self.sendButton = QtGui.QPushButton("\nReport this error\n")
+        self.sendButton = QPushButton("\nReport this error\n")
         self.sendButton.pressed.connect(self.postReport) 
         dialog.layout().addWidget(self.sendButton)
         
-        label = QtGui.QLabel()
+        label = QLabel()
         label.setText("<b>Do you want to continue, or get help in the forums?</b><br/><i>(thanks for helping us make FAF better)</i>")
         label.setWordWrap(False)
         dialog.layout().addWidget(label)
         
-        self.buttons = QtGui.QDialogButtonBox()
+        self.buttons = QDialogButtonBox()
         buttons = self.buttons        
-        buttons.addButton("Close", QtGui.QDialogButtonBox.AcceptRole)
-        buttons.addButton("Help", QtGui.QDialogButtonBox.HelpRole)
+        buttons.addButton("Close", QDialogButtonBox.AcceptRole)
+        buttons.addButton("Help", QDialogButtonBox.HelpRole)
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
         buttons.helpRequested.connect(dialog.techSupport)
@@ -122,15 +120,15 @@ class ReportDialog(QtGui.QDialog):
     
     @QtCore.pyqtSlot()
     def techSupport(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(HELP_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(HELP_URL))
 
 
     @QtCore.pyqtSlot()
     def postReport(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(HELP_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(HELP_URL))
 #            self.sendButton.setEnabled(False)
 #            self.sendButton.setText("\nSending...\n")
-#            QtGui.QApplication.processEvents()
+#            QApplication.processEvents()
 #            
 #            import urllib
 #            import urllib2

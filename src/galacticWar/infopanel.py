@@ -17,15 +17,16 @@
 #-------------------------------------------------------------------------------
 
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QCompleter
+
 import util
 from galacticWar import logger
 from attackitem import AttackItem
 from defenseitem import DefenseItem
-
 from teams.teamswidget import TeamWidget
-
 from galacticWar import FACTIONS
+
 
 FormClass, BaseClass = util.loadUiType("galacticwar/infopanel.ui")
 
@@ -101,7 +102,7 @@ class InfoPanelWidget(FormClass, BaseClass):
             if name != None and name != '':
                 planetList.append(name)
 
-        self.completer =  QtGui.QCompleter(sorted(planetList), parent=self)
+        self.completer =  QCompleter(sorted(planetList), parent=self)
         self.completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
 
         self.findPlanet.setCompleter(self.completer) 
@@ -214,9 +215,9 @@ class InfoPanelWidget(FormClass, BaseClass):
     def giveToattackProposal(self, item):
         ''' give this attack to the second in command system '''
         
-        question = QtGui.QMessageBox.question(self, item.itemText, "You are going to give away this attack. Do you want to proceed?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+        question = QMessageBox.question(self, item.itemText, "You are going to give away this attack. Do you want to proceed?", QMessageBox.Yes, QMessageBox.No)
         
-        if question == QtGui.QMessageBox.Yes :
+        if question == QMessageBox.Yes :
             planetuid = item.uid
             self.parent.send(dict(command="send_to_proposal", uid=planetuid))
                 

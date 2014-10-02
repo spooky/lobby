@@ -24,8 +24,10 @@ import json
 import re
 import hashlib
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
+from PyQt5 import QtCore
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 import util
 from AuthService import AuthService
@@ -35,9 +37,9 @@ PASSWORD_RECOVERY_URL = "http://www.faforever.com/faf/forgotPass.php"
 NAME_CHANGE_URL = "http://www.faforever.com/faf/userName.php"
 STEAM_LINK_URL = "http://www.faforever.com/faf/steam.php"
 
-class LoginWizard(QtGui.QWizard):
+class LoginWizard(QWizard):
     def __init__(self, client):
-        QtGui.QWizard.__init__(self)
+        QWizard.__init__(self)
 
         self.client = client
 
@@ -46,10 +48,10 @@ class LoginWizard(QtGui.QWizard):
         
         self.addPage(loginPage(self))
 
-        self.setWizardStyle(QtGui.QWizard.ModernStyle)
+        self.setWizardStyle(QWizard.ModernStyle)
         self.setModal(True)
 
-        buttons_layout = [QtGui.QWizard.CancelButton, QtGui.QWizard.FinishButton]
+        buttons_layout = [QWizard.CancelButton, QWizard.FinishButton]
 
         self.setButtonLayout(buttons_layout)
 
@@ -59,67 +61,63 @@ class LoginWizard(QtGui.QWizard):
         self.login = self.field("login").strip()
         if (self.field("password") != "!!!password!!!"): #Not entirely nicely coded, this can go into a lambda function connected to the LineEdit
             # FIXME Sheeo pass hash
-            self.password = self.field("password").strip().encode("utf-8")
+            self.password = hashlib.sha256(self.field("password").strip().encode("utf-8")).hexdigest()
 
         self.client.login = self.field("login").strip()
         self.client.password = self.password    #this is the hash, not the dummy password
         self.client.remember = self.field("remember")
         self.client.autologin = self.field("autologin")
 
-        self.login_reply = reply = AuthService.Login(self.login, self.field("password").strip().encode())
+        self.login_reply = reply = AuthService.Login(self.login, self.password)
+
+        reply.error.connect(self._onLoginError)
+        reply.done.connect(self._onLoginReply)
 
         # FIXME To be asynchronous
-        self.loop = loop = QEventLoop()
-        reply.finished.connect(self.loop.quit)
-        loop.exec_(QEventLoop.AllEvents | QEventLoop.WaitForMoreEvents)
-
-        if self._onLoginReply():
-            QtGui.QWizard.accept(self)
+        # self.loop = loop = QEventLoop()
+        # reply.finished.connect(self.loop.quit)
+        # loop.exec_(QEventLoop.AllEvents | QEventLoop.WaitForMoreEvents)
+        #
+        # if self._onLoginReply():
+        #     QWizard.accept(self)
 
     def reject(self):
-        QtGui.QWizard.reject(self)
+        QWizard.reject(self)
 
-    def _onLoginReply(self):
-        resData = str(self.login_reply.readAll())
-        resp = json.loads(resData)
+    def _onLoginError(self, resp):
+        QMessageBox.information(self, "Login Failed", resp['statusMessage'])
 
-        self.loop.exit()
-
-        if 'success' not in resp:
-            # if self.client.state == ClientState.REJECTED:
-            QtGui.QMessageBox.information(self, "Login Failed", resp['statusMessage'])
-            return False
-        else:
-            self.client.session_id = resp["session_id"]
-            return True
+    def _onLoginReply(self, resp):
+        self.client.session_id = resp["session_id"]
+        QWizard.accept(self)
 
 
-class loginPage(QtGui.QWizardPage):
+class loginPage(QWizardPage):
     def __init__(self, parent=None, *args, **kwargs):
-        QtGui.QWizardPage.__init__(self, *args, **kwargs)
+        QWizardPage.__init__(self, *args, **kwargs)
 
         self.parent= parent
         self.client = parent.client
         
-        self.setButtonText(QtGui.QWizard.CancelButton, "Quit")
-        self.setButtonText(QtGui.QWizard.FinishButton, "Login")        
+        self.setButtonText(QWizard.CancelButton, "Quit")
+        self.setButtonText(QWizard.FinishButton, "Login")
         
         self.setTitle("ACU ready for combat.")
         self.setSubTitle("Log yourself in, commander.")
         
-        self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("client/login_watermark.png"))
+        self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("client/login_watermark.png"))
 
-        loginLabel = QtGui.QLabel("&User name :")
-        self.loginLineEdit = QtGui.QLineEdit()
+        loginLabel = QLabel("&User name :")
+        self.loginLineEdit = QLineEdit()
         loginLabel.setBuddy(self.loginLineEdit)
         self.loginLineEdit.setText(self.client.login)
 
-        passwordLabel = QtGui.QLabel("&Password :")
-        self.passwordLineEdit = QtGui.QLineEdit()
+        passwordLabel = QLabel("&Password :")
+        self.passwordLineEdit = QLineEdit()
         
         passwordLabel.setBuddy(self.passwordLineEdit)
         
-        self.passwordLineEdit.setEchoMode(QtGui.QLineEdit.Password)
+        self.passwordLineEdit.setEchoMode(QLineEdit.Password)
                 
         if (self.client.password):
             self.passwordLineEdit.setText("!!!password!!!")
@@ -127,10 +125,10 @@ class loginPage(QtGui.QWizardPage):
         self.passwordLineEdit.selectionChanged.connect(self.passwordLineEdit.clear)               
 
 
-        self.rememberCheckBox = QtGui.QCheckBox("&Remember password")
+        self.rememberCheckBox = QCheckBox("&Remember password")
         self.rememberCheckBox.setChecked(self.client.remember)
         
-        self.autologinCheckBox = QtGui.QCheckBox("&Automatic Login")
+        self.autologinCheckBox = QCheckBox("&Automatic Login")
         self.autologinCheckBox.setChecked(self.client.autologin)
         self.autologinCheckBox.setEnabled(self.client.remember)
         
@@ -138,11 +136,11 @@ class loginPage(QtGui.QWizardPage):
         self.rememberCheckBox.clicked.connect(self.autologinCheckBox.setChecked)
         self.rememberCheckBox.clicked.connect(self.autologinCheckBox.setEnabled)
         
-        self.createAccountBtn = QtGui.QPushButton("Create new Account")
-        self.renameAccountBtn = QtGui.QPushButton("Rename your account")
-        self.linkAccountBtn = QtGui.QPushButton("Link your account to Steam")
-        self.forgotPasswordBtn = QtGui.QPushButton("Forgot Login or Password")
-        self.reportBugBtn = QtGui.QPushButton("Report a Bug")
+        self.createAccountBtn = QPushButton("Create new Account")
+        self.renameAccountBtn = QPushButton("Rename your account")
+        self.linkAccountBtn = QPushButton("Link your account to Steam")
+        self.forgotPasswordBtn = QPushButton("Forgot Login or Password")
+        self.reportBugBtn = QPushButton("Report a Bug")
 
         self.createAccountBtn.released.connect(self.createAccount)
         self.renameAccountBtn.released.connect(self.renameAccount)
@@ -156,7 +154,7 @@ class loginPage(QtGui.QWizardPage):
         self.registerField('autologin', self.autologinCheckBox)
 
 
-        layout = QtGui.QGridLayout()
+        layout = QGridLayout()
 
         layout.addWidget(loginLabel, 1, 0)
         layout.addWidget(self.loginLineEdit, 1, 1)
@@ -192,15 +190,15 @@ class loginPage(QtGui.QWizardPage):
 
     @QtCore.pyqtSlot()
     def linkAccount(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(STEAM_LINK_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(STEAM_LINK_URL))
         
     @QtCore.pyqtSlot()
     def renameAccount(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(NAME_CHANGE_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(NAME_CHANGE_URL))
         
     @QtCore.pyqtSlot()
     def forgotPassword(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(PASSWORD_RECOVERY_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(PASSWORD_RECOVERY_URL))
 
 
     @QtCore.pyqtSlot()
@@ -209,33 +207,33 @@ class loginPage(QtGui.QWizardPage):
 
 
 
-class creationAccountWizard(QtGui.QWizard):
+class creationAccountWizard(QWizard):
     def __init__(self, parent=None):
         
         super(creationAccountWizard, self).__init__(parent)
 
         self.client = parent.client
 
-        self.setOption(QtGui.QWizard.DisabledBackButtonOnLastPage)
+        self.setOption(QWizard.DisabledBackButtonOnLastPage)
         self.addPage(IntroPage())
         self.addPage(AccountCreationPage(self))
         self.addPage(AccountCreated())
 
 
-        self.setWizardStyle(QtGui.QWizard.ModernStyle)
+        self.setWizardStyle(QWizard.ModernStyle)
 
-        self.setPixmap(QtGui.QWizard.BannerPixmap,
-                QtGui.QPixmap('client/banner.png'))
-        self.setPixmap(QtGui.QWizard.BackgroundPixmap,
-                QtGui.QPixmap('client/background.png'))
+        self.setPixmap(QWizard.BannerPixmap,
+                QPixmap('client/banner.png'))
+        self.setPixmap(QWizard.BackgroundPixmap,
+                QPixmap('client/background.png'))
 
         self.setWindowTitle("Create Account")
 
 
 
-class gameSettingsWizard(QtGui.QWizard):
+class gameSettingsWizard(QWizard):
     def __init__(self, client, *args, **kwargs):
-        QtGui.QWizard.__init__(self, *args, **kwargs)
+        QWizard.__init__(self, *args, **kwargs)
         
         self.client = client
 
@@ -246,10 +244,10 @@ class gameSettingsWizard(QtGui.QWizard):
 
         self.setWizardStyle(1)
 
-        self.setPixmap(QtGui.QWizard.BannerPixmap,
-                QtGui.QPixmap('client/banner.png'))
-        self.setPixmap(QtGui.QWizard.BackgroundPixmap,
-                QtGui.QPixmap('client/background.png'))
+        self.setPixmap(QWizard.BannerPixmap,
+                QPixmap('client/banner.png'))
+        self.setPixmap(QWizard.BackgroundPixmap,
+                QPixmap('client/background.png'))
 
         self.setWindowTitle("Set Game Port")
 
@@ -257,12 +255,12 @@ class gameSettingsWizard(QtGui.QWizard):
         self.client.gamePort = self.settings.gamePortSpin.value()
         self.client.useUPnP = self.settings.checkUPnP.isChecked()
         self.client.savePort()
-        QtGui.QWizard.accept(self)        
+        QWizard.accept(self)
 
 
-class mumbleOptionsWizard(QtGui.QWizard):
+class mumbleOptionsWizard(QWizard):
     def __init__(self, client, *args, **kwargs):
-        QtGui.QWizard.__init__(self, *args, **kwargs)
+        QWizard.__init__(self, *args, **kwargs)
         
         self.client = client
 
@@ -272,10 +270,10 @@ class mumbleOptionsWizard(QtGui.QWizard):
 
         self.setWizardStyle(1)
 
-        self.setPixmap(QtGui.QWizard.BannerPixmap,
-                QtGui.QPixmap('client/banner.png'))
-        self.setPixmap(QtGui.QWizard.BackgroundPixmap,
-                QtGui.QPixmap('client/background.png'))
+        self.setPixmap(QWizard.BannerPixmap,
+                QPixmap('client/banner.png'))
+        self.setPixmap(QWizard.BackgroundPixmap,
+                QPixmap('client/background.png'))
 
         self.setWindowTitle("Configure Voice")
 
@@ -283,29 +281,29 @@ class mumbleOptionsWizard(QtGui.QWizard):
     def accept(self):
         self.client.enableMumble = self.settings.checkEnableMumble.isChecked()
         self.client.saveMumble()
-        QtGui.QWizard.accept(self)
+        QWizard.accept(self)
 
 
 
-class IntroPage(QtGui.QWizardPage):
+class IntroPage(QWizardPage):
     def __init__(self, parent=None):
         super(IntroPage, self).__init__(parent)
 
         self.setTitle("Welcome to FA Forever.")
         self.setSubTitle("In order to play, you first need to create an account.")
-        self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("client/account_watermark_intro.png"))
+        self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("client/account_watermark_intro.png"))
 
-        label = QtGui.QLabel("This wizard will help you in the process of account creation.<br/><br/><b>At this time, we only allow one account per computer.</b>")
+        label = QLabel("This wizard will help you in the process of account creation.<br/><br/><b>At this time, we only allow one account per computer.</b>")
         
         label.setWordWrap(True)
 
-        layout = QtGui.QVBoxLayout()
+        layout = QVBoxLayout()
         layout.addWidget(label)
         self.setLayout(layout)
 
 
 
-class AccountCreationPage(QtGui.QWizardPage):
+class AccountCreationPage(QWizardPage):
     def __init__(self, parent=None):
         super(AccountCreationPage, self).__init__(parent)
 
@@ -315,31 +313,31 @@ class AccountCreationPage(QtGui.QWizardPage):
         self.setTitle("Account Creation")
         self.setSubTitle("Please enter your desired login and password. Note that your password will not be stored on our server. Please specify a working email address in case you need to change it.")
         
-        self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("client/account_watermark_input.png"))
+        self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("client/account_watermark_input.png"))
 
-        loginLabel = QtGui.QLabel("&User name :")
-        self.loginLineEdit = QtGui.QLineEdit()
+        loginLabel = QLabel("&User name :")
+        self.loginLineEdit = QLineEdit()
         rxLog = QtCore.QRegExp("[A-Z,a-z]{1}[A-Z,a-z,0-9,_,-]{0,15}")
-        validLog = QtGui.QRegExpValidator(rxLog, self)
+        validLog = QRegExpValidator(rxLog, self)
         self.loginLineEdit.setValidator(validLog)
         loginLabel.setBuddy(self.loginLineEdit)
 
-        passwordLabel = QtGui.QLabel("&Password :")
-        self.passwordLineEdit = QtGui.QLineEdit()
+        passwordLabel = QLabel("&Password :")
+        self.passwordLineEdit = QLineEdit()
         passwordLabel.setBuddy(self.passwordLineEdit)
 
         self.passwordLineEdit.setEchoMode(2)
 
-        passwordCheckLabel = QtGui.QLabel("&Re-type Password :")
-        self.passwordCheckLineEdit = QtGui.QLineEdit()
+        passwordCheckLabel = QLabel("&Re-type Password :")
+        self.passwordCheckLineEdit = QLineEdit()
         passwordCheckLabel.setBuddy(self.passwordCheckLineEdit)
 
         self.passwordCheckLineEdit.setEchoMode(2)
 
-        EmailLabel = QtGui.QLabel("E-mail :")
-        self.EmailLineEdit = QtGui.QLineEdit()
+        EmailLabel = QLabel("E-mail :")
+        self.EmailLineEdit = QLineEdit()
         rxMail = QtCore.QRegExp("^[a-zA-Z0-9]{1}[a-zA-Z0-9._%-]+@[a-zA-Z0-9._%-]+.[a-zA-Z]{2,6}$")
-        validMail = QtGui.QRegExpValidator(rxMail, self)
+        validMail = QRegExpValidator(rxMail, self)
         self.EmailLineEdit.setValidator(validMail)
 
 
@@ -351,7 +349,7 @@ class AccountCreationPage(QtGui.QWizardPage):
         self.password1 = ''
         self.password2 = ''
         
-        layout = QtGui.QGridLayout()
+        layout = QGridLayout()
                 
         layout.addWidget(loginLabel, 1, 0)
         layout.addWidget(self.loginLineEdit, 1, 1)
@@ -378,72 +376,83 @@ class AccountCreationPage(QtGui.QWizardPage):
 
 
     def validatePage(self):
+
+        if self.done:
+            return True
+
         password1 = hashlib.sha256(self.passwordLineEdit.text().encode("utf-8")).hexdigest()        
         password2 = hashlib.sha256(self.passwordCheckLineEdit.text().encode("utf-8")).hexdigest()
         
         if password1 != password2 :
-            QtGui.QMessageBox.information(self, "Create account","Passwords don't match!")
+            QMessageBox.information(self, "Create account","Passwords don't match!")
             return False
         
         email = self.EmailLineEdit.text()
         
         if not self.validateEmail(email) :
-            QtGui.QMessageBox.information(self, "Create account", "Invalid Email address!")
+            QMessageBox.information(self, "Create account", "Invalid Email address!")
             return False   
         
         # check if the login is okay
-        login = self.loginLineEdit.text().strip()
+        self.login = login = self.loginLineEdit.text().strip()
+        self.password = password = password1
 
-        rep = AuthService.Register(email, login, self.passwordLineEdit.text().encode())
+        rep = AuthService.Register(email, login, password)
 
         self.register_reply = rep
 
         # FIXME To be asynchronous
-        self.loop = loop = QEventLoop()
-        rep.finished.connect(self.loop.quit)
-        loop.exec_(QEventLoop.AllEvents|QEventLoop.WaitForMoreEvents)
+        rep.error.connect(self._onRegisterError)
+        rep.done.connect(self._onRegisterSuccess)
 
-        return self.onRegisterReply()
+        return False
 
-    def onRegisterReply(self):
-        resData = str(self.register_reply.readAll())
-        print "Response:", self.register_reply.errorString(), resData
-        resp = json.loads(resData)
+    def _onRegisterError(self, resp):
+        QMessageBox.information(self, "Create account", resp['statusMessage'])
 
+    def _onRegisterSuccess(self, resp):
+        self.client.login = self.login
+        self.client.password = self.password
+        self.client.session_id = resp["session_id"]
+
+        self.done = True
+        self.wizard().next()
+
+    def onRegisterReply(self, resp):
+        QEventLoop.exit()
         if 'success' not in resp:
         #if self.client.state == ClientState.REJECTED:
-            QtGui.QMessageBox.information(self, "Create account", resp['statusMessage'])
-            return False
+            self.massive_hack =  False
         else:
             self.client.session_id = resp["session_id"]
-            return True  
+            self.massive_hack = True
 
-class GameSettings(QtGui.QWizardPage):
+class GameSettings(QWizardPage):
     def __init__(self, parent=None):
         super(GameSettings, self).__init__(parent)
 
         self.parent = parent
         self.setTitle("Network Settings")
-        self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("client/settings_watermark.png"))
+        self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("client/settings_watermark.png"))
         
-        self.label = QtGui.QLabel()
+        self.label = QLabel()
         self.label.setText('Forged Alliance needs an open UDP port to play. If you have trouble connecting to other players, try the UPnP option first. If that fails, you should try to open or forward the port on your router and firewall.<br/><br/>Visit the <a href="http://www.faforever.com/forums/viewforum.php?f=3">Tech Support Forum</a> if you need help.<br/><br/>')
         self.label.setOpenExternalLinks(True)
         self.label.setWordWrap(True)
 
-        self.labelport = QtGui.QLabel()
+        self.labelport = QLabel()
         self.labelport.setText("<b>UDP Port</b> (default 6112)")
         self.labelport.setWordWrap(True)
         
-        self.gamePortSpin = QtGui.QSpinBox() 
+        self.gamePortSpin = QSpinBox()
         self.gamePortSpin.setMinimum(1024)
         self.gamePortSpin.setMaximum(65535) 
         self.gamePortSpin.setValue(6112)
 
-        self.checkUPnP = QtGui.QCheckBox("use UPnP")
+        self.checkUPnP = QCheckBox("use UPnP")
         self.checkUPnP.setToolTip("FAF can try to open and forward your game port automatically using UPnP.<br/><b>Caution: This doesn't work for all connections, but may help with some routers.</b>")
 
-        layout = QtGui.QVBoxLayout()
+        layout = QVBoxLayout()
         layout.addWidget(self.label)
         layout.addWidget(self.labelport)
         layout.addWidget(self.gamePortSpin)
@@ -454,22 +463,22 @@ class GameSettings(QtGui.QWizardPage):
     def validatePage(self):        
         return 1
 
-class MumbleSettings(QtGui.QWizardPage):
+class MumbleSettings(QWizardPage):
     def __init__(self, parent=None):
         super(MumbleSettings, self).__init__(parent)
 
         self.parent = parent
         self.setTitle("Voice Settings")
-        self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("client/settings_watermark.png"))
+        self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("client/settings_watermark.png"))
         
-        self.label = QtGui.QLabel()
+        self.label = QLabel()
         self.label.setText('FAF supports the automatic setup of voice connections between you and your team mates. It will automatically move you into a channel with your team mates anytime you enter a game lobby or start a game. To enable, download and install <a href="http://mumble.sourceforge.net/">Mumble</a> and tick the checkbox below.')
         self.label.setOpenExternalLinks(True)
         self.label.setWordWrap(True)
 
-        self.checkEnableMumble = QtGui.QCheckBox("Enable Mumble Connector")
+        self.checkEnableMumble = QCheckBox("Enable Mumble Connector")
 
-        layout = QtGui.QVBoxLayout()
+        layout = QVBoxLayout()
         layout.addWidget(self.label)
         layout.addWidget(self.checkEnableMumble)
         self.setLayout(layout)
@@ -479,18 +488,18 @@ class MumbleSettings(QtGui.QWizardPage):
 
 
 
-class AccountCreated(QtGui.QWizardPage):
+class AccountCreated(QWizardPage):
     def __init__(self, *args, **kwargs):
-        QtGui.QWizardPage.__init__(self, *args, **kwargs)
+        QWizardPage.__init__(self, *args, **kwargs)
 
         self.setFinalPage(True)
         self.setTitle("Congratulations!")
         self.setSubTitle("Your Account has been created.")
-        self.setPixmap(QtGui.QWizard.WatermarkPixmap, util.pixmap("client/account_watermark_created.png"))
+        self.setPixmap(QWizard.WatermarkPixmap, util.pixmap("client/account_watermark_created.png"))
 
-        self.label = QtGui.QLabel()
+        self.label = QLabel()
         self.label.setWordWrap(True)
-        layout = QtGui.QVBoxLayout()
+        layout = QVBoxLayout()
         layout.addWidget(self.label)
         self.setLayout(layout)
 

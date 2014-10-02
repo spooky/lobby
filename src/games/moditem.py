@@ -15,12 +15,10 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
+from PyQt5.QtGui import QColor
 
+from PyQt5.QtWidgets import *
 
-
-
-
-from PyQt4 import QtGui
 import util
 import client
 
@@ -36,9 +34,9 @@ mod_invisible = []
 
 mod_favourites = []  # LATER: Make these saveable and load them from settings
 
-class ModItem(QtGui.QListWidgetItem):
+class ModItem(QListWidgetItem):
     def __init__(self, message, *args, **kwargs):
-        QtGui.QListWidgetItem.__init__(self, *args, **kwargs)
+        QListWidgetItem.__init__(self, *args, **kwargs)
 
         self.mod  = message["name"]
         self.name = message["fullname"]
@@ -61,7 +59,7 @@ class ModItem(QtGui.QListWidgetItem):
         else:
             color = client.instance.getColor("player")
             
-        self.setTextColor(QtGui.QColor(color))
+        self.setTextColor(QColor(color))
         self.setText(self.name)
 
 

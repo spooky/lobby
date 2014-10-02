@@ -16,21 +16,18 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
+import random
 
+from PyQt5.QtWidgets import *
+from PyQt5 import QtCore
 
-
-
-from PyQt4 import QtCore, QtGui
 import util
-
 from games.gameitem import GameItem, GameItemDelegate
 from games.moditem import ModItem, mod_invisible, mods
 from games.hostgamewidget import HostgameWidget
-
 from games._mapSelectWidget import mapSelectWidget
 from games import logger
 from fa import Faction
-import random
 import fa
 import modvault
 import notificatation_system as ns
@@ -145,7 +142,7 @@ class GamesWidget(FormClass, BaseClass):
         #     self.leaveTeamButton.clicked.connect(self.quitTeam)    
         #     self.leaveTeamButton.setVisible(False)
         # except:
-        #     QtGui.QMessageBox.warning(None, "Skin outdated.", "The theme you are using is outdated. Please remove it or the lobby will malfunction.")
+        #     QMessageBox.warning(None, "Skin outdated.", "The theme you are using is outdated. Please remove it or the lobby will malfunction.")
 
         #Load game name from settings (yay, it's persistent!)
         self.loadGameName()
@@ -221,7 +218,7 @@ class GamesWidget(FormClass, BaseClass):
 
             self.client.notificationSystem.on_event(ns.NotificationSystem.TEAM_INVITE, "%s is inviting you to join his team." % who)
 
-            item = QtGui.QListWidgetItem(who)
+            item = QListWidgetItem(who)
             
             self.teamInvitations[who] = item
             self.teamInvitationsListWidget.addItem(self.teamInvitations[who])
@@ -340,7 +337,7 @@ class GamesWidget(FormClass, BaseClass):
         #self.stopSearchRanked()
 
         # if (fa.exe.running()):
-        #     QtGui.QMessageBox.information(None, "ForgedAlliance.exe", "FA is already running.")          
+        #     QMessageBox.information(None, "ForgedAlliance.exe", "FA is already running.")
         #     self.stopSearchingTeamMatchmaker()
         #     return        
 
@@ -355,7 +352,7 @@ class GamesWidget(FormClass, BaseClass):
     def startSearchRanked(self, race):
         self.stopSearchingTeamMatchmaker()
         if (fa.exe.running()):
-            QtGui.QMessageBox.information(None, "ForgedAlliance.exe", "FA is already running.")
+            QMessageBox.information(None, "ForgedAlliance.exe", "FA is already running.")
             self.stopSearchRanked()
             return
 
@@ -626,7 +623,7 @@ class GamesWidget(FormClass, BaseClass):
             self.stopSearchRanked()
 
 
-    @QtCore.pyqtSlot(QtGui.QListWidgetItem)
+    @QtCore.pyqtSlot(QListWidgetItem)
     def gameDoubleClicked(self, item):
         '''
         Slot that attempts to join a game.
@@ -640,7 +637,7 @@ class GamesWidget(FormClass, BaseClass):
 
         if fa.exe.check(item.mod, item.mapname, None, item.mods):
             if item.access == "password" :
-                passw, ok = QtGui.QInputDialog.getText(self.client, "Passworded game" , "Enter password :", QtGui.QLineEdit.Normal, "")
+                passw, ok = QInputDialog.getText(self.client, "Passworded game" , "Enter password :", QLineEdit.Normal, "")
                 if ok:
                     self.client.send(dict(command="game_join", password=passw, uid=item.uid, gameport=self.client.gamePort))
             else :
@@ -651,7 +648,7 @@ class GamesWidget(FormClass, BaseClass):
 
 
 
-    @QtCore.pyqtSlot(QtGui.QListWidgetItem)
+    @QtCore.pyqtSlot(QListWidgetItem)
     def hostGameClicked(self, item):
         '''
         Hosting a game event
@@ -677,7 +674,7 @@ class GamesWidget(FormClass, BaseClass):
                             gameoptions.append(option.isChecked())
 
                         if oneChecked == False :
-                            QtGui.QMessageBox.warning(None, "No option checked !", "You have to check at least one option !")
+                            QMessageBox.warning(None, "No option checked !", "You have to check at least one option !")
                             return
                     modnames = [str(moditem.text()) for moditem in hostgamewidget.modList.selectedItems()]
                     mods = [hostgamewidget.mods[modstr] for modstr in modnames]

@@ -17,10 +17,17 @@
 #-------------------------------------------------------------------------------
 
 
-from PyQt4 import QtCore, QtGui, QtNetwork
-import util
 import os
+
+from PyQt5 import QtCore
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
+from PyQt5.QtNetwork import *
+
+import util
 from featuredmods import logger
+
 
 FormClass, BaseClass = util.loadUiType("featuredmods/featuredmods.ui")
 
@@ -45,13 +52,13 @@ class FeaturedModsWidget(FormClass, BaseClass):
         self.fileToUpload   = None
         self.currentUid     = None
         
-        self.ftp = QtNetwork.QFtp(self)
-        self.ftp.commandFinished.connect(self.ftpCommandFinished)
+        self.ftp = QNetworkAccessManager(self)
+        self.ftp.finished.connect(self.ftpCommandFinished)
         self.ftp.listInfo.connect(self.addToList)
         self.ftp.dataTransferProgress.connect(self.updateDataTransferProgress)
         self.ftplist = []
         
-        self.progressDialog = QtGui.QProgressDialog(self)
+        self.progressDialog = QProgressDialog(self)
         self.progressDialog.canceled.connect(self.cancelUpload)
         
         
@@ -76,7 +83,7 @@ class FeaturedModsWidget(FormClass, BaseClass):
     def ftpCommandFinished(self, _, error):
         if self.ftp.currentCommand() == QtNetwork.QFtp.ConnectToHost:
             if error:
-                QtGui.QMessageBox.information(self, "FTP",
+                QMessageBox.information(self, "FTP",
                         "Unable to connect to the FTP server at faforever.com. ")
                 logger.warn("Cannot connect to FTP")
                 self.ftp.abort()       
@@ -85,7 +92,7 @@ class FeaturedModsWidget(FormClass, BaseClass):
         
         if self.ftp.currentCommand() == QtNetwork.QFtp.Login:
             if error :
-                QtGui.QMessageBox.information(self, "FTP",
+                QMessageBox.information(self, "FTP",
                         "Unable to login to the FTP. Please check your login and/or password.")
                 logger.warn("Cannot login to FTP")
                 self.ftp.abort()     
@@ -96,7 +103,7 @@ class FeaturedModsWidget(FormClass, BaseClass):
 
         if self.ftp.currentCommand() == QtNetwork.QFtp.Put:
             if error:
-                QtGui.QMessageBox.information(self, "FTP",
+                QMessageBox.information(self, "FTP",
                         "Canceled upload of %s." % self.fileToUpload.fileName())
                 logger.info("Upload cancelled")
                 self.fileToUpload.close()
@@ -105,7 +112,7 @@ class FeaturedModsWidget(FormClass, BaseClass):
                 self.ftp.remove(os.path.basename(self.fileToUpload.fileName()))
                 self.ftp.close()
             else:
-                QtGui.QMessageBox.information(self, "FTP",
+                QMessageBox.information(self, "FTP",
                         "%s uploaded !" % self.fileToUpload.fileName())
 
                 logger.info("Upload done !")
@@ -119,7 +126,7 @@ class FeaturedModsWidget(FormClass, BaseClass):
             filename = os.path.basename(self.fileToUpload.fileName ())
             
             if filename in self.ftplist :
-                QtGui.QMessageBox.information(self, "FTP",
+                QMessageBox.information(self, "FTP",
                         "This file already exists on the server. Please rename it.")
                 logger.warn("file already exists in FTP")
                 self.ftp.abort()  
@@ -128,7 +135,7 @@ class FeaturedModsWidget(FormClass, BaseClass):
 
             else :
                 if not self.fileToUpload.open(QtCore.QIODevice.ReadWrite):
-                    QtGui.QMessageBox.information(self, "FTP",
+                    QMessageBox.information(self, "FTP",
                             "Can't open this file.")
                     logger.warn("Can't open this file.")
                     self.ftp.abort() 
@@ -146,8 +153,8 @@ class FeaturedModsWidget(FormClass, BaseClass):
         self.progressDialog.setValue(readBytes)
 
     def addVersionFile(self):
-        text, ok = QtGui.QInputDialog.getText(self, "Version number",
-                "Please enter the version number :", QtGui.QLineEdit.Normal, "")
+        text, ok = QInputDialog.getText(self, "Version number",
+                "Please enter the version number :", QLineEdit.Normal, "")
                 
         if ok and text != '':
             
@@ -156,10 +163,10 @@ class FeaturedModsWidget(FormClass, BaseClass):
             if len(version) != 0 :
                 self.version = int(version)
                 
-                options = QtGui.QFileDialog.Options()       
-                options |= QtGui.QFileDialog.DontUseNativeDialog            
+                options = QFileDialog.Options()
+                options |= QFileDialog.DontUseNativeDialog
                 
-                fileName = QtGui.QFileDialog.getOpenFileName(self,
+                fileName = QFileDialog.getOpenFileName(self,
                 "Select the file",
                 "",
                 "aLL Files (*.*)", options)
@@ -180,12 +187,12 @@ class FeaturedModsWidget(FormClass, BaseClass):
 
     
     def versionClicked(self, row, col):
-        if QtGui.QApplication.mouseButtons() != QtCore.Qt.RightButton:
+        if QApplication.mouseButtons() != QtCore.Qt.RightButton:
             return            
         
-        menu = QtGui.QMenu(self.versionTable)
+        menu = QMenu(self.versionTable)
         
-        actionAdd = QtGui.QAction("Add File", menu)
+        actionAdd = QAction("Add File", menu)
         # Adding to menu
         menu.addAction(actionAdd)            
         
@@ -194,18 +201,18 @@ class FeaturedModsWidget(FormClass, BaseClass):
         #actionAdd.triggered.connect()
         
         #Finally: Show the popup
-        menu.popup(QtGui.QCursor.pos())        
+        menu.popup(QCursor.pos())
         
     
     def fileClicked(self, row, col):
-#        if QtGui.QApplication.mouseButtons() != QtCore.Qt.RightButton:
+#        if QApplication.mouseButtons() != QtCore.Qt.RightButton:
 #            return            
         self.viewUpdatesFiles(row+1)
-#        menu = QtGui.QMenu(self.filesTable)
+#        menu = QMenu(self.filesTable)
 #        
 #        
-#        actionView = QtGui.QAction("View Update Files", menu)
-#        actionAdd = QtGui.QAction("Add File", menu)
+#        actionView = QAction("View Update Files", menu)
+#        actionAdd = QAction("Add File", menu)
 #        # Adding to menu
 #        menu.addAction(actionView)
 #        #menu.addAction(actionAdd)            
@@ -215,19 +222,19 @@ class FeaturedModsWidget(FormClass, BaseClass):
 #        #actionAdd.triggered.connect()
 #        
 #        #Finally: Show the popup
-#        menu.popup(QtGui.QCursor.pos())
+#        menu.popup(QCursor.pos())
 
     def viewUpdatesFiles(self, uid):
         self.currentUid = uid
         self.versionTable.clear()
-        self.versionTable.setHorizontalHeaderItem(0, QtGui.QTableWidgetItem("version"))
-        self.versionTable.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem("filename"))
+        self.versionTable.setHorizontalHeaderItem(0, QTableWidgetItem("version"))
+        self.versionTable.setHorizontalHeaderItem(1, QTableWidgetItem("filename"))
                 
         i = 0
         for f in self.versionFiles :
             if f["fileuid"] == uid :
-                itemFile = QtGui.QTableWidgetItem (f["name"])
-                itemVersion = QtGui.QTableWidgetItem (str(f["version"]))
+                itemFile = QTableWidgetItem (f["name"])
+                itemVersion = QTableWidgetItem (str(f["version"]))
                 
                 #self.filesTable.insertRow(uid)
                 self.versionTable.setRowCount ( i+1 )
@@ -240,17 +247,17 @@ class FeaturedModsWidget(FormClass, BaseClass):
         self.filesTable.clear()
         self.versionTable.clear()
         
-        self.filesTable.setHorizontalHeaderItem(0, QtGui.QTableWidgetItem("path"))
-        self.filesTable.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem("filename"))
+        self.filesTable.setHorizontalHeaderItem(0, QTableWidgetItem("path"))
+        self.filesTable.setHorizontalHeaderItem(1, QTableWidgetItem("filename"))
         
-        self.versionTable.setHorizontalHeaderItem(0, QtGui.QTableWidgetItem("version"))
-        self.versionTable.setHorizontalHeaderItem(1, QtGui.QTableWidgetItem("filename"))
+        self.versionTable.setHorizontalHeaderItem(0, QTableWidgetItem("version"))
+        self.versionTable.setHorizontalHeaderItem(1, QTableWidgetItem("filename"))
         
         
         self.filesTable.setRowCount(len(self.modFiles))
         for f in self.modFiles :
-            itemFile = QtGui.QTableWidgetItem (f["filename"])
-            itemPath = QtGui.QTableWidgetItem (f["path"])
+            itemFile = QTableWidgetItem (f["filename"])
+            itemPath = QTableWidgetItem (f["path"])
             uid = f["uid"] - 1
             #self.filesTable.insertRow(uid)
             self.filesTable.setItem ( uid, 0, itemPath )
@@ -271,8 +278,8 @@ class FeaturedModsWidget(FormClass, BaseClass):
         self.show()
         
 
-        text, ok = QtGui.QInputDialog.getText(self, "Password",
-            "Please enter your password for this mod :", QtGui.QLineEdit.Password, "")
+        text, ok = QInputDialog.getText(self, "Password",
+            "Please enter your password for this mod :", QLineEdit.Password, "")
     
         if ok and text != '':
             self.password = text        

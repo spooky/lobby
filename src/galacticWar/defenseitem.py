@@ -15,15 +15,18 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
+from PyQt5.QtWidgets import QListWidgetItem
 
 TIME_CHARGE = 60.0*10.0
 
-from PyQt4 import QtCore, QtGui
 import time
 
-class DefenseItem(QtGui.QListWidgetItem):
+from PyQt5 import QtCore
+
+
+class DefenseItem(QListWidgetItem):
     def __init__(self, uid, *args, **kwargs):
-        QtGui.QListWidgetItem.__init__(self, *args, **kwargs)
+        QListWidgetItem.__init__(self, *args, **kwargs)
         
         self.uid            = uid      
         self.timeAttack     = 0

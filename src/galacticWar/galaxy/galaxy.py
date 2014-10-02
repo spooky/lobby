@@ -1,9 +1,12 @@
-
-from PyQt4 import QtCore, QtGui
 import random
-from  voronoi import Site, computeVoronoiDiagram
 import math
 import copy
+
+from PyQt5 import QtCore
+from PyQt5.QtGui import QVector3D
+
+from  voronoi import Site, computeVoronoiDiagram
+
 
 class Galaxy(object):
     def __init__(self, parent):
@@ -12,7 +15,7 @@ class Galaxy(object):
         sizex = 2000
         sizey = 2000
         
-        self.space_size = QtGui.QVector3D(sizex, sizey, 0)
+        self.space_size = QVector3D(sizex, sizey, 0)
 
         self.COLOR_FACTIONS = self.parent.COLOR_FACTIONS
         
@@ -139,7 +142,7 @@ class Galaxy(object):
         self.star_field = []
         numStars = int(max(1, 15000 * (float(self.parent.stars) / 100.0)))
         for _ in range(numStars) :
-            star = QtGui.QVector3D(random.randrange(-self.space_size.x(),self.space_size.x()), random.randrange(-self.space_size.y(),self.space_size.y()), random.randrange(float(-200*2), float(minDepth)))            
+            star = QVector3D(random.randrange(-self.space_size.x(),self.space_size.x()), random.randrange(-self.space_size.y(),self.space_size.y()), random.randrange(float(-200*2), float(minDepth)))
             self.star_field.append(star)
     
    

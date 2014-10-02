@@ -57,7 +57,6 @@ If there is default value for a search entry, error will not be generated. Defau
 	destination - you can specify a dictionary for matched items in the resulting array
 """
 import re
-import zipfile
 import os
 
 class luaParser:

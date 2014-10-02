@@ -22,11 +22,8 @@
 
 from SkillCalculator import *
 from Numerics.BasicMath import *
-from Numerics.Range import *
 from PlayersRange import *
 from TeamsRange import *
-from Guard import *
-from math import sqrt
 from RankSorter import *
 from RatingContainer import *
 from PairwiseComparison import *
@@ -38,6 +35,10 @@ from TruncatedGaussianCorrectionFunctions import *
 # * When you only have two players, a lot of the math simplifies. The main purpose of this class
 # * is to show the bare minimum of what a TrueSkill implementation should have.
 # */
+from trueSkill import Guard, RankSorter, PairwiseComparison
+from trueSkill.Rating import Rating
+from trueSkill.SkillCalculator import SkillCalculatorSupportedOptions, SkillCalculator
+
 
 class TwoPlayerTrueSkillCalculator (SkillCalculator) :
 

@@ -18,16 +18,16 @@
 
 
 
-import urllib2
 import tempfile
 import zipfile
 import os
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore
+from PyQt5.QtGui import *
 
 import modvault
-from util import datetostr,strtodate,now
 import util
+
 
 FormClass, BaseClass = util.loadUiType("modvault/upload.ui")
 
@@ -67,13 +67,13 @@ class UploadModWidget(FormClass, BaseClass):
     def upload(self):
         n = self.Name.text()
         if any([(i in n) for i in '"<*>|?/\\:']):
-            QtGui.QMessageBox.information(self.client,"Invalid Name",
+            QMessageBox.information(self.client,"Invalid Name",
                         "The mod name contains invalid characters: /\\<>|?:\"")
             return
 
 
 #        if not self.updateThumbnail():
-#            QtGui.QMessageBox.information(self.client,"No thumbnail",
+#            QMessageBox.information(self.client,"No thumbnail",
 #                        "There is no thumbnail attached")
 #            return
 
@@ -100,7 +100,7 @@ class UploadModWidget(FormClass, BaseClass):
                           os.path.join(modvault.MODFOLDER, self.modinfo["name"]))
                 self.oldname = self.modinfo["name"]
             except:
-                QtGui.QMessageBox.information(self.client,"Changing folder name",
+                QMessageBox.information(self.client,"Changing folder name",
                         "Because you changed the mod name, the folder name \
                          has to change as well. This failed.")
                 return
@@ -109,7 +109,7 @@ class UploadModWidget(FormClass, BaseClass):
             self.modDir = os.path.join(modvault.MODFOLDER, self.modinfo["name"])
         '''
         if iconpath != "" and not infolder:
-            QtGui.QMessageBox.information(self.client,"Invalid Icon File",
+            QMessageBox.information(self.client,"Invalid Icon File",
                         "The file %s is not located inside the modfolder. Copy the icon file to your modfolder and change the mod_info.lua accordingly" % iconpath)
             return
             '''
@@ -127,7 +127,7 @@ class UploadModWidget(FormClass, BaseClass):
         #self.modinfo["icon"] = iconpath
             
         #if not modvault.updateModInfo(self.modinfo["name"], self.modinfo):
-        #    QtGui.QMessageBox.information(self.client,"Error updating Mod Info",
+        #    QMessageBox.information(self.client,"Error updating Mod Info",
         #                "FAF could not read or write to the mod_info.lua file.")
         #    return
         
@@ -138,7 +138,7 @@ class UploadModWidget(FormClass, BaseClass):
             zipped.close()
             temp.flush()
         except:
-            QtGui.QMessageBox.critical(self.client, "Mod uploading error", "Something went wrong zipping the mod files.")
+            QMessageBox.critical(self.client, "Mod uploading error", "Something went wrong zipping the mod files.")
             return
         qfile =QtCore.QFile(temp.name)
 
@@ -151,7 +151,7 @@ class UploadModWidget(FormClass, BaseClass):
     '''
     @QtCore.pyqtSlot()
     def openicondialog(self):
-        iconfilename = QtGui.QFileDialog.getOpenFileName(self.client, "Select an icon file", self.modDir,"Images (*.png *.jpg *.jpeg *.dds)")
+        iconfilename = QFileDialog.getOpenFileName(self.client, "Select an icon file", self.modDir,"Images (*.png *.jpg *.jpeg *.dds)")
         if iconfilename == "": return
         if os.path.splitext(iconfilename)[1].lower() == ".dds":
             old = iconfilename
@@ -159,12 +159,12 @@ class UploadModWidget(FormClass, BaseClass):
             succes = modvault.generateThumbnail(old,iconfilename)
             if not succes:
                 logger.info("Could not write the png file for %s" % old)
-                QtGui.QMessageBox.information(self.client,"Invalid Icon File",
+                QMessageBox.information(self.client,"Invalid Icon File",
                         "Because FAF can't read DDS files, it tried to convert it to a png. This failed. Try something else")
                 return
         self.Thumbnail.setPixmap(util.pixmap(iconfilename, False))
         #except:
-        #   QtGui.QMessageBox.information(self.client,"Invalid Icon File",
+        #   QMessageBox.information(self.client,"Invalid Icon File",
         #                "This was not a valid icon file. Please pick a png, jpeg or dds")
         #    return
         self.IconURI.setText(iconfilename)
@@ -180,13 +180,13 @@ class UploadModWidget(FormClass, BaseClass):
             succes = modvault.generateThumbnail(old,iconfilename)
             if not succes:
                 logger.info("Could not write the png file for %s" % old)
-                QtGui.QMessageBox.information(self.client,"Invalid Icon File",
+                QMessageBox.information(self.client,"Invalid Icon File",
                         "Because FAF can't read DDS files, it tried to convert it to a png. This failed. Try something else")
                 return False
         try:
             self.Thumbnail.setPixmap(util.pixmap(iconfilename,False))
         except:
-            QtGui.QMessageBox.information(self.client,"Invalid Icon File",
+            QMessageBox.information(self.client,"Invalid Icon File",
                         "This was not a valid icon file. Please pick a png or jpeg")
             return False
         self.modinfo.thumbnail = modvault.fullPathToIcon(iconfilename)

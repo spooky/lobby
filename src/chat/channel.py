@@ -20,15 +20,19 @@
 
 
 
-import util
-from PyQt4 import QtGui, QtCore
 import time
+import re
+import json
+
+from PyQt5 import QtCore
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
+import util
 from chat import user2name, logger
 from chat.chatter import Chatter
-import re          
 import fa
-import json
-import unicodedata
+
 
 QUERY_BLINK_SPEED = 250
 CHAT_TEXT_LIMIT = 350
@@ -87,16 +91,16 @@ class Channel(FormClass, BaseClass):
             self.nickList.sortItems(Chatter.SORT_COLUMN)
             
             #Properly and snugly snap all the columns
-            self.nickList.horizontalHeader().setResizeMode(Chatter.RANK_COLUMN, QtGui.QHeaderView.Fixed)
+            self.nickList.horizontalHeader().setSectionResizeMode(Chatter.RANK_COLUMN, QHeaderView.Fixed)
             self.nickList.horizontalHeader().resizeSection(Chatter.RANK_COLUMN, self.NICKLIST_COLUMNS['RANK'])
 
-            self.nickList.horizontalHeader().setResizeMode(Chatter.AVATAR_COLUMN, QtGui.QHeaderView.Fixed)
+            self.nickList.horizontalHeader().setSectionResizeMode(Chatter.AVATAR_COLUMN, QHeaderView.Fixed)
             self.nickList.horizontalHeader().resizeSection(Chatter.AVATAR_COLUMN, self.NICKLIST_COLUMNS['AVATAR'])
             
-            self.nickList.horizontalHeader().setResizeMode(Chatter.STATUS_COLUMN, QtGui.QHeaderView.Fixed)
+            self.nickList.horizontalHeader().setSectionResizeMode(Chatter.STATUS_COLUMN, QHeaderView.Fixed)
             self.nickList.horizontalHeader().resizeSection(Chatter.STATUS_COLUMN, self.NICKLIST_COLUMNS['STATUS'])
             
-            self.nickList.horizontalHeader().setResizeMode(Chatter.SORT_COLUMN, QtGui.QHeaderView.Stretch)
+            self.nickList.horizontalHeader().setSectionResizeMode(Chatter.SORT_COLUMN, QHeaderView.Stretch)
             
             self.nickList.itemDoubleClicked.connect(self.nickDoubleClicked)
             self.nickList.itemPressed.connect(self.nickPressed)
@@ -193,10 +197,10 @@ class Channel(FormClass, BaseClass):
             
     @QtCore.pyqtSlot()    
     def pingWindow(self):
-        QtGui.QApplication.alert(self.lobby.client)
+        QApplication.alert(self.lobby.client)
             
         
-        if not self.isVisible() or QtGui.QApplication.activeWindow() != self.lobby.client:
+        if not self.isVisible() or QApplication.activeWindow() != self.lobby.client:
             if self.oneMinuteOrOlder():
                 if self.lobby.client.soundeffects:
                     util.sound("chat/sfx/query.wav")
@@ -214,7 +218,7 @@ class Channel(FormClass, BaseClass):
         elif url.scheme() == "fafgame":
             self.lobby.client.joinGameFromURL(url)
         else :
-            QtGui.QDesktopServices.openUrl(url)
+            QDesktopServices.openUrl(url)
 
 
     @QtCore.pyqtSlot(str, str)
@@ -227,7 +231,7 @@ class Channel(FormClass, BaseClass):
         scroll_needed = scroll_forced or ((self.chatArea.verticalScrollBar().maximum() - scroll_current) < 20)
 
         cursor = self.chatArea.textCursor()
-        cursor.movePosition(QtGui.QTextCursor.End)
+        cursor.movePosition(QTextCursor.End)
         self.chatArea.setTextCursor(cursor)
 
         formatter = self.FORMATTER_ANNOUNCEMENT        
@@ -256,8 +260,8 @@ class Channel(FormClass, BaseClass):
         try:
             if self.lines > CHAT_TEXT_LIMIT :
                 cursor = self.chatArea.textCursor()
-                cursor.movePosition(QtGui.QTextCursor.Start)
-                cursor.movePosition(QtGui.QTextCursor.Down, QtGui.QTextCursor.KeepAnchor, CHAT_REMOVEBLOCK)
+                cursor.movePosition(QTextCursor.Start)
+                cursor.movePosition(QTextCursor.Down, QTextCursor.KeepAnchor, CHAT_REMOVEBLOCK)
                 cursor.removeSelectedText()
                 self.lines = self.lines - CHAT_REMOVEBLOCK
             
@@ -277,7 +281,7 @@ class Channel(FormClass, BaseClass):
             else:
                 if name in self.chatters:
                     chatter = self.chatters[name]                
-                    color = chatter.textColor().name()
+                    color = chatter.foreground().color().name()
                     if chatter.avatar:
                         avatar = chatter.avatar["url"] 
                         avatarTip = chatter.avatarTip or ""
@@ -299,14 +303,14 @@ class Channel(FormClass, BaseClass):
             scroll_needed = scroll_forced or ((self.chatArea.verticalScrollBar().maximum() - scroll_current) < 20)
     
             cursor = self.chatArea.textCursor()
-            cursor.movePosition(QtGui.QTextCursor.End)
+            cursor.movePosition(QTextCursor.End)
             self.chatArea.setTextCursor(cursor)                
             
             if avatar :
                 pix = util.respix(avatar)
                 if pix:
-                    if not self.chatArea.document().resource(QtGui.QTextDocument.ImageResource, QtCore.QUrl(avatar)):
-                        self.chatArea.document().addResource(QtGui.QTextDocument.ImageResource,  QtCore.QUrl(avatar), pix)                        
+                    if not self.chatArea.document().resource(QTextDocument.ImageResource, QtCore.QUrl(avatar)):
+                        self.chatArea.document().addResource(QTextDocument.ImageResource,  QtCore.QUrl(avatar), pix)
                     formatter = self.FORMATTER_MESSAGE_AVATAR
                     line = formatter.format(time=self.timestamp(), avatar=avatar, name=displayName, avatarTip=avatarTip, color=color, width=self.maxChatterWidth, text=util.irc_escape(text, self.lobby.a_style))                 
                 else :
@@ -324,7 +328,7 @@ class Channel(FormClass, BaseClass):
                 self.chatArea.verticalScrollBar().setValue(self.chatArea.verticalScrollBar().maximum())
             else:
                 self.chatArea.verticalScrollBar().setValue(scroll_current)
-        except:
+        except Exception as e:
             pass
 
     @QtCore.pyqtSlot(str, str)
@@ -335,8 +339,8 @@ class Channel(FormClass, BaseClass):
         try:
             if self.lines > CHAT_TEXT_LIMIT :
                 cursor = self.chatArea.textCursor()
-                cursor.movePosition(QtGui.QTextCursor.Start)
-                cursor.movePosition(QtGui.QTextCursor.Down, QtGui.QTextCursor.KeepAnchor, CHAT_REMOVEBLOCK)
+                cursor.movePosition(QTextCursor.Start)
+                cursor.movePosition(QTextCursor.Down, QTextCursor.KeepAnchor, CHAT_REMOVEBLOCK)
                 cursor.removeSelectedText()
                 self.lines = self.lines - CHAT_REMOVEBLOCK        
             
@@ -369,14 +373,14 @@ class Channel(FormClass, BaseClass):
             scroll_needed = scroll_forced or ((self.chatArea.verticalScrollBar().maximum() - scroll_current) < 20)
             
             cursor = self.chatArea.textCursor()
-            cursor.movePosition(QtGui.QTextCursor.End)
+            cursor.movePosition(QTextCursor.End)
             self.chatArea.setTextCursor(cursor)
     
             if avatar :
                 pix = util.respix(avatar)
                 if pix:            
-                    if not self.chatArea.document().resource(QtGui.QTextDocument.ImageResource, QtCore.QUrl(avatar)) :
-                        self.chatArea.document().addResource(QtGui.QTextDocument.ImageResource,  QtCore.QUrl(avatar), pix)
+                    if not self.chatArea.document().resource(QTextDocument.ImageResource, QtCore.QUrl(avatar)) :
+                        self.chatArea.document().addResource(QTextDocument.ImageResource,  QtCore.QUrl(avatar), pix)
                     formatter = self.FORMATTER_ACTION_AVATAR
                     line = formatter.format(time=self.timestamp(), avatar=avatar, avatarTip=avatarTip, name=displayName, color=color, width=self.maxChatterWidth, text=util.irc_escape(text, self.lobby.a_style))
                 else:            
@@ -417,7 +421,7 @@ class Channel(FormClass, BaseClass):
             scroll_needed = scroll_forced or ((self.chatArea.verticalScrollBar().maximum() - scroll_current) < 20)
             
             cursor = self.chatArea.textCursor()
-            cursor.movePosition(QtGui.QTextCursor.End)
+            cursor.movePosition(QTextCursor.End)
             self.chatArea.setTextCursor(cursor)
                                 
             formatter = self.FORMATTER_RAW
@@ -445,16 +449,16 @@ class Channel(FormClass, BaseClass):
         return self.lasttimestamp != timestamp
         
     
-    @QtCore.pyqtSlot(QtGui.QTableWidgetItem)
+    @QtCore.pyqtSlot(QTableWidgetItem)
     def nickDoubleClicked(self, item):
         chatter = self.nickList.item(item.row(), Chatter.SORT_COLUMN) #Look up the associated chatter object          
         chatter.doubleClicked(item)
         pass
 
 
-    @QtCore.pyqtSlot(QtGui.QTableWidgetItem)
+    @QtCore.pyqtSlot(QTableWidgetItem)
     def nickPressed(self, item):
-        if QtGui.QApplication.mouseButtons() == QtCore.Qt.RightButton:            
+        if QApplication.mouseButtons() == QtCore.Qt.RightButton:
             #Look up the associated chatter object
             chatter = self.nickList.item(item.row(), Chatter.SORT_COLUMN)           
             chatter.pressed(item)

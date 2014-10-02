@@ -15,19 +15,14 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
+import time
 
-
-
-
-
-from TrueSkill.TwoPlayerTrueSkillCalculator import *
-from Player import *
 from Team import *
 from Teams import *
-        
-import time
-   
-from TrueSkill.FactorGraphTrueSkillCalculator import *  
+
+from TrueSkill.FactorGraphTrueSkillCalculator import *
+from trueSkill.GameInfo import GameInfo
+from trueSkill.Player import Player
 
 
 time1 = time.time()
