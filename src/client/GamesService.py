@@ -17,5 +17,5 @@ class GamesService(IRESTService):
         return IRESTService._get(GAMES_SERVICE_URL + "/%d/livereplay" % game_id)
 
     @staticmethod
-    def OpenGame(game_params):
-        return IRESTService._post(GAMES_SERVICE_URL + "/open", game_params)
+    def OpenGame(port, game_params):
+        return IRESTService._post(GAMES_SERVICE_URL + "/open", { 'port': port, 'game_params': game_params })

@@ -23,7 +23,11 @@ class RESTResponse(QObject):
             if len(resData) == 0:
                 self.error.emit({ 'statusMessage': self.reply.errorString() })
             else:
-                self.error.emit( json.loads(resData) )
+                try:
+                    self.error.emit( json.loads(resData) )
+                except ValueError: # Non-json response -> Internal vibe.d error
+                    self.error.emit({ 'statusMessage': resData })
+
         else:
             resp = json.loads(resData)
 

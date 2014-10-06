@@ -16,20 +16,21 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-import os
+import os, copy
 
+from PyQt5.QtCore import *
 from PyQt5.QtGui import QIcon, QColor, QPen, QTextDocument
-
 from PyQt5.QtWidgets import *
+
 from PyQt5 import QtCore
 
 from fa import maps
 from trueSkill.GameInfo import GameInfo
 import util
 from games.moditem import mod_invisible, mods
-from trueSkill.Team import *
-from trueSkill.TrueSkill.FactorGraphTrueSkillCalculator import *
-from trueSkill.Rating import *
+from trueSkill.Team import Team
+from trueSkill.TrueSkill.FactorGraphTrueSkillCalculator import FactorGraphTrueSkillCalculator
+from trueSkill.Rating import Rating
 import client
 
 
@@ -127,9 +128,12 @@ class GameItem(QListWidgetItem):
         if not player:
             player = self.host
             
-        
+        from client.GamesService import GAMES_SERVICE_URL
+
+        # FIXME: Need better schema for urls
+        return None
         if self.state == "playing":
-            url = QtCore.QUrl()
+            url = QUrl("faflive://faforever.com/games/%d/livereplay")
             url.setScheme("faflive")
             url.setHost("faforever.com")
             url.setPath(str(self.uid) + "/" + player + ".SCFAreplay")

@@ -618,8 +618,10 @@ class Updater(QtCore.QObject):
                 src_file = os.path.join(src_dir, file_)
                 dst_file = os.path.join(dst_dir, file_)
                 if not os.path.exists(dst_file):
-                    shutil.copy(src_file, dst_dir)                                      
-                os.chmod(dst_file, stat.S_IWRITE)   # make all files we were considering writable, because we may need to patch them
+                    shutil.copy(src_file, dst_dir)
+
+                exec_flag = stat.S_IEXEC if file_.endswith('exe') else 0
+                os.chmod(dst_file, stat.S_IREAD | stat.S_IWRITE | exec_flag)   # make all files we were considering writable, because we may need to patch them
                
                
     def doUpdate(self):

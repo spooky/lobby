@@ -33,6 +33,7 @@ from PyQt5 import QtCore, QtNetwork, QtWebKit
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtNetwork import *
 
 from client import logger, ClientState, MUMBLE_URL, WEBSITE_URL, WIKI_URL, \
     FORUMS_URL, UNITDB_URL, SUPPORT_URL, TICKET_URL, GAME_PORT_DEFAULT, LOBBY_HOST, \
@@ -56,6 +57,7 @@ import random
 import notificatation_system as ns
 
 from LobbyServerContext import LobbyServerContext
+from util.WebSocket import WebSocket
 
 try:
     from profile import playerstats
@@ -179,6 +181,13 @@ class ClientWindow(FormClass, BaseClass):
 
     matchmakerInfo = QtCore.pyqtSignal(dict)
 
+    # Push notifications
+    push_reconnected = pyqtSignal()
+
+    push_games_open = pyqtSignal(dict)
+    push_games_updated = pyqtSignal(dict)
+    push_games_closed = pyqtSignal(dict)
+
     def __init__(self, *args, **kwargs):
         BaseClass.__init__(self, *args, **kwargs)
 
@@ -188,11 +197,16 @@ class ClientWindow(FormClass, BaseClass):
         QApplication.instance().aboutToQuit.connect(self.cleanup)
 
         #Init and wire the TCP Network socket to communicate with faforever.com
-        self.lobby_ctx = LobbyServerContext()
+        #self.lobby_ctx = LobbyServerContext()
+        self.lobby_ctx = WebSocket("ws://localhost:8080/notify/ws", self)
 
-        self.lobby_ctx.messageReceived.connect(self.dispatch)
+        self.lobby_ctx.reconnected.connect(lambda: self.push_reconnected.emit())
+        self.lobby_ctx.messageReceived.connect(self._new_dispatch)
 
-        self.lobby_ctx.connectToHost(LOBBY_HOST, LOBBY_PORT)
+        self.lobby_ctx.start()
+
+        #self.lobby_ctx.sendMessage()
+        #self.lobby_ctx.connectToHost(LOBBY_HOST, LOBBY_PORT)
 
         self.progress = QProgressDialog()
         self.progress.setMinimum(0)
@@ -1243,6 +1257,7 @@ class ClientWindow(FormClass, BaseClass):
         # util.waitForSignal(self.lobby_ctx.loggedIn)
 
     def _onLoggedIn(self):
+        self.lobby_ctx.sendMessage('subscribe', 'games')
 
         self.state = ClientState.ACCEPTED
 
@@ -1262,7 +1277,20 @@ class ClientWindow(FormClass, BaseClass):
             util.crash.CRASHREPORT_USER = self.login
 
             # FIXME: local adress a bit of a hack, needed for upnp
-            self.localIP = str(self.lobby_ctx.socket.localAddress().toString())
+
+            # FIXME: Will *likely* fail on pcs with multiple connected interfaces.
+            ips = QNetworkInterface.allAddresses()
+
+            for ip in ips:
+                if not ip.isLoopback() and  ( ip.protocol() in [QAbstractSocket.IPv4Protocol,
+                                                                QAbstractSocket.IPv6Protocol] ):
+                    self.localIP = ip.toString()
+                    logger.debug("Local IP: %s", self.localIP)
+                    break
+
+            if not self.localIP:
+                raise RuntimeError("Local ip not found.")
+            #self.localIP = str(self.lobby_ctx.socket.localAddress().toString())
 
             portTest = PortTester(self.login, self.localIP, self.gamePort)
 
@@ -1757,6 +1785,13 @@ class ClientWindow(FormClass, BaseClass):
         self.socket.write(struct.pack('=l', len(data)))
         self.socket.write(data)
 
+    @pyqtSlot(str, dict)
+    def _new_dispatch(self, subsystem, command, args):
+        push_cmd_id = 'push_%s_%s' % (subsystem, command)
+        try:
+            getattr(self, push_cmd_id).emit(args)
+        except KeyError:
+            logger.warning("Push notification '%s' not handled." % push_cmd_id)
 
     @pyqtSlot(str, dict)
     def dispatch(self, command, args):

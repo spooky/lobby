@@ -25,6 +25,9 @@ from games.gameitem import GameItem, GameItemDelegate
 import modvault
 from fa import maps
 import util
+
+from client.GamesService import GamesService
+
 logger = logging.getLogger("faf.hostgamewidget")
 logger.setLevel(logging.DEBUG)
 
@@ -37,7 +40,7 @@ FormClass, BaseClass = util.loadUiType("games/host.ui")
 
 
 class HostgameWidget(FormClass, BaseClass):
-    def __init__(self, parent, item, *args, **kwargs):
+    def __init__(self, parent, *args, **kwargs):
         BaseClass.__init__(self, *args, **kwargs)
 
         self.setupUi(self)
@@ -45,13 +48,15 @@ class HostgameWidget(FormClass, BaseClass):
         
         self.parent.options = []
 
-        if len(item.options) == 0 :   
+        item_options = {}
+
+        if len(item_options) == 0 :
             self.optionGroup.setVisible(False)
         else :
             group_layout = QVBoxLayout()
             self.optionGroup.setLayout(group_layout)
             
-            for option in item.options :
+            for option in item_options :
                 checkBox = QCheckBox(self)
                 checkBox.setText(option)
                 checkBox.setChecked(True)
@@ -60,11 +65,11 @@ class HostgameWidget(FormClass, BaseClass):
         
         self.setStyleSheet(self.parent.client.styleSheet())
         
-        self.setWindowTitle ( "Hosting Game : " + item.name )
+        self.setWindowTitle ( "Hosting Game " )
         self.titleEdit.setText ( self.parent.gamename )
         self.passEdit.setText ( self.parent.gamepassword )
         self.game = GameItem(0)
-        self.gamePreview.setItemDelegate(GameItemDelegate(self));
+        self.gamePreview.setItemDelegate(GameItemDelegate(self))
         self.gamePreview.addItem(self.game)
         
         self.message = {}
@@ -117,10 +122,25 @@ class HostgameWidget(FormClass, BaseClass):
         #self.mapPreview.setPixmap(icon)
         
         self.mapList.currentIndexChanged.connect(self.mapChanged)
-        self.hostButton.released.connect(self.hosting)
+        self.hostButton.clicked.connect(self._onHostButtonClicked)
         self.titleEdit.textChanged.connect(self.updateText)
         self.modList.itemClicked.connect(self.modclicked)
-        
+
+    def _onHostButtonClicked(self):
+
+        def _onHostError(resp):
+            QMessageBox.warning( self, "Hosting Failed", resp['statusMessage'] )
+
+        def _onHostSuccess(resp):
+            QMessageBox.information( self, "Host success", "Success" )
+            self.done(0)
+
+        # FIXME: Use configured port.
+        self.reply = rep = GamesService.OpenGame(6112, self.message)
+
+        rep.error.connect(_onHostError)
+        rep.done.connect(_onHostSuccess)
+
     def updateText(self, text):
         self.message['title'] = text
         self.game.update(self.message, self.parent.client)
