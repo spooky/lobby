@@ -51,7 +51,10 @@ UNITS_PREVIEW_ROOT = "http://www.faforever.com/faf/unitsDB/icons/big/"
 COMMON_DIR = "_res"
 
 # These directories are in Appdata (e.g. C:\ProgramData on some Win7 versions)
-APPDATA_DIR = os.path.join(os.environ['ALLUSERSPROFILE'], "FAForever")
+if os.name == 'nt':
+    APPDATA_DIR = os.path.join(os.environ['ALLUSERSPROFILE'], "FAForever")
+else:
+    APPDATA_DIR = os.path.join(os.environ['HOME'], '.FAForever')
 
 #This contains the themes
 THEME_DIR = os.path.join(APPDATA_DIR , "themes")

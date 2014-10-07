@@ -31,7 +31,6 @@ patched, and all required files for a given mod are installed
 from PyQt5 import QtCore, QtNetwork
 from PyQt5.QtWidgets import *
 
-#import _winreg
 # import bz2
 # import cPickle as pickle
 import os
@@ -49,6 +48,9 @@ import fa
 import tempfile
 import json
 import modvault
+
+if os.name == 'nt':
+    import _winreg
 
 logger = logging.getLogger("faf.updater")
 logger.setLevel(logging.DEBUG)

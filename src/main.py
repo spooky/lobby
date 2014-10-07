@@ -32,7 +32,9 @@ sip.setapi('QStringList', 2)
 sip.setapi('QList', 2)
 sip.setapi('QProcess', 2)
 
+import os
 import sys
+import ctypes
 from PyQt5.QtWidgets import *
 
 
@@ -98,10 +100,12 @@ if __name__ == '__main__':
     logger.info(">>> --------------------------- Application Launch")
     app = QApplication(sys.argv)
     app.setWindowIcon(util.icon("window_icon.png", True))
-    #Set application icon to nicely stack in the system task bar    
-    # if getattr(ctypes.windll.shell32, "SetCurrentProcessExplicitAppUserModelID", None) is not None:
-    #     myappid = 'com.faforever.lobby'
-    #     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
+    #Set application icon to nicely stack in the system task bar on windows
+    if os.name == 'nt' and \
+       getattr(ctypes.windll.shell32, "SetCurrentProcessExplicitAppUserModelID", None) is not None:
+        myappid = 'com.faforever.lobby'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
     if len(sys.argv) == 1:
         #Do the magic   
