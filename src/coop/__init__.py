@@ -21,8 +21,7 @@
 
 
 import logging
-
-logger = logging.getLogger("faf.coop")
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 

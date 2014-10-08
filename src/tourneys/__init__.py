@@ -22,7 +22,7 @@
 
 import logging
 
-logger = logging.getLogger("faf.tourneys")
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 from _tournamentswidget import TournamentsWidget as Tourneys

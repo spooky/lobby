@@ -27,6 +27,7 @@ from PyQt5.QtNetwork import QNetworkRequest
 
 from chat._avatarWidget import avatarWidget
 from chat import user2name
+from fa.replay import replay
 import util
 import fa
 import client
@@ -446,7 +447,7 @@ class Chatter(QTableWidgetItem):
     @QtCore.pyqtSlot()
     def viewReplay(self):
         if self.name in client.instance.urls:
-            fa.exe.replay(client.instance.urls[self.name])
+            replay(client.instance.urls[self.name])
 
     @QtCore.pyqtSlot()
     def viewVaultReplay(self):

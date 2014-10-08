@@ -27,13 +27,15 @@ from games.moditem import ModItem, mod_invisible, mods
 from games.hostgamewidget import HostgameWidget
 from games._mapSelectWidget import mapSelectWidget
 from games import logger
-from fa import Faction
+from fa import faction
 import fa
 import modvault
 import notificatation_system as ns
 
 from client.GamesService import GamesService
 
+import logging
+logger = logging.getLogger(__name__)
 
 RANKED_SEARCH_EXPANSION_TIME = 10000 #milliseconds before search radius expands
 
@@ -248,7 +250,7 @@ class GamesWidget(FormClass, BaseClass):
     def handleMatchmakerInfo(self, message):
         action = message["action"]
         if action == "startSearching":
-            if (not fa.exe.check("matchmaker")):
+            if (not fa.check.check("matchmaker")):
                 logger.error("Can't play ranked without successfully updating Forged Alliance.")
                 return            
 
@@ -430,27 +432,16 @@ class GamesWidget(FormClass, BaseClass):
         self.client.send(dict(command="game_matchmaking", mod="matchmaker", state="askingtostop"))
         #self.stopSearchRanked()
 
-        # if (fa.exe.running()):
-        #     QMessageBox.information(None, "ForgedAlliance.exe", "FA is already running.")
-        #     self.stopSearchingTeamMatchmaker()
-        #     return        
-
-        # if (not fa.exe.check("teammatchmaker")):
-        #     self.stopSearchingTeamMatchmaker()
-        #     logger.error("Can't play matchmaker without successfully updating Forged Alliance.")
-        #     return
-
-
 
 
     def startSearchRanked(self, race):
         self.stopSearchingTeamMatchmaker()
-        if (fa.exe.running()):
+        if fa.instance.running():
             QMessageBox.information(None, "ForgedAlliance.exe", "FA is already running.")
             self.stopSearchRanked()
             return
 
-        if (not fa.exe.check("ladder1v1")):
+        if (not fa.check.check("ladder1v1")):
             self.stopSearchRanked()
             logger.error("Can't play ranked without successfully updating Forged Alliance.")
             return
@@ -644,7 +635,7 @@ class GamesWidget(FormClass, BaseClass):
     @pyqtSlot(bool)
     def toggleUEF(self, state):
         if (state):
-            self.startSearchRanked(Faction.UEF)
+            self.startSearchRanked(faction.UEF)
             self.disconnectRankedToggles()
             self.rankedAeon.setChecked(False)
             self.rankedCybran.setChecked(False)
@@ -657,7 +648,7 @@ class GamesWidget(FormClass, BaseClass):
     @pyqtSlot(bool)
     def toggleAeon(self, state):
         if (state):
-            self.startSearchRanked(Faction.AEON)
+            self.startSearchRanked(faction.AEON)
             self.disconnectRankedToggles()
             self.rankedCybran.setChecked(False)
             self.rankedSeraphim.setChecked(False)
@@ -671,7 +662,7 @@ class GamesWidget(FormClass, BaseClass):
     @pyqtSlot(bool)
     def toggleCybran(self, state):
         if (state):
-            self.startSearchRanked(Faction.CYBRAN)
+            self.startSearchRanked(faction.CYBRAN)
             self.disconnectRankedToggles()
             self.rankedAeon.setChecked(False)
             self.rankedSeraphim.setChecked(False)
@@ -685,7 +676,7 @@ class GamesWidget(FormClass, BaseClass):
     @pyqtSlot(bool)
     def toggleSeraphim(self, state):
         if (state):
-            self.startSearchRanked(Faction.SERAPHIM)
+            self.startSearchRanked(faction.SERAPHIM)
             self.disconnectRankedToggles()
             self.rankedAeon.setChecked(False)
             self.rankedCybran.setChecked(False)
@@ -700,13 +691,13 @@ class GamesWidget(FormClass, BaseClass):
         if (state):
             faction = random.randint(1,4)
             if faction == 1 :
-                self.startSearchRanked(Faction.UEF)
+                self.startSearchRanked(faction.UEF)
             elif faction == 2 :
-                self.startSearchRanked(Faction.CYBRAN)
+                self.startSearchRanked(faction.CYBRAN)
             elif faction == 3 :
-                self.startSearchRanked(Faction.AEON)
+                self.startSearchRanked(faction.AEON)
             else :
-                self.startSearchRanked(Faction.SERAPHIM)
+                self.startSearchRanked(faction.SERAPHIM)
 
             self.disconnectRankedToggles()
             self.rankedAeon.setChecked(False)
@@ -722,14 +713,14 @@ class GamesWidget(FormClass, BaseClass):
         '''
         Slot that attempts to join a game.
         '''
-        if not fa.exe.available():
+        if not fa.instance.available():
             return
 
         self.stopSearchRanked() #Actually a workaround
 
         passw = None
 
-        if fa.exe.check(item.mod, item.mapname, None, item.mods):
+        if fa.check.check(item.mod, item.mapname, None, item.mods):
             if item.access == "password" :
                 passw, ok = QInputDialog.getText(self.client, "Passworded game" , "Enter password :", QLineEdit.Normal, "")
                 if ok:
@@ -747,13 +738,13 @@ class GamesWidget(FormClass, BaseClass):
         '''
         Hosting a game event
         '''
-        if not fa.exe.available():
+        if not fa.instance.available():
             return
 
         self.stopSearchRanked()
 
         # A simple Hosting dialog.
-        if fa.exe.check(item.mod):
+        if fa.check.check(item.mod):
             hostgamewidget = HostgameWidget(self, item)
 
             if hostgamewidget.exec_() == 1 :

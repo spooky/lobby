@@ -15,10 +15,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
-
-
-
-
+from fa.replay import replay
 
 import time
 import re
@@ -80,8 +77,6 @@ class Channel(FormClass, BaseClass):
         self.name = name
         self.private = private
         
-        self.gwChannel = False
-        
         self.setup()
         
         
@@ -108,8 +103,6 @@ class Channel(FormClass, BaseClass):
             self.nickFilter.textChanged.connect(self.filterNicks)
             
             self.lobby.client.usersUpdated.connect(self.updateChatters)
-            self.updateChannels()
-            self.channelsComboBox.currentIndexChanged.connect(self.joinChannel)
         else:
             self.nickFrame.hide()
             self.announceLine.hide()
@@ -127,13 +120,7 @@ class Channel(FormClass, BaseClass):
         channel = self.channelsComboBox.itemText(index)
         if channel.startswith('#'):
             self.lobby.autoJoin([channel])
-        
-    def updateChannels(self):
-        ''' add channel available to join '''
-        
-        self.channelsComboBox.clear()
-        self.channelsComboBox.insertItems(1,[""] + sorted(self.lobby.channelsAvailable))
-        
+
     def keyReleaseEvent(self, keyevent):
         '''
         Allow the ctrl-C event.
@@ -167,7 +154,7 @@ class Channel(FormClass, BaseClass):
             
     def updateUserCount(self):
         count = len(self.chatters.keys())
-        self.nickFilter.setPlaceholderText(str(count) + " users... (type to search)")
+        self.nickFilter.setPlaceholderText(str(count) + " users... (type to filter)")
             
         if self.nickFilter.text():
             self.filterNicks()
@@ -214,7 +201,7 @@ class Channel(FormClass, BaseClass):
     def openUrl(self, url):
         logger.debug("Clicked on URL: " + url.toString())
         if url.scheme() == "faflive":
-            fa.exe.replay(url)
+            replay(url)
         elif url.scheme() == "fafgame":
             self.lobby.client.joinGameFromURL(url)
         else :
@@ -563,9 +550,11 @@ class Channel(FormClass, BaseClass):
                 continue
                 
             # System commands        
-            if text[0] == "/":
-                if text.startswith(("/topic ")):
-                    self.lobby.setTopic(self.name,text[7:])
+            if text.startswith("/"):
+                if text.startswith(("/join ")):
+                    self.lobby.join(text[6:])
+                elif text.startswith(("/topic ")):
+                    self.lobby.setTopic(self.name, text[7:])
                 elif text.startswith(("/me ")):
                     if self.lobby.sendAction(target, text[4:]):
                         self.printAction(self.lobby.client.login, text[4:], True)
@@ -579,15 +568,7 @@ class Channel(FormClass, BaseClass):
             else:
                 if self.lobby.sendMsg(target, text):
                     self.printMsg(self.lobby.client.login, text, True)
-                    if target.lower() == "#uef" or target.lower() == "#aeon" or target.lower() == "#cybran" or target.lower() == "#seraphim" :
-                        if self.gwChannel == True:
-                            # we need to send to the "normal" chat too
-                            if target in self.lobby.client.chat.channels:
-                                self.lobby.client.chat.channels[target].printMsg(self.lobby.client.login, text, True)
-                        else:
-                            # we need to send to the GW chat too
-                            self.lobby.client.GalacticWar.channel.printMsg(self.lobby.client.login, text, True)
-        
+
         self.chatEdit.clear()
         
         

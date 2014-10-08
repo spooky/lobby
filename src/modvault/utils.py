@@ -34,7 +34,7 @@ import util
 from vault import luaparser
 
 
-logger = logging.getLogger("faf.modvault")
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 MODFOLDER = os.path.join(util.PERSONAL_DIR, "My Games", "Gas Powered Games", "Supreme Commander Forged Alliance", "Mods")

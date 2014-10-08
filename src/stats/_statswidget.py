@@ -31,6 +31,9 @@ import util
 from stats import mapstat
 
 
+import logging
+logger = logging.getLogger(__name__)
+
 ANTIFLOOD = 0.1
 
 FormClass, BaseClass = util.loadUiType("stats/stats.ui")

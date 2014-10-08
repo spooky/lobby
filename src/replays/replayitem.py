@@ -234,7 +234,6 @@ class ReplayItem(QTreeWidgetItem):
                     
 
                     if "faction" in player :
-                       
                         if player["faction"] == 1 :
                             faction = "UEF"
                         elif player["faction"] == 2 :

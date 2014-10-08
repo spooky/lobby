@@ -25,10 +25,11 @@ Created on Mar 22, 2012
 
 @author: thygrrr
 '''
-import logging
 import sys
+import util
 
-logger= logging.getLogger("faf.fa.upnp")
+import logging
+logger= logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 

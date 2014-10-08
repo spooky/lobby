@@ -35,8 +35,7 @@ import util
 from fa import maps
 from vault import luaparser
 
-
-logger = logging.getLogger("faf.vault")
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 class MapVault(QtCore.QObject):

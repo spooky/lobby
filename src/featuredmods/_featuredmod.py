@@ -26,7 +26,10 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtNetwork import *
 
 import util
-from featuredmods import logger
+
+import logging
+logger = logging.getLogger(__name__)
+
 
 
 FormClass, BaseClass = util.loadUiType("featuredmods/featuredmods.ui")

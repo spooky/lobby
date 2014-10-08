@@ -28,16 +28,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtNetwork import *
 
-logger = logging.getLogger("faf.client")
+logger = logging.getLogger(__name__)
 #logger.setLevel(logging.DEBUG)
-
-VERSION        = 0
-VERSION_STRING = "development"
-
-#Load build number from version file.
-if not util.developer():        
-    VERSION_STRING = open("version").read()
-    VERSION = int(VERSION_STRING.rsplit('.', 1)[1])
 
 
 # Initialize all important globals
@@ -53,8 +45,10 @@ WEBSITE_URL = "http://www.faforever.com"
 UNITDB_URL = "http://www.faforever.com/faf/unitsDB/"
 WIKI_URL = "http://www.faforever.com/mediawiki/index.php/Main_Page"
 SUPPORT_URL = "http://www.faforever.com/forums/viewforum.php?f=3"
-TICKET_URL = "http://www.faforever.com/forums/viewforum.php?f=3"
+TICKET_URL = "https://gitreports.com/issue/FAForever/lobby"
 STEAMLINK_URL = "http://www.faforever.com/faf/steam.php"
+PASSWORD_RECOVERY_URL = "http://www.faforever.com/faf/forgotPass.php"
+NAME_CHANGE_URL = "http://www.faforever.com/faf/userName.php"
 
 
 networkAccessManager = QNetworkAccessManager()

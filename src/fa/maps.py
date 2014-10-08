@@ -16,22 +16,13 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-
-import sip
-sip.setapi('QString', 2)
-sip.setapi('QVariant', 2)
-sip.setapi('QStringList', 2)
-sip.setapi('QList', 2)
-sip.setapi('QProcess', 2)
-
-
 import logging
 import string
 import sys
 from urllib2 import HTTPError
 import fa
 
-logger= logging.getLogger("faf.fa.maps")
+logger= logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
@@ -116,41 +107,7 @@ maps = { # A Lookup table for info (names, sizes, players) of the official Forge
 
 __exist_maps = None
 
-def gwmap(mapname):
-    folder = folderForMap(mapname)
-    if folder:       
-        scenario = getScenarioFile(folder)        
-        if scenario:
-            
-            if not os.path.isdir(os.path.join(getUserMapsFolder(), "gwScenario")):
-                os.makedirs(os.path.join(getUserMapsFolder(), "gwScenario"))                        
-            save = os.path.join(getUserMapsFolder(), "gwScenario", "gw_scenario.lua")
 
-            fopen = open(os.path.join(folder, scenario), 'r')
-            temp = []
-            for line in fopen:
-                temp.append(line.rstrip())                
-            text = " ".join(temp)
-            
-            pattern = re.compile("customprops.*?=.*?({.*?}),")
-            match = re.search(pattern, text)
-            if match:
-                pattern2 = re.compile("'*ExtraArmies'*.*?[\"'](.*)[\"']")
-                match2 = re.search(pattern2, match.group(1))
-                if match2 :
-                    text = text.replace(match2.group(1), "SUPPORT_1 SUPPORT_2 " + match2.group(1))
-                else:
-                    text = text.replace(match.group(1), "{ ExtraArmies=\" SUPPORT_1 SUPPORT_2\" }")
-            
-            fopen.close()
-            f  = open(save, 'w')
-            f.write(text)
-            f.close() 
-            return True
-            
-    return False
-            
-        
 
 def isBase(mapname):
     '''
@@ -458,11 +415,11 @@ def __exportPreviewFromMap(mapname, positions=None):
         if not isinstance(positions, dict):
             logger.debug("Icon positions were not passed or they were wrong for: " + mapname)
             return previews
-        genPrevFromDDS(previewddsname,previewlargename,small=False)
-        mapimage = QPixmap(previewlargename)
-        armyicon = QPixmap(os.path.join(os.getcwd(), ur"_res\vault\map_icons\army.png")).scaled(8, 9, 1, 1)
-        massicon = QPixmap(os.path.join(os.getcwd(), ur"_res\vault\map_icons\mass.png")).scaled(8, 8, 1, 1)
-        hydroicon = QPixmap(os.path.join(os.getcwd(), ur"_res\vault\map_icons\hydro.png")).scaled(10, 10, 1, 1)
+        genPrevFromDDS(previewddsname, previewlargename, small=False)
+        mapimage = util.pixmap(previewlargename)
+        armyicon = util.pixmap("vault/map_icons/army.png").scaled(8, 9, 1, 1)
+        massicon = util.pixmap("vault/map_icons/mass.png").scaled(8, 8, 1, 1)
+        hydroicon = util.pixmap("vault/map_icons/hydro.png").scaled(10, 10, 1, 1)
         
         
         painter = QPainter()

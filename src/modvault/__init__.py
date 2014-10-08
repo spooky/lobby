@@ -67,8 +67,8 @@ from modwidget import ModWidget
 from uploadwidget import UploadModWidget
 from uimodwidget import UIModWidget
 import util
-
-logger = logging.getLogger("faf.modvault")
+import logging
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 import urllib2
 
@@ -164,7 +164,7 @@ class ModVault(FormClass, BaseClass):
         self.updateVisibilities()
     
 
-    @QtCore.pyqtSlot(QListWidgetItem)
+    @QtCore.pyqtSlot(QtGui.QListWidgetItem)
     def modClicked(self, item):
         widget = ModWidget(self, item)
         widget.exec_()
@@ -196,7 +196,7 @@ class ModVault(FormClass, BaseClass):
     
     @QtCore.pyqtSlot()
     def openUploadForm(self):
-        modDir = QFileDialog.getExistingDirectory(self.client, "Select the mod directory to upload", MODFOLDER,  QFileDialog.ShowDirsOnly)
+        modDir = QtGui.QFileDialog.getExistingDirectory(self.client, "Select the mod directory to upload", MODFOLDER,  QtGui.QFileDialog.ShowDirsOnly)
         logger.debug("Uploading mod from: " + modDir)
         if modDir != "":
             if isModFolderValid(modDir):
@@ -205,20 +205,20 @@ class ModVault(FormClass, BaseClass):
                 if modinfofile.error:
                     logger.debug("There were " + str(modinfofile.errors) + " errors and " + str(modinfofile.warnings) + " warnings.")
                     logger.debug(modinfofile.errorMsg)
-                    QMessageBox.critical(self.client, "Lua parsing error", modinfofile.errorMsg + "\nMod uploading cancelled.")
+                    QtGui.QMessageBox.critical(self.client, "Lua parsing error", modinfofile.errorMsg + "\nMod uploading cancelled.")
                 else:
                     if modinfofile.warning:
-                        uploadmod = QMessageBox.question(self.client, "Lua parsing warning", modinfofile.errorMsg + "\nDo you want to upload the mod?", QMessageBox.Yes, QMessageBox.No)
+                        uploadmod = QtGui.QMessageBox.question(self.client, "Lua parsing warning", modinfofile.errorMsg + "\nDo you want to upload the mod?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
                     else:
-                        uploadmod = QMessageBox.Yes
-                    if uploadmod == QMessageBox.Yes:
+                        uploadmod = QtGui.QMessageBox.Yes
+                    if uploadmod == QtGui.QMessageBox.Yes:
                         modinfo = ModInfo(**modinfo)
                         modinfo.setFolder(os.path.split(modDir)[1])
                         modinfo.update()
                         dialog = UploadModWidget(self, modDir, modinfo)
                         dialog.exec_()
             else :
-                QMessageBox.information(self.client,"Mod selection",
+                QtGui.QMessageBox.information(self.client,"Mod selection",
                         "This folder doesn't contain a mod_info.lua file")
 
     @QtCore.pyqtSlot()
@@ -247,37 +247,37 @@ class ModVault(FormClass, BaseClass):
         
 
 #the drawing helper function for the modlist
-class ModItemDelegate(QStyledItemDelegate):
+class ModItemDelegate(QtGui.QStyledItemDelegate):
     
     def __init__(self, *args, **kwargs):
-        QStyledItemDelegate.__init__(self, *args, **kwargs)
+        QtGui.QStyledItemDelegate.__init__(self, *args, **kwargs)
         
     def paint(self, painter, option, index, *args, **kwargs):
         self.initStyleOption(option, index)
                 
         painter.save()
         
-        html = QTextDocument()
+        html = QtGui.QTextDocument()
         html.setHtml(option.text)
         
-        icon = QIcon(option.icon)
+        icon = QtGui.QIcon(option.icon)
         iconsize = icon.actualSize(option.rect.size())
         
         #clear icon and text before letting the control draw itself because we're rendering these parts ourselves
-        option.icon = QIcon()
+        option.icon = QtGui.QIcon()        
         option.text = ""  
-        option.widget.style().drawControl(QStyle.CE_ItemViewItem, option, painter, option.widget)
+        option.widget.style().drawControl(QtGui.QStyle.CE_ItemViewItem, option, painter, option.widget)
         
         #Shadow
-        painter.fillRect(option.rect.left()+8-1, option.rect.top()+8-1, iconsize.width(), iconsize.height(), QColor("#202020"))
+        painter.fillRect(option.rect.left()+8-1, option.rect.top()+8-1, iconsize.width(), iconsize.height(), QtGui.QColor("#202020"))
 
         #Icon
         icon.paint(painter, option.rect.adjusted(5-2, -2, 0, 0), QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         
         #Frame around the icon
-        pen = QPen()
+        pen = QtGui.QPen()
         pen.setWidth(1);
-        pen.setBrush(QColor("#303030"));  #FIXME: This needs to come from theme.
+        pen.setBrush(QtGui.QColor("#303030"));  #FIXME: This needs to come from theme.
         pen.setCapStyle(QtCore.Qt.RoundCap);
         painter.setPen(pen)
         painter.drawRect(option.rect.left()+5-2, option.rect.top()+3, iconsize.width(), iconsize.height())
@@ -293,12 +293,12 @@ class ModItemDelegate(QStyledItemDelegate):
     def sizeHint(self, option, index, *args, **kwargs):
         self.initStyleOption(option, index)
         
-        html = QTextDocument()
+        html = QtGui.QTextDocument()
         html.setHtml(option.text)
         html.setTextWidth(ModItem.TEXTWIDTH)
         return QtCore.QSize(ModItem.ICONSIZE + ModItem.TEXTWIDTH + ModItem.PADDING, ModItem.ICONSIZE + ModItem.PADDING)   
 
-class ModItem(QListWidgetItem):
+class ModItem(QtGui.QListWidgetItem):
     TEXTWIDTH = 230
     ICONSIZE = 100
     PADDING = 10
@@ -311,7 +311,7 @@ class ModItem(QListWidgetItem):
     FORMATTER_MOD_UI = unicode(util.readfile("modvault/modinfoui.qthtml"))
     
     def __init__(self, parent, uid, *args, **kwargs):
-        QListWidgetItem.__init__(self, *args, **kwargs)
+        QtGui.QListWidgetItem.__init__(self, *args, **kwargs)
 
         self.parent = parent
         self.uid = uid

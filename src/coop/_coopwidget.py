@@ -32,8 +32,11 @@ from games.gameitem import GameItem, GameItemDelegate
 from coop.coopmapitem import CoopMapItem, CoopMapItemDelegate
 from games.hostgamewidget import HostgameWidget
 import fa
+from fa.replay import replay
 import modvault
 
+import logging
+logger = logging.getLogger(__name__)
 
 FormClass, BaseClass = util.loadUiType("coop/coop.ui")
 
@@ -110,7 +113,7 @@ class CoopWidget(FormClass, BaseClass):
         faf_replay.write(reply.readAll())
         faf_replay.flush()
         faf_replay.close()  
-        fa.exe.replay(os.path.join(util.CACHE_DIR, "temp.fafreplay"))    
+        replay(os.path.join(util.CACHE_DIR, "temp.fafreplay"))
         
     def processLeaderBoardInfos(self, message):
         ''' Process leaderboard'''
@@ -212,16 +215,16 @@ class CoopWidget(FormClass, BaseClass):
         if not hasattr(item, "mapUrl") :
             return
         
-        if not fa.exe.available():
+        if not fa.instance.available():
             return
             
         self.client.games.stopSearchRanked()
         self.gamemap = fa.maps.link2name(item.mapUrl)
         
-        fa.exe.checkMap(self.gamemap, force=True)
+        fa.check.checkMap(self.gamemap, force=True)
         
         # A simple Hosting dialog.
-        if fa.exe.check("coop"):     
+        if fa.check.check("coop"):
             hostgamewidget = HostgameWidget(self, item)
             
             if hostgamewidget.exec_() == 1 :
@@ -313,12 +316,12 @@ class CoopWidget(FormClass, BaseClass):
         '''
         Slot that attempts to join a game.
         '''
-        if not fa.exe.available():            
+        if not fa.instance.available():
             return
         
         passw = None 
         
-        if fa.exe.check(item.mod, item.mapname, None, item.mods):
+        if fa.check.check(item.mod, item.mapname, None, item.mods):
             if item.access == "password" : 
                 passw, ok = QInputDialog.getText(self.client, "Passworded game" , "Enter password :", QLineEdit.Normal, "")
                 if ok:

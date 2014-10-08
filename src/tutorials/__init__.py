@@ -22,7 +22,7 @@
 
 import logging
 
-logger = logging.getLogger("faf.tutorials")
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 from _tutorialswidget import tutorialsWidget as Tutorials

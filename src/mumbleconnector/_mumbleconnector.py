@@ -16,7 +16,8 @@ import _winreg
 import mumble_link
 from PyQt5.QtGui import QDesktopServices
 
-from mumbleconnector import logger
+import logging
+logger = logging.getLogger(__name__)
 
 class mumbleConnector():
 

@@ -28,7 +28,7 @@ from PyQt5 import QtCore, QtNetwork
 from PyQt5.QtWidgets import QProgressDialog, QApplication
 
 
-logger = logging.getLogger("faf.secondaryServer")
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 def log(string):

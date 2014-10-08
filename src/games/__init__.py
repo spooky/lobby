@@ -22,7 +22,7 @@
 
 import logging
 
-logger = logging.getLogger("faf.games")
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 

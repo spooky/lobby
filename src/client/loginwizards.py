@@ -35,7 +35,8 @@ from AuthService import AuthService
 
 PASSWORD_RECOVERY_URL = "http://www.faforever.com/faf/forgotPass.php"
 NAME_CHANGE_URL = "http://www.faforever.com/faf/userName.php"
-STEAM_LINK_URL = "http://www.faforever.com/faf/steam.php"
+
+from . import TICKET_URL, STEAMLINK_URL, NAME_CHANGE_URL, PASSWORD_RECOVERY_URL
 
 class LoginWizard(QWizard):
     def __init__(self, client):
@@ -190,7 +191,7 @@ class loginPage(QWizardPage):
 
     @QtCore.pyqtSlot()
     def linkAccount(self):
-        QDesktopServices.openUrl(QtCore.QUrl(STEAM_LINK_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(STEAMLINK_URL))
         
     @QtCore.pyqtSlot()
     def renameAccount(self):
@@ -203,7 +204,7 @@ class loginPage(QWizardPage):
 
     @QtCore.pyqtSlot()
     def reportBug(self):
-        util.ReportDialog().exec_()
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl(TICKET_URL))
 
 
 

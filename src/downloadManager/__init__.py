@@ -26,7 +26,7 @@ from PyQt5 import QtCore
 import util
 
 
-logger= logging.getLogger("faf.downloader")
+logger= logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 VAULT_PREVIEW_ROOT = "http://www.faforever.com/faf/vault/map_previews/small/"
