@@ -56,7 +56,6 @@ import os
 import random
 import notificatation_system as ns
 
-from LobbyServerContext import LobbyServerContext
 from util.WebSocket import WebSocket
 
 try:
@@ -526,7 +525,8 @@ class ClientWindow(FormClass, BaseClass):
         self.vault = vault.MapVault(self)
         self.modvault = modvault.ModVault(self)
         self.replays = replays.Replays(self)
-        self.tutorials = tutorials.Tutorials(self)        self.Coop = coop.Coop(self)
+        self.tutorials = tutorials.Tutorials(self)
+        self.Coop = coop.Coop(self)
         self.notificationSystem = ns.NotificationSystem(self)
 
         # set menu states
@@ -1161,15 +1161,13 @@ class ClientWindow(FormClass, BaseClass):
             #self.send(dict(command="ask_session"))    
             return True
 
-
-
-
+    # NOT USED
     def waitSession(self):
         self.progress.setLabelText("Setting up Session...")
         self.send(dict(command="ask_session"))
         start = time.time()
         while self.session == None and self.progress.isVisible() :
-            QtGui.QApplication.processEvents()
+            QApplication.processEvents()
             if time.time() - start > 15 :
                 break
 
@@ -1219,10 +1217,10 @@ class ClientWindow(FormClass, BaseClass):
         #
         # Voice connector (This isn't supposed to be here, but I need the settings to be loaded before I can determine if we can hook in the mumbleConnector
         #
-        # if self.enableMumble:
-        # self.progress.setLabelText("Setting up Mumble...")
-        # import mumbleconnector
-        #     self.mumbleConnector = mumbleconnector.MumbleConnector(self)
+        if os.name == 'nt' and self.enableMumble:
+            self.progress.setLabelText("Setting up Mumble...")
+            import mumbleconnector
+            self.mumbleConnector = mumbleconnector.MumbleConnector(self)
 
         #Determine if a login wizard needs to be displayed and do so
         if self.autologin and self.password and self.login:
@@ -1532,7 +1530,7 @@ class ClientWindow(FormClass, BaseClass):
         Tries to join the game at the given URL
         '''
         logger.debug("joinGameFromURL: " + url.toString())
-        if (available()):
+        if fa.instance.available():
             add_mods = []
             try:
                 modstr = url.queryItemValue("mods")
@@ -1667,7 +1665,7 @@ class ClientWindow(FormClass, BaseClass):
             self.process(action, ins)
             self.blockSize = 0
 
-            self.dispatch(msg['id'], msg['data'])
+            #self.dispatch(msg['id'], msg['data'])
 
     @QtCore.pyqtSlot()
     def disconnectedFromServer(self):
@@ -1887,7 +1885,8 @@ class ClientWindow(FormClass, BaseClass):
                 logger.warn("Server says that Updating is needed.")
                 self.progress.close()
                 self.state = ClientState.OUTDATED
-                fa.updater.fetchClientUpdate(message["update"])
+                import updater
+                updater.fetchClientUpdate(message["update"])
 
             else:
                 logger.debug("Skipping update because this is a developer version.")

@@ -2,7 +2,7 @@ import os
 import sys
 import tempfile
 import urllib2
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore
 
 import logging
 logger = logging.getLogger(__name__)

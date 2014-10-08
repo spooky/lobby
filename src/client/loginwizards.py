@@ -204,7 +204,7 @@ class loginPage(QWizardPage):
 
     @QtCore.pyqtSlot()
     def reportBug(self):
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl(TICKET_URL))
+        QDesktopServices.openUrl(QtCore.QUrl(TICKET_URL))
 
 
 

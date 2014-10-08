@@ -27,7 +27,8 @@ It ensures, through communication with faforever.com, that Forged Alliance is pr
 patched, and all required files for a given mod are installed
 
 @author thygrrr
-'''
+"""
+
 from PyQt5 import QtCore, QtNetwork
 from PyQt5.QtWidgets import *
 
@@ -425,7 +426,7 @@ class Updater(QtCore.QObject):
         Updates the files in a given file group, in the destination subdirectory of the Forged Alliance path.
         If existing=True, the existing contents of the directory will be added to the current self.filesToUpdate
         list. 
-        '''
+        """
         QApplication.processEvents()
 
         self.progress.setLabelText("Updating files: " + filegroup)
@@ -1055,7 +1056,7 @@ class UpgradePageSC(QWizardPage):
             return False
 
 class WizardSC(QWizard):
-    '''
+    """
     The actual Wizard which walks the user through the install.
     """
 

@@ -212,7 +212,7 @@ class GamesWidget(FormClass, BaseClass):
         '''
         Hosting a game event
         '''
-        if not fa.exe.available():
+        if not fa.instance.available():
             return
 
         self.stopSearchRanked()

@@ -251,7 +251,7 @@ class ReplaysWidget(BaseClass, FormClass):
                 item.setText(1, infile)
                 item.filename = os.path.join(util.REPLAY_DIR, infile)
                 item.setIcon(0, util.icon("replays/replay.png"))
-                item.setTextColor(0, QColor(client.instance.getColor("default")))
+                item.setForeground(0, QBrush(QColor(client.instance.getColor("default"))))
                                 
                 bucket.append(item)
                 
@@ -285,7 +285,7 @@ class ReplaysWidget(BaseClass, FormClass):
                             item.setIcon(0,util.icon("games/unknown_map.png"))                                                      
                         item.setToolTip(0, fa.maps.getDisplayName(item.info['mapname']))
                         item.setText(0, game_hour)
-                        item.setTextColor(0, QColor(client.instance.getColor("default")))
+                        item.setForeground(0, QBrush(QColor(client.instance.getColor("default"))))
                         
                         item.setText(1, item.info['title'])
                         item.setToolTip(1, infile)
@@ -300,21 +300,21 @@ class ReplaysWidget(BaseClass, FormClass):
                         # Add additional info
                         item.setText(3, item.info['featured_mod'])
                         item.setTextAlignment(3, QtCore.Qt.AlignCenter)
-                        item.setTextColor(1, QColor(client.instance.getUserColor(item.info.get('recorder', ""))))
+                        item.setForeground(1, QBrush(QColor(client.instance.getUserColor(item.info.get('recorder', "")))))
                     else:
                         bucket = buckets.setdefault("incomplete", [])                    
                         item.setIcon(0, util.icon("replays/replay.png"))
                         item.setText(1, infile)
                         item.setText(2, "(replay doesn't have complete metadata)")
-                        item.setTextColor(1, QColor("yellow")) #FIXME: Needs to come from theme
+                        item.setForeground(1, QBrush(QColor("yellow"))) #FIXME: Needs to come from theme
 
                 except:
                     bucket = buckets.setdefault("broken", [])                    
                     item.setIcon(0, util.icon("replays/broken.png"))
                     item.setText(1, infile)
-                    item.setTextColor(1, QColor("red"))   #FIXME: Needs to come from theme
+                    item.setForeground(1, QBrush(QColor("red")))   #FIXME: Needs to come from theme
                     item.setText(2, "(replay parse error)")
-                    item.setTextColor(2, QColor("gray"))  #FIXME: Needs to come from theme
+                    item.setForeground(2, QBrush(QColor("gray")))  #FIXME: Needs to come from theme
                     logger.error("Replay parse error for " + infile)
 
                 bucket.append(item)
@@ -328,24 +328,24 @@ class ReplaysWidget(BaseClass, FormClass):
             bucket_item = QTreeWidgetItem()
             
             if bucket == "broken":
-                bucket_item.setTextColor(0, QColor("red")) #FIXME: Needs to come from theme
+                bucket_item.setForeground(0, QColor("red")) #FIXME: Needs to come from theme
                 bucket_item.setText(1, "(not watchable)")
-                bucket_item.setTextColor(1, QColor(client.instance.getColor("default")))
+                bucket_item.setForeground(1, QColor(client.instance.getColor("default")))
             elif bucket == "incomplete":
-                bucket_item.setTextColor(0, QColor("yellow")) #FIXME: Needs to come from theme
+                bucket_item.setForeground(0, QColor("yellow")) #FIXME: Needs to come from theme
                 bucket_item.setText(1, "(watchable)")
-                bucket_item.setTextColor(1, QColor(client.instance.getColor("default")))
+                bucket_item.setForeground(1, QColor(client.instance.getColor("default")))
             elif bucket == "legacy":
-                bucket_item.setTextColor(0, QColor(client.instance.getColor("default")))
-                bucket_item.setTextColor(1, QColor(client.instance.getColor("default")))
+                bucket_item.setForeground(0, QColor(client.instance.getColor("default")))
+                bucket_item.setForeground(1, QColor(client.instance.getColor("default")))
                 bucket_item.setText(1, "(old replay system)")
             else:
-                bucket_item.setTextColor(0, QColor(client.instance.getColor("player")))
+                bucket_item.setForeground(0, QColor(client.instance.getColor("player")))
                 
             bucket_item.setIcon(0, util.icon("replays/bucket.png"))                                
             bucket_item.setText(0, bucket)
             bucket_item.setText(3, str(len(buckets[bucket])) + " replays")
-            bucket_item.setTextColor(3, QColor(client.instance.getColor("default")))
+            bucket_item.setForeground(3, QColor(client.instance.getColor("default")))
                 
             self.myTree.addTopLevelItem(bucket_item)
             #self.myTree.setFirstItemColumnSpanned(bucket_item, True)
@@ -395,12 +395,12 @@ class ReplaysWidget(BaseClass, FormClass):
                 icon = util.icon("games/unknown_map.png")
 
             item.setText(0,time.strftime("%H:%M", time.localtime(item.info['game_time'])))
-            item.setTextColor(0, QColor(client.instance.getColor("default")))
+            item.setForeground(0, QColor(client.instance.getColor("default")))
                                     
 
             item.setIcon(0, icon)
             item.setText(1, info['title'])
-            item.setTextColor(1, QColor(client.instance.getColor("player")))
+            item.setForeground(1, QColor(client.instance.getColor("player")))
             
             item.setText(2, info['featured_mod'])
             item.setTextAlignment(2, QtCore.Qt.AlignCenter)
@@ -430,22 +430,22 @@ class ReplaysWidget(BaseClass, FormClass):
                     playeritem.url = url
                     if client.instance.login == player:
                         mygame = True
-                        item.setTextColor(1, QColor(client.instance.getColor("self")))
-                        playeritem.setTextColor(0, QColor(client.instance.getColor("self")))
+                        item.setForeground(1, QColor(client.instance.getColor("self")))
+                        playeritem.setForeground(0, QColor(client.instance.getColor("self")))
                         playeritem.setToolTip(0, url.toString())
                         playeritem.setIcon(0, util.icon("replays/replay.png"))                        
                     elif client.instance.isFriend(player):
                         if not mygame:
-                            item.setTextColor(1, QColor(client.instance.getColor("friend")))
-                        playeritem.setTextColor(0, QColor(client.instance.getColor("friend")))
+                            item.setForeground(1, QColor(client.instance.getColor("friend")))
+                        playeritem.setForeground(0, QColor(client.instance.getColor("friend")))
                         playeritem.setToolTip(0, url.toString())
                         playeritem.setIcon(0, util.icon("replays/replay.png"))                        
                     elif client.instance.isPlayer(player):
-                        playeritem.setTextColor(0, QColor(client.instance.getColor("player")))
+                        playeritem.setForeground(0, QColor(client.instance.getColor("player")))
                         playeritem.setToolTip(0, url.toString())
                         playeritem.setIcon(0, util.icon("replays/replay.png"))                        
                     else:
-                        playeritem.setTextColor(0, QColor(client.instance.getColor("default")))
+                        playeritem.setForeground(0, QColor(client.instance.getColor("default")))
                         playeritem.setDisabled(True)
 
                     item.addChild(playeritem)

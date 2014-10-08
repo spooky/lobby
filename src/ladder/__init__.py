@@ -1,7 +1,7 @@
-from PyQt4 import QtCore
-from PyQt4 import QtWebKit
+from PyQt5 import QtCore
+from PyQt5.QtWebKitWidgets import *
+from PyQt5 import QtWebKit
 import logging
-import urllib
 import util
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ class Ladder(QtCore.QObject):
         
         self.client = client
 
-        self.ui = QtWebKit.QWebView()
+        self.ui = QWebView()
         
         self.client.ladderTab.layout().addWidget(self.ui)
         

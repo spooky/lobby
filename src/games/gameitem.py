@@ -132,24 +132,24 @@ class GameItem(QListWidgetItem):
 
         # FIXME: Need better schema for urls
         return None
-        if self.state == "playing":
-            url = QUrl("faflive://faforever.com/games/%d/livereplay")
-            url.setScheme("faflive")
-            url.setHost("faforever.com")
-            url.setPath(str(self.uid) + "/" + player + ".SCFAreplay")
-            url.addQueryItem("map", self.mapname)
-            url.addQueryItem("mod", self.mod)
-            return url
-        elif self.state == "open":
-            url = QtCore.QUrl()
-            url.setScheme("fafgame")
-            url.setHost("faforever.com")
-            url.setPath(self.host)
-            url.addQueryItem("map", self.mapname)
-            url.addQueryItem("mod", self.mod)
-            url.addQueryItem("uid", str(self.uid))
-            return url
-        return None 
+        # if self.state == "playing":
+        #     url = QUrl("faflive://faforever.com/games/%d/livereplay")
+        #     url.setScheme("faflive")
+        #     url.setHost("faforever.com")
+        #     url.setPath(str(self.uid) + "/" + player + ".SCFAreplay")
+        #     url.addQueryItem("map", self.mapname)
+        #     url.addQueryItem("mod", self.mod)
+        #     return url
+        # elif self.state == "open":
+        #     url = QtCore.QUrl()
+        #     url.setScheme("fafgame")
+        #     url.setHost("faforever.com")
+        #     url.setPath(self.host)
+        #     url.addQueryItem("map", self.mapname)
+        #     url.addQueryItem("mod", self.mod)
+        #     url.addQueryItem("uid", str(self.uid))
+        #     return url
+        # return None
         
         
     @QtCore.pyqtSlot()

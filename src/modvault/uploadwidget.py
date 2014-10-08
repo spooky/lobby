@@ -28,6 +28,8 @@ from PyQt5.QtGui import *
 import modvault
 import util
 
+import logging
+logger = logging.getLogger(__name__)
 
 FormClass, BaseClass = util.loadUiType("modvault/upload.ui")
 

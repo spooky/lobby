@@ -115,8 +115,8 @@ class CrashDialog(QDialog):
 
     @QtCore.pyqtSlot()
     def tech_support(self):
-        QtGui.QDesktopServices().openUrl(QtCore.QUrl(HELP_URL))
+        QDesktopServices().openUrl(QtCore.QUrl(HELP_URL))
 
     @QtCore.pyqtSlot()
     def post_report(self):
-        QtGui.QDesktopServices().openUrl(QtCore.QUrl(TICKET_URL))
+        QDesktopServices().openUrl(QtCore.QUrl(TICKET_URL))

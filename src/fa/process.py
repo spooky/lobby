@@ -18,7 +18,7 @@
 
 
 import os
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui
 import util
 
 import logging
@@ -104,13 +104,13 @@ class Process(QtCore.QProcess):
             progress.setLabelText("FA Forever exited, but ForgedAlliance.exe is still running.<p align='left'><ul><b>Are you still in a game?</b><br/><br/>You may choose to:<li>press <b>ALT+TAB</b> to return to the game</li><li>kill ForgedAlliance.exe by clicking <b>Terminate</b></li></ul></p>")
             progress.show()
 
-            while running() and progress.isVisible():
+            while self.running() and progress.isVisible():
                 QtGui.QApplication.processEvents()
 
             progress.close()
 
             if self.running():
-                kill()
+                self.kill()
 
             self.close()
 

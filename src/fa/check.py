@@ -19,7 +19,7 @@
 import sys
 import logging
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui
 
 import fa
 from fa.mods import checkMods

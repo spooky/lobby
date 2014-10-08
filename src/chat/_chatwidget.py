@@ -94,7 +94,7 @@ class ChatWidget(FormClass, BaseClass, SimpleIRCClient):
 
         #add signal handler for game exit
         self.client.gameExit.connect(self.processGameExit)
-        self.replayInfo = fa.exe.instance.info
+        self.replayInfo = fa.instance.info
 
 
         #Hook with client's connection and autojoin mechanisms
@@ -146,18 +146,18 @@ class ChatWidget(FormClass, BaseClass, SimpleIRCClient):
 
     def finishDownloadAvatar(self, reply):
         ''' this take care of updating the avatars of players once they are downloaded '''
-        img = QtGui.QImage()
+        img = QImage()
         img.loadFromData(reply.readAll())
         pix = util.respix(reply.url().toString())
         if pix :
-            pix = QtGui.QIcon(QtGui.QPixmap(img))
+            pix = QIcon(QPixmap(img))
         else :
-            util.addrespix(reply.url().toString(), QtGui.QPixmap(img))
+            util.addrespix(reply.url().toString(), QPixmap(img))
 
         for player in util.curDownloadAvatar(reply.url().toString()) :
             for channel in self.channels :
                 if player in self.channels[channel].chatters :
-                    self.channels[channel].chatters[player].avatarItem.setIcon(QtGui.QIcon(util.respix(reply.url().toString())))
+                    self.channels[channel].chatters[player].avatarItem.setIcon(QIcon(util.respix(reply.url().toString())))
                     self.channels[channel].chatters[player].avatarItem.setToolTip(self.channels[channel].chatters[player].avatarTip)
 
 
@@ -252,7 +252,7 @@ class ChatWidget(FormClass, BaseClass, SimpleIRCClient):
         self.autopostjoin = util.settings.value("chat/autopostjoin")
         logger.info("autopostjoin: " + str(self.autopostjoin))
         if (str(self.autopostjoin) == "true"):
-            self.replayInfo = fa.exe.instance.info
+            self.replayInfo = fa.instance.info
             if self.replayInfo:
                 if 'num_players' in self.replayInfo:
                     self.nrofplayers = int(self.replayInfo['num_players'])

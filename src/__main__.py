@@ -52,9 +52,9 @@ def excepthook(exc_type, exc_value, traceback_object):
     dialog = util.CrashDialog((exc_type, exc_value, traceback_object))
     answer = dialog.exec_()
 
-    if answer == QtGui.QDialog.Rejected:
+    if answer == QDialog.Rejected:
         sys.excepthook = excepthook_original
-        QtGui.QApplication.exit(1)
+        QApplication.exit(1)
 
 
 #Override our except hook.

@@ -7,7 +7,7 @@ __author__ = 'Thygrrr'
 import logging
 logger = logging.getLogger(__name__)
 
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 settings = QtCore.QSettings("ForgedAllianceForever", "FA Lobby")
 
