@@ -454,7 +454,7 @@ class ServerConnection(Connection):
             self.socket.connect((self.server, self.port))
             if ssl:
                 self.ssl = socket.ssl(self.socket)
-        except socket.error as x:
+        except OSError as x:
             self.socket.close()
             self.socket = None
             raise ServerConnectionError("Couldn't connect to socket: %s" % x)
@@ -511,7 +511,7 @@ class ServerConnection(Connection):
                 new_data = self.ssl.read(2**14)
             else:
                 new_data = self.socket.recv(2**14)
-        except socket.error as x:
+        except OSError as x:
             # The server hung up.
             self.disconnect("Connection reset by peer")
             return
@@ -686,7 +686,7 @@ class ServerConnection(Connection):
 
         try:
             self.socket.close()
-        except socket.error as x:
+        except OSError as x:
             pass
         self.socket = None
         self._handle_event(Event("disconnect", self.server, "", [message]))
@@ -816,7 +816,7 @@ class ServerConnection(Connection):
                 self.socket.send((string + "\r\n").encode("utf-8"))   #FIXME utf-8 support hacked in by thygrrr (may break in some scenarios)
             if DEBUG:
                 print("TO SERVER:", string)
-        except socket.error as x:
+        except OSError as x:
             # Ouch!
             self.disconnect("Connection reset by peer.")
 
@@ -914,7 +914,7 @@ class DCCConnection(Connection):
         self.passive = 0
         try:
             self.socket.connect((self.peeraddress, self.peerport))
-        except socket.error as x:
+        except OSError as x:
             raise DCCConnectionError("Couldn't connect to socket: %s" % x)
         self.connected = 1
         if self.irclibobj.fn_to_add_socket:
@@ -939,7 +939,7 @@ class DCCConnection(Connection):
             self.socket.bind((socket.gethostbyname(socket.gethostname()), 0))
             self.localaddress, self.localport = self.socket.getsockname()
             self.socket.listen(10)
-        except socket.error as x:
+        except OSError as x:
             raise DCCConnectionError("Couldn't bind socket: %s" % x)
         return self
 
@@ -956,7 +956,7 @@ class DCCConnection(Connection):
         self.connected = 0
         try:
             self.socket.close()
-        except socket.error as x:
+        except OSError as x:
             pass
         self.socket = None
         self.irclibobj._handle_event(
@@ -982,7 +982,7 @@ class DCCConnection(Connection):
 
         try:
             new_data = self.socket.recv(2**14)
-        except socket.error as x:
+        except OSError as x:
             # The server hung up.
             self.disconnect("Connection reset by peer")
             return
@@ -1036,7 +1036,7 @@ class DCCConnection(Connection):
                 self.socket.send("\n")
             if DEBUG:
                 print("TO PEER: %s\n" % string)
-        except socket.error as x:
+        except OSError as x:
             # Ouch!
             self.disconnect("Connection reset by peer.")
 

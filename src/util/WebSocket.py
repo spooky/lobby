@@ -81,7 +81,7 @@ class WebSocket(QThread):
             self._heartbeat_timer.start(10*60*1000)
 
             self._socket_connected = True
-        except socket.error as e:
+        except OSError as e:
             logger.debug("Failed to connect to %s", str(e))
             QTimer.singleShot(10*1000, self._reconnect)
 
@@ -94,7 +94,7 @@ class WebSocket(QThread):
                 data = self._ws.sock.recv(1024)
                 self._ws.process(data)
 
-        except socket.error as e:
+        except OSError as e:
             if e.errno == errno.EAGAIN: # Non-blocking op
                 return
             else:
