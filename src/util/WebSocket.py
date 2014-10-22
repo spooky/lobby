@@ -94,11 +94,8 @@ class WebSocket(QThread):
                 data = self._ws.sock.recv(1024)
                 self._ws.process(data)
 
-        except OSError as e:
-            if e.errno == errno.EAGAIN: # Non-blocking op
-                return
-            else:
-                raise
+        except BlockingIOError:
+            return
 
 
     def _write_thread(self):
