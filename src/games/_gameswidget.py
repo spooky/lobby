@@ -157,14 +157,12 @@ class GamesWidget(FormClass, BaseClass):
         self._syncGameList()
 
         self.client.push_reconnected.connect(self._syncGameList)
-        self.client.push_games_open.connect(self._onGameOpened)
+        self.client.push_games_opened.connect(self._onGameOpened)
         self.client.push_games_updated.connect(self._onGameUpdated)
         self.client.push_games_closed.connect(self._onGameClosed)
 
     def _onGameOpened(self, game):
-        uid = game['_id']
-
-        game['host'] = game['host']['username']
+        uid = game['id']
 
         #if uid not in self.games:
         self.games[uid] = GameItem(uid)
@@ -177,12 +175,12 @@ class GamesWidget(FormClass, BaseClass):
             #self.games[uid].update(game, self.client)
 
     def _onGameUpdated(self, game):
-        uid = game['_id']
+        uid = game['id']
 
         self.games[uid].update(game, self.client)
 
     def _onGameClosed(self, game):
-        uid = game['_id']
+        uid = game['id']
 
         if uid in self.games:
             self.gameList.takeItem(self.gameList.row(self.games[uid]))
@@ -191,8 +189,9 @@ class GamesWidget(FormClass, BaseClass):
     def _syncGameList(self):
 
         def _onPollError(resp):
-            #QMessageBox.warning( self, "Game Poll Failed", resp['statusMessage'] )
-            return
+            QMessageBox.warning( self, "Game Listing Failed", resp['statusMessage'] )
+
+            del self._poll_reply
 
         def _onPollSuccess(resp):
             self.gameList.clear()
@@ -219,7 +218,7 @@ class GamesWidget(FormClass, BaseClass):
 
         # A simple Hosting dialog.
         # if fa.exe.check(item.mod):
-        hostgamewidget = HostgameWidget(self)
+        hostgamewidget = HostgameWidget(self.client, self)
 
         item_mod = "banana"
 
@@ -720,13 +719,35 @@ class GamesWidget(FormClass, BaseClass):
 
         passw = None
 
-        if fa.check.check(item.mod, item.mapname, None, item.mods):
-            if item.access == "password" :
-                passw, ok = QInputDialog.getText(self.client, "Passworded game" , "Enter password :", QLineEdit.Normal, "")
-                if ok:
-                    self.client.send(dict(command="game_join", password=passw, uid=item.uid, gameport=self.client.gamePort))
-            else :
-                self.client.send(dict(command="game_join", uid=item.uid, gameport=self.client.gamePort))
+        if fa.check.check('faf', item.mapname, None, item.mods):
+            from fa.GameSession import GameSession
+            self.client.game_session = sess = GameSession()
+
+            sess.addArg('windowed', 1024, 768)
+            sess.addArg('showlog')
+
+            sess.addArg('mean', 1000)
+            sess.addArg('deviation', 0)
+
+            sess.addArg('init', 'init_test.lua')
+
+            sess.setFAFConnection(self.client.lobby_ctx)
+
+            hostInfo = item.hoster
+
+            host_addr = '%s:%d' % (hostInfo['ip'], hostInfo['port'])
+
+            sess.setLocalPlayer(self.client.login, qrand() % 2**16)
+            sess.setJoinGame( host_addr )
+
+            sess.start()
+            # TODO: NAT Joins
+            # if item.access == "password" :
+            #     passw, ok = QInputDialog.getText(self.client, "Passworded game" , "Enter password :", QLineEdit.Normal, "")
+            #     if ok:
+            #         self.client.send(dict(command="game_join", password=passw, uid=item.uid, gameport=self.client.gamePort))
+            # else :
+            #     self.client.send(dict(command="game_join", uid=item.uid, gameport=self.client.gamePort))
 
         else:
             pass #checkFA failed and notified the user what was wrong. We won't join now.

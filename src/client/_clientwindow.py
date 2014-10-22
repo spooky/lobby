@@ -56,7 +56,9 @@ import os
 import random
 import notificatation_system as ns
 
-from util.WebSocket import WebSocket
+from LobbyServerContext import LobbyServerContext
+
+import loginwizards
 
 try:
     from profile import playerstats
@@ -183,9 +185,13 @@ class ClientWindow(FormClass, BaseClass):
     # Push notifications
     push_reconnected = pyqtSignal()
 
-    push_games_open = pyqtSignal(dict)
+    push_games_opened = pyqtSignal(dict)
     push_games_updated = pyqtSignal(dict)
     push_games_closed = pyqtSignal(dict)
+
+    # FAF Messages
+    # (command_id, args)
+    faf_games = pyqtSignal(str, dict)
 
     def __init__(self, *args, **kwargs):
         BaseClass.__init__(self, *args, **kwargs)
@@ -197,9 +203,11 @@ class ClientWindow(FormClass, BaseClass):
 
         #Init and wire the TCP Network socket to communicate with faforever.com
         #self.lobby_ctx = LobbyServerContext()
-        self.lobby_ctx = WebSocket("ws://localhost:8080/notify/ws", self)
+        self.lobby_ctx = LobbyServerContext("ws://%s:8080/notify/ws" % LOBBY_HOST, self)
 
         self.lobby_ctx.reconnected.connect(lambda: self.push_reconnected.emit())
+
+        self.lobby_ctx.eventReceived.connect(self._event_dispatch)
         self.lobby_ctx.messageReceived.connect(self._new_dispatch)
 
         self.lobby_ctx.start()
@@ -540,7 +548,7 @@ class ClientWindow(FormClass, BaseClass):
         self.warning = QHBoxLayout()
 
         self.warnPlayer = QLabel(self)
-        self.warnPlayer.setText("A player of your skill level is currently searching for a 1v1 game. Click a faction to join him! ")
+        self.warnPlayer.setText("A player of your skill level is currently searching for a 1v1 game. Click a faction to join them! ")
         self.warnPlayer.setAlignment(QtCore.Qt.AlignHCenter)
         self.warnPlayer.setAlignment(QtCore.Qt.AlignVCenter)
 
@@ -1003,6 +1011,7 @@ class ClientWindow(FormClass, BaseClass):
         else:
             if 'alternative_port' in testResult:
                 logger.info("Using alternative port %i for FA." % testResult['alternative_port'])
+                self.gamePort = testResult['alternative_port']
             self.udpTest = True
 
     # # NOT USED
@@ -1223,24 +1232,36 @@ class ClientWindow(FormClass, BaseClass):
             self.mumbleConnector = mumbleconnector.MumbleConnector(self)
 
         #Determine if a login wizard needs to be displayed and do so
-        if self.autologin and self.password and self.login:
+        if self.autologin and self.login and self.password:
             from AuthService import AuthService
 
-            reply = AuthService.Login(self.login, self.password)
+            self._login_reply = reply = AuthService.Login(self.login, self.password)
 
             def onError():
                 self.password = None
-                QMessageBox.information("Auto-login failed", "Did you nickname or password change?")
+                QMessageBox.information(self, "Auto-login failed", "Did your nickname or password change?")
+
+                self.autologin = False
+                self.password = None
+
+                del self._login_reply
+
+                # Show wizard on auto-login fail.
+                if not loginwizards.LoginWizard(self).exec_():
+                    QApplication.exit(0)
+                else:
+                    self._onLoggedIn()
 
             def onSuccess(resp):
                 self.session_id = resp['session_id']
                 self._onLoggedIn()
 
+                del self._login_reply
+
             reply.error.connect(onError)
             reply.done.connect(onSuccess)
 
         if not self.autologin or not self.password or not self.login:
-            import loginwizards
             if not loginwizards.LoginWizard(self).exec_():
                 return False
             self._onLoggedIn()
@@ -1248,7 +1269,11 @@ class ClientWindow(FormClass, BaseClass):
         return True
 
     def _onLoggedIn(self):
-        self.lobby_ctx.sendMessage('subscribe', 'games')
+        logger.info("Logged in as %s" % self.login)
+
+        self.lobby_ctx.sendNotify('subscribe', 'games')
+
+        self.lobby_ctx.sendMessage("auth", "login", self.session_id)
 
         self.state = ClientState.ACCEPTED
 
@@ -1832,13 +1857,26 @@ class ClientWindow(FormClass, BaseClass):
         self.socket.write(struct.pack('=l', len(data)))
         self.socket.write(data)
 
-    @pyqtSlot(str, dict)
-    def _new_dispatch(self, subsystem, command, args):
-        push_cmd_id = 'push_%s_%s' % (subsystem, command)
+    @pyqtSlot(list, dict)
+    def _event_dispatch(self, event_id, args):
+        assert isinstance(event_id, list)
+
+        push_cmd_id = 'push_'+'_'.join(event_id)
         try:
             getattr(self, push_cmd_id).emit(args)
-        except KeyError:
+        except AttributeError:
             logger.warning("Push notification '%s' not handled." % push_cmd_id)
+
+    @pyqtSlot(str, dict)
+    def _new_dispatch(self, subsystem, command, args):
+        assert isinstance(subsystem, basestring)
+        assert isinstance(command, basestring)
+
+        faf_subsys = 'faf_%s' % subsystem
+        try:
+            getattr(self, faf_subsys).emit(command, args)
+        except AttributeError:
+            logger.warning("Subsystem '%s' not handled." % faf_subsys)
 
     @pyqtSlot(str, dict)
     def dispatch(self, command, args):

@@ -20,6 +20,7 @@ import sys
 import logging
 
 from PyQt5 import QtGui
+from PyQt5.QtWidgets import *
 
 import fa
 from fa.mods import checkMods
@@ -40,10 +41,10 @@ def checkMap(mapname, force=False, silent=False):
     if force:
         return fa.maps.downloadMap(mapname, silent=silent)
 
-    result = QtGui.QMessageBox.question(None, "Download Map",
+    result = QMessageBox.question(None, "Download Map",
                                         "Seems that you don't have the map. Do you want to download it?<br/><b>" + mapname + "</b>",
-                                        QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
-    if result == QtGui.QMessageBox.Yes:
+                                        QMessageBox.Yes, QMessageBox.No)
+    if result == QMessageBox.Yes:
         if not fa.maps.downloadMap(mapname, silent=silent):
             return False
     else:
@@ -60,7 +61,7 @@ def check(mod, mapname=None, version=None, modVersions=None, sim_mods=None, sile
     logger.info("Checking FA for: " + str(mod) + " and map " + str(mapname))
 
     if not mod:
-        QtGui.QMessageBox.warning(None, "No Mod Specified", "The application didn't specify which mod to update.")
+        QMessageBox.warning(None, "No Mod Specified", "The application didn't specify which mod to update.")
         return False
 
     if not fa.gamepath:
@@ -91,7 +92,7 @@ def check(mod, mapname=None, version=None, modVersions=None, sim_mods=None, sile
         writeFAPathLua()
     except:
         logger.error("fa_path.lua can't be written: ", exc_info=sys.exc_info())
-        QtGui.QMessageBox.critical(None, "Cannot write fa_path.lua",
+        QMessageBox.critical(None, "Cannot write fa_path.lua",
                                    "This is a  rare error and you should report it!<br/>(open Menu BETA, choose 'Report a Bug')")
         return False
 

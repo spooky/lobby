@@ -1,7 +1,7 @@
 
 from IRESTService import IRESTService
 
-AUTH_SERVICE_URL = "http://localhost:44343/auth"
+from client import AUTH_SERVICE_URL
 
 class AuthService(IRESTService):
     @staticmethod

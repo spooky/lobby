@@ -130,7 +130,11 @@ class GameItem(QListWidgetItem):
             
         from client.GamesService import GAMES_SERVICE_URL
 
-        # FIXME: Need better schema for urls
+        if self.state == "Live":
+            url = QUrl("faflive://faforever.com/games/%d/livereplay" % self.uid)
+            return url
+        elif self.state == "Lobby":
+            return QUrl("fafgame://faforever.com/games/%d" % self.uid)
         return None
         # if self.state == "playing":
         #     url = QUrl("faflive://faforever.com/games/%d/livereplay")
@@ -206,19 +210,20 @@ class GameItem(QListWidgetItem):
         
         self.client  = client
 
-        self.title      = message['title']
-        self.host       = message['host']
-        self.teams      = dict.copy(message['teams'])
+        self.title      = message['Title']
+        self.host       = message['host']['username']
+        self.hoster     = message['host']
+        self.teams      = {}#dict.copy(message['teams'])
         self.access     = message.get('access', 'public')
-        self.mod        = message['featured_mod']
+        self.mod        = 'faf'#message['featured_mod']
         self.modVersion = message.get('featured_mod_versions', [])
-        self.mods       = message.get('sim_mods',{})
+        self.mods       = {}#message.get('GameMods',{})
         self.options    = message.get('options', [])
         self.numplayers = message.get('num_players', 0) 
         self.slots      = message.get('max_players',12)
         
         oldstate = self.state
-        self.state  = message['state']
+        self.state  = message['GameState']
       
 
         # Assemble a players & teams lists
@@ -232,7 +237,7 @@ class GameItem(QListWidgetItem):
 
         #HACK: Visibility field not supported yet.
         self.private = self.title.lower().find("private") != -1        
-        self.setHidden((self.state != 'open') or (self.mod in mod_invisible))        
+        #self.setHidden((self.state != 'open') or (self.mod in mod_invisible))
 
 
         # Clear the status for all involved players (url may change, or players may have left, or game closed)        
@@ -250,14 +255,15 @@ class GameItem(QListWidgetItem):
         for team in self.teams:
             self.players.extend(self.teams[team])
 
-
-        # Map preview code
-        if self.mapname != message['mapname']:
-            self.mapname = message['mapname']
-            self.mapdisplayname = maps.getDisplayName(self.mapname)
-            refresh_icon = True
-        else:
-            refresh_icon = False
+        refresh_icon = False
+        if 'GameOption' in message:
+            if 'ScenarioFile' in message['GameOption']:
+                mapname = message['GameOption']['ScenarioFile'].split('/')[2]
+                # Map preview code
+                if self.mapname != mapname:
+                    self.mapname = mapname
+                    self.mapdisplayname = maps.getDisplayName(self.mapname)
+                    refresh_icon = True
                     
         #Resolve pretty display name
         self.moddisplayname = self.mod

@@ -407,6 +407,10 @@ class Updater(QtCore.QObject):
 
             shutil.move(output.name, toFile)
 
+            if toFile.endswith('.exe'):
+                from stat import *
+                os.chmod(toFile, os.stat(toFile).st_mode | S_IEXEC)
+
             if (progress.value() == file_size) or progress.value() == -1:
                 logger.debug("File downloaded successfully.")
                 return True

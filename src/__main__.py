@@ -35,6 +35,8 @@ sip.setapi('QProcess', 2)
 import os
 import sys
 import ctypes
+
+from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 import util
@@ -47,7 +49,12 @@ def excepthook(exc_type, exc_value, traceback_object):
     """
     This exception hook will stop the app if an uncaught error occurred, regardless where in the QApplication.
     """
-    
+
+    if exc_type is KeyboardInterrupt:
+        sys.excepthook = excepthook_original
+        QApplication.exit(0)
+        return
+
     logger.error("Uncaught exception", exc_info=(exc_type, exc_value, traceback_object))
     dialog = util.CrashDialog((exc_type, exc_value, traceback_object))
     answer = dialog.exec_()
@@ -59,7 +66,6 @@ def excepthook(exc_type, exc_value, traceback_object):
 
 #Override our except hook.
 sys.excepthook = excepthook
-
 
 def runFAF():
     #Load theme from settings (one of the first things to be done)
@@ -92,6 +98,12 @@ if __name__ == '__main__':
     logger.info(">>> --------------------------- Application Launch")
     app = QApplication(sys.argv)
     app.setWindowIcon(util.icon("window_icon.png", True))
+
+    # Make a python interpreter timer,
+    # so that python events (exceptions) get processed.
+    interpreter_timer = QTimer(app)
+    interpreter_timer.start(500)
+    interpreter_timer.timeout.connect(lambda: None)
 
     #Set application icon to nicely stack in the system task bar on windows
     if os.name == 'nt' and \

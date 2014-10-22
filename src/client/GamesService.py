@@ -1,7 +1,7 @@
 
 from IRESTService import IRESTService
 
-GAMES_SERVICE_URL = "http://localhost:8080/games"
+from client import GAMES_SERVICE_URL
 
 class GamesService(IRESTService):
     @staticmethod

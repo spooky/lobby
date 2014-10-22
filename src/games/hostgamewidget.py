@@ -41,13 +41,15 @@ FormClass, BaseClass = util.loadUiType("games/host.ui")
 
 
 class HostgameWidget(FormClass, BaseClass):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, client, parent, *args, **kwargs):
         BaseClass.__init__(self, *args, **kwargs)
 
         self.setupUi(self)
         self.parent = parent
         
         self.parent.options = []
+
+        self.client = client
 
         item_options = {}
 
@@ -74,14 +76,14 @@ class HostgameWidget(FormClass, BaseClass):
         self.gamePreview.addItem(self.game)
         
         self.message = {}
-        self.message['title'] = self.parent.gamename
-        self.message['host'] = self.parent.client.login
+        self.message['Title'] = self.parent.gamename
+        self.message['host'] = {'username':self.parent.client.login}
         self.message['teams'] = {1:[self.parent.client.login]}
 #        self.message.get('access', 'public')
         self.message['featured_mod'] = "faf"
         self.message['mapname'] = self.parent.gamemap
-        self.message['state'] = "open"
-        
+        self.message['GameState'] = "open"
+
         self.game.update(self.message, self.parent.client)
         
         i = 0
@@ -128,22 +130,33 @@ class HostgameWidget(FormClass, BaseClass):
         self.modList.itemClicked.connect(self.modclicked)
 
     def _onHostButtonClicked(self):
+        from fa.GameSession import GameSession
 
-        def _onHostError(resp):
-            QMessageBox.warning( self, "Hosting Failed", resp['statusMessage'] )
+        from fa.check import check
 
-        def _onHostSuccess(resp):
-            QMessageBox.information( self, "Host success", "Success" )
-            self.done(0)
+        check('faf')
+        self.client.game_session = sess = GameSession()
 
-        # FIXME: Use configured port.
-        self.reply = rep = GamesService.OpenGame(6112, self.message)
+        sess.addArg('windowed', 1024, 768)
+        sess.addArg('showlog')
 
-        rep.error.connect(_onHostError)
-        rep.done.connect(_onHostSuccess)
+        sess.addArg('mean', 1000)
+        sess.addArg('deviation', 0)
+
+        sess.addArg('init', 'init_test.lua')
+
+        sess.setTitle( self.message['Title'])
+
+        sess.setLocalPlayer(self.client.login, 0)
+
+        sess.setFAFConnection(self.client.lobby_ctx)
+
+        sess.start()
+
+        self.done(0)
 
     def updateText(self, text):
-        self.message['title'] = text
+        self.message['Title'] = text
         self.game.update(self.message, self.parent.client)
 
     def hosting(self):

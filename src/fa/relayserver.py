@@ -51,7 +51,7 @@ class Packet():
         headerPackStr = "<i" + str(headerSize) + "si"
         data += struct.pack(headerPackStr, headerSize, headerField, chunkSize)
 
-        for field in self._data :      
+        for field in self._data :
             fieldType = 0 if type(field) is int else 1
 
             chunkPackStr = ""

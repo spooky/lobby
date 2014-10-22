@@ -349,7 +349,12 @@ class AccountCreationPage(QWizardPage):
 
         self.password1 = ''
         self.password2 = ''
-        
+
+        # Posted HTTP reply reference
+        self.register_reply = None
+
+        self.done = False
+
         layout = QGridLayout()
                 
         layout.addWidget(loginLabel, 1, 0)
@@ -402,7 +407,6 @@ class AccountCreationPage(QWizardPage):
 
         self.register_reply = rep
 
-        # FIXME To be asynchronous
         rep.error.connect(self._onRegisterError)
         rep.done.connect(self._onRegisterSuccess)
 

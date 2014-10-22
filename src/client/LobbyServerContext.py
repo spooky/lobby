@@ -20,7 +20,7 @@ class ProtocolError(Exception):
         super(ProtocolError, self).__init__(message)
 
 
-class LobbyServerContext(QObject):
+class LobbyServerContext_vTCP(QObject):
     messageReceived = pyqtSignal(str, dict)
     loggedIn = pyqtSignal()
 
@@ -34,7 +34,7 @@ class LobbyServerContext(QObject):
         self._send(command_id, message)
 
     def __init__(self):
-        super(LobbyServerContext, self).__init__()
+        super(LobbyServerContext_vTCP, self).__init__()
 
         self.socket = QTcpSocket()
         self.state = STATE_HANDSHAKE
@@ -56,7 +56,6 @@ class LobbyServerContext(QObject):
         self.sendMessage('login', {'username': username, 'session_id': session_id})
 
     def _send(self, command_id, message):
-        return
         data = json.dumps({'id': command_id, 'data': message}).encode()
         self.socket.write(struct.pack('=l', len(data)))
         self.socket.write(data)
@@ -112,3 +111,64 @@ class LobbyServerContext(QObject):
 
     def _onDisconnected(self):
         logger.info("Disconnected from server.")
+
+
+from util.WebSocket import WebSocket
+
+class LobbyServerContext(QObject):
+    # subsystem, command_id, args
+    messageReceived = pyqtSignal(str, str, dict)
+
+    # command_id, args
+    faf_auth = pyqtSignal(str, dict)
+    faf_games = pyqtSignal(str, dict)
+
+    # event_id, args
+    eventReceived = pyqtSignal(list, dict)
+
+    reconnected = pyqtSignal()
+
+    def __init__(self, lobby_ws_url, parent=None):
+        super(LobbyServerContext, self).__init__(parent)
+
+        self._ws = WebSocket(lobby_ws_url, self)
+
+        self._ws.reconnected.connect(lambda: self.reconnected.emit())
+
+        self._ws.messageReceived.connect(self._dispatch)
+
+    def start(self):
+        self._ws.start()
+
+    @pyqtSlot(str, dict)
+    def sendGames(self, command_id, args):
+        self.sendMessage('games', command_id, args)
+
+    @pyqtSlot(str, dict)
+    def sendNotify(self, command_id, args):
+        self.sendMessage('notify', command_id, args)
+
+    @pyqtSlot(str, str, dict)
+    def sendMessage(self, subsystem, command_id, args):
+        msg = { 'subsystem': subsystem,
+                'id': command_id,
+                'data': args }
+
+        self._ws.sendMessage(json.dumps(msg))
+
+    pyqtSlot(str)
+    def _dispatch(self, msg_):
+        msg = json.loads(msg_)
+
+        subsystem = msg['subsystem']
+
+        if subsystem == 'events':
+            self.eventReceived.emit(msg['event_id'], msg['data'])
+        else:
+            self.messageReceived.emit(subsystem, msg['id'], msg['data'])
+
+            faf_subsystem = 'faf_%s' % subsystem
+            try:
+                getattr(self, faf_subsystem).emit( msg['id'], msg['data'])
+            except KeyError:
+                logger.warning("Subsystem '%s' not handled." % faf_subsystem)

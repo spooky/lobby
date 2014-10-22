@@ -74,13 +74,20 @@ def savePath(path):
     settings.endGroup()
     settings.sync()
 
+import re
 
 def writeFAPathLua():
     """
     Writes a small lua file to disk that helps the new SupComDataPath.lua find the actual install of the game
     """
     name = os.path.join(util.APPDATA_DIR, u"fa_path.lua")
-    code = u"fa_path = '" + gamepath.replace(u"\\", u"\\\\") + u"'\n"
+
+    # Naive Wine cross-platform
+    gamepath_ = gamepath
+    if os.name != 'nt':
+        gamepath_ = 'Z:'+gamepath
+
+    code = u"fa_path = '" + gamepath_.replace(u"\\", u"\\\\") + u"'\n"
 
     if gamepathSC:
         code = code + u"sc_path = '" + gamepathSC.replace(u"\\", u"\\\\") + u"'\n"

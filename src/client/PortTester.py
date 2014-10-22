@@ -7,11 +7,9 @@ from PyQt5.QtNetwork import *
 import util
 
 import fa
-from client import LOBBY_HOST
+from client import LOBBY_HOST, GAME_TEST_PORT
 
 logger = logging.getLogger(__name__)
-
-TEST_PORT = 8002
 
 
 class PortTester(QThread):
@@ -48,7 +46,7 @@ class PortTester(QThread):
         self.recv_success += 1
 
     def sendPkt(self):
-        self.udpSocket.writeDatagram(self.magic_cookie, self.testServer, TEST_PORT)
+        self.udpSocket.writeDatagram(self.magic_cookie, self.testServer, GAME_TEST_PORT)
 
     def finishTest(self):
         self.testResult['success'] = self.recv_success > 2
@@ -90,10 +88,10 @@ class PortTester(QThread):
             self.testResult['alternative_port'] = udpSocket.localPort()
 
         logger.info("Sending packet to %s:%i from %s:%i",
-                    self.testServer.toString(), TEST_PORT,
+                    self.testServer.toString(), GAME_TEST_PORT,
                     udpSocket.localAddress().toString(), udpSocket.localPort())
 
-        if udpSocket.writeDatagram(self.magic_cookie, self.testServer, TEST_PORT) == -1:
+        if udpSocket.writeDatagram(self.magic_cookie, self.testServer, GAME_TEST_PORT) == -1:
             logger.warning("Unable to send UDP Packet: %s", udpSocket.errorString())
             self.testResult['success'] = False
             self.testResult['reason'] = udpSocket.errorString()
