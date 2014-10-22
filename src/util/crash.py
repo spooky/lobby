@@ -58,10 +58,10 @@ class CrashDialog(QDialog):
         label.setWordWrap(False)
         dialog.layout().addWidget(label)
 
-        self.trace = u"".join(traceback.format_exception(exc_type, exc_value, traceback_object, 10))
-        self.hash = hashlib.md5(self.trace).hexdigest()
+        self.trace = "".join(traceback.format_exception(exc_type, exc_value, traceback_object, 10))
+        self.hash = hashlib.md5(self.trace.encode()).hexdigest()
 
-        self.title = u"[auto] Crash from " + CRASH_REPORT_USER + u": " + str(exc_value)
+        self.title = "[auto] Crash from " + CRASH_REPORT_USER + ": " + str(exc_value)
 
         dialog.setWindowTitle(self.title)
         
@@ -69,29 +69,29 @@ class CrashDialog(QDialog):
         box = self.box
         try:
             box.setFont(QFont("Lucida Console", 8))
-            box.append(u"\n**FAF Username:** " + CRASH_REPORT_USER)
-            box.append(u"\n**FAF Version:** " + VERSION_STRING)
-            box.append(u"\n**FAF Directory:** " + APPDATA_DIR)
-            box.append(u"\n**FA Path:** " + str(fa.gamepath))
-            box.append(u"\n**Home Directory:** " + PERSONAL_DIR)
-        except StandardError:
-            box.append(u"\n**(Exception raised while writing debug vars)**")
+            box.append("\n**FAF Username:** " + CRASH_REPORT_USER)
+            box.append("\n**FAF Version:** " + VERSION_STRING)
+            box.append("\n**FAF Directory:** " + APPDATA_DIR)
+            box.append("\n**FA Path:** " + str(fa.gamepath))
+            box.append("\n**Home Directory:** " + PERSONAL_DIR)
+        except Exception:
+            box.append("\n**(Exception raised while writing debug vars)**")
             pass
 
-        box.append(u"")
-        box.append(u"\n**FA Forever Log (last 128 lines):**")
-        box.append(u"{{{")
+        box.append("")
+        box.append("\n**FA Forever Log (last 128 lines):**")
+        box.append("{{{")
         try:
             box.append("\n".join(readlines(LOG_FILE_FAF, False)[-128:]))
-        except StandardError:
-            box.append(unicode(LOG_FILE_FAF))
-            box.append(u"empty or not readable")
+        except Exception:
+            box.append(str(LOG_FILE_FAF))
+            box.append("empty or not readable")
 
-        box.append(u"\n**Stack trace:**")
-        box.append(u"{{{")
+        box.append("\n**Stack trace:**")
+        box.append("{{{")
         box.append(self.trace)
-        box.append(u"}}}")
-        box.append(u"")
+        box.append("}}}")
+        box.append("")
 
         dialog.layout().addWidget(box)
         self.sendButton = QPushButton("\nOpen ticket system.\n")

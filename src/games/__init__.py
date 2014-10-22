@@ -28,4 +28,4 @@ logger.setLevel(logging.DEBUG)
 
 
 # For use by other modules
-from _gameswidget import GamesWidget as Games
+from ._gameswidget import GamesWidget as Games

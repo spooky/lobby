@@ -20,7 +20,7 @@
 
 
 
-from Numerics.Range import *
+from .Numerics.Range import *
 
 
 class TeamsRange(Range) :

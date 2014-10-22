@@ -30,7 +30,7 @@ class NsSettingsDialog(FormClass2, BaseClass2):
         self.hooks[ns.NotificationSystem.NEW_GAME] = NsHookNewGame()
         self.hooks[ns.NotificationSystem.TEAM_INVITE] = NsHookTeamInvite()
 
-        model = NotificationHooks(self, self.hooks.values())
+        model = NotificationHooks(self, list(self.hooks.values()))
         self.tableView.setModel(model)
         # stretch first column
         self.tableView.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)

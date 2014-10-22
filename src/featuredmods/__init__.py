@@ -27,4 +27,4 @@ logger.setLevel(logging.DEBUG)
 
 
 # For use by other modules
-from _featuredmod import FeaturedModsWidget as FeaturedMods
+from ._featuredmod import FeaturedModsWidget as FeaturedMods

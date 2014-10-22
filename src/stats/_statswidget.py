@@ -72,8 +72,8 @@ class StatsWidget(BaseClass, FormClass):
         self.currentLeague = 0
         self.currentDivision = 0
         
-        self.FORMATTER_LADDER        = unicode(util.readfile("stats/formatters/ladder.qthtml"))
-        self.FORMATTER_LADDER_HEADER = unicode(util.readfile("stats/formatters/ladder_header.qthtml"))
+        self.FORMATTER_LADDER        = str(util.readfile("stats/formatters/ladder.qthtml"))
+        self.FORMATTER_LADDER_HEADER = str(util.readfile("stats/formatters/ladder_header.qthtml"))
         self.stylesheet              = util.readstylesheet("stats/formatters/style.css")
 
         self.leagues.setStyleSheet(self.stylesheet)
@@ -191,11 +191,11 @@ class StatsWidget(BaseClass, FormClass):
             tab =  self.currentLeague-1
 
             if not tab in self.pagesDivisions :
-                print "no tab in division"
+                print("no tab in division")
                 self.pagesDivisions[tab] = self.createDivisionsTabs(message["values"])
                 leagueTab = self.leagues.widget(tab).findChild(QTabWidget,"league"+str(tab))
                 leagueTab.widget(1).layout().addWidget(self.pagesDivisions[tab])
-                print "done"
+                print("done")
 
 
         elif typeStat == "division_table" :

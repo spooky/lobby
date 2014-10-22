@@ -20,7 +20,7 @@
 
 
 
-from Schedule import ScheduleSequence
+from .Schedule import ScheduleSequence
 
 class FactorGraphLayer(object):
     def __init__(self, parentGraph):

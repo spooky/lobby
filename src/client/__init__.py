@@ -89,6 +89,6 @@ class ClientState:
 
 
 
-from _clientwindow import ClientWindow as Client
+from ._clientwindow import ClientWindow as Client
 
 instance = Client()

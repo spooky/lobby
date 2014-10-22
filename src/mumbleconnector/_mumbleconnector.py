@@ -10,7 +10,7 @@ import re
 
 from PyQt5 import QtCore
 
-import _winreg
+import winreg
 
 # Link-dll to interface with the mumble client
 import mumble_link
@@ -44,10 +44,10 @@ class mumbleConnector():
         # For the mumbleconnector to work, mumble needs positional audio enabled, and link-to-games enabled. We also need the link 1.20 dll enabled,
         # but that cannot be set in registry and is also the default
         try:
-            key = _winreg.OpenKey(_winreg.HKEY_CURRENT_USER, "Software\\Mumble\\Mumble\\audio", 0, _winreg.KEY_ALL_ACCESS)
-            _winreg.SetValueEx(key, "postransmit", 0, _winreg.REG_SZ, "true")
-            _winreg.SetValueEx(key, "positional", 0, _winreg.REG_SZ, "true")
-            _winreg.CloseKey(key)
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Software\\Mumble\\Mumble\\audio", 0, winreg.KEY_ALL_ACCESS)
+            winreg.SetValueEx(key, "postransmit", 0, winreg.REG_SZ, "true")
+            winreg.SetValueEx(key, "positional", 0, winreg.REG_SZ, "true")
+            winreg.CloseKey(key)
         except:
             logger.info("Updating Mumble registry settings failed.")
 

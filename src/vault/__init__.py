@@ -23,7 +23,7 @@
 from stat import *
 import logging
 import os
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import re
 import json
 
@@ -154,7 +154,7 @@ class MapVault(QtCore.QObject):
     
     @QtCore.pyqtSlot(str)  
     def downloadMap(self, link):
-        link = urllib2.unquote(link)
+        link = urllib.parse.unquote(link)
         name = maps.link2name(link)
         if not maps.isMapAvailable(name):
             maps.downloadMap(name)  
@@ -168,7 +168,7 @@ class MapVault(QtCore.QObject):
     def checkMaps(self, data):
         exist_maps = list()
         viewed_maps = json.loads(data)
-        for id, name in viewed_maps.iteritems():
+        for id, name in viewed_maps.items():
             if maps.mapExists(name):
                exist_maps.append(id)
         if len(exist_maps) > 0:

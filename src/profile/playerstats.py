@@ -208,7 +208,7 @@ class Statpage(QMainWindow):
     def save_plot(self):
         file_choices = "PNG (*.png)|*.png"
         
-        path = unicode(QFileDialog.getSaveFileName(self, 
+        path = str(QFileDialog.getSaveFileName(self, 
                         'Save file', '', 
                         file_choices))
         if path:
@@ -226,7 +226,7 @@ class Statpage(QMainWindow):
     def on_draw(self):
         """ Redraws the figure
         """
-        str = unicode(self.textbox.text())
+        str = str(self.textbox.text())
         
         x = self.mu + self.sigma*np(50000)
 

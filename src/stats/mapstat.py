@@ -37,7 +37,8 @@ class LadderMapStat(FormClass, BaseClass):
     This class list all the maps given by the server, and ask for more details when selected.
     '''
     def __init__(self, client, parent, *args, **kwargs):
-        FormClass.__init__(self, client, *args, **kwargs)
+        # FIXME: FormClass seems to be 'object'
+        #FormClass.__init__(self, client, *args, **kwargs)
         BaseClass.__init__(self, client, *args, **kwargs)
 
         self.setupUi(self)
@@ -65,11 +66,11 @@ class LadderMapStat(FormClass, BaseClass):
             
         elif (now.month == 6 and now.day < 21) or now.month < 6 :
     
-            previous = datetime.datetime(now.year, 03, 21)
+            previous = datetime.datetime(now.year, 0o3, 21)
             
         elif (now.month == 9 and now.day < 21) or now.month < 9 :
          
-            previous = datetime.datetime(now.year, 06, 21)
+            previous = datetime.datetime(now.year, 0o6, 21)
             
         else  :
           

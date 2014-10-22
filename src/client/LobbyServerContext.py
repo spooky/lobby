@@ -27,7 +27,7 @@ class LobbyServerContext_vTCP(QObject):
     @pyqtSlot(str, dict)
     def sendMessage(self, command_id, message):
 
-        assert isinstance(command_id, basestring)
+        assert isinstance(command_id, str)
 
         logger.info("Send: %s : %s", command_id, message)
 

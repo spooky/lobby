@@ -118,7 +118,7 @@ class Chatter(QTableWidgetItem):
         
         # Everyone is compared by operator status, operators are > everyone, just like in real life
         # CAVEAT: This is actually arbitrary because the dict isn't guaranteed to be the 'correct' order
-        if self.elevation and other.elevation: return self.lobby.OPERATOR_COLORS.keys().index(self.elevation) < self.lobby.OPERATOR_COLORS.keys().index(other.elevation)
+        if self.elevation and other.elevation: return list(self.lobby.OPERATOR_COLORS.keys()).index(self.elevation) < list(self.lobby.OPERATOR_COLORS.keys()).index(other.elevation)
         if self.elevation and not other.elevation: return True
         if not self.elevation and other.elevation: return False
         

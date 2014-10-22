@@ -14,8 +14,8 @@ import errno
 
 from PyQt5.QtCore import *
 
-import thread
-from Queue import Queue, Empty
+import _thread
+from queue import Queue, Empty
 
 from ws4py.client import WebSocketBaseClient
 from ws4py.messaging import PongControlMessage
@@ -70,7 +70,7 @@ class WebSocket(QThread):
             self._socket_connected = True
 
             self.reconnected.emit()
-            thread.start_new_thread(self._write_thread, ())
+            _thread.start_new_thread(self._write_thread, ())
 
             self._read_timer = QTimer(self)
             self._read_timer.timeout.connect(self._read_some)

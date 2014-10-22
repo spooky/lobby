@@ -18,7 +18,7 @@ class RESTResponse(QObject):
         reply.finished.connect(self._onFinished)
 
     def _onFinished(self):
-        resData = str(self.reply.readAll())
+        resData = bytes(self.reply.readAll()).decode()
         if self.reply.error():
             if len(resData) == 0:
                 self.error.emit({ 'statusMessage': self.reply.errorString() })
@@ -29,9 +29,11 @@ class RESTResponse(QObject):
                     self.error.emit({ 'statusMessage': resData })
 
         else:
-            resp = json.loads(resData)
+            try:
+                self.done.emit(json.loads(resData))
+            except ValueError: # Non-json response -> Internal vibe.d error
+                self.error.emit({ 'statusMessage': resData })
 
-            self.done.emit(resp)
 
 class IRESTService:
     @staticmethod

@@ -1,4 +1,4 @@
-from process import instance
+from .process import instance
 
 import util
 

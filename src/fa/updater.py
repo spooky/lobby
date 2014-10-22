@@ -37,10 +37,10 @@ import stat
 import time
 import subprocess
 import shutil
-from types import FloatType, IntType, ListType
+#from types import FloatType, IntType, ListType
 import util
 import logging
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import sys
 import fa
 import tempfile
@@ -48,7 +48,7 @@ import json
 import modvault
 
 if os.name == 'nt':
-    import _winreg
+    import winreg
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -64,7 +64,7 @@ def clearLog():
 
 def log(string):
     logger.debug(string)
-    debugLog.append(unicode(string))
+    debugLog.append(str(string))
 
 
 def dumpPlainText():
@@ -76,22 +76,25 @@ def dumpHTML():
 
 
 # A set of exceptions we use to see what goes wrong during asynchronous data transfer waits
-class UpdaterCancellation(StandardError):
+class UpdaterCancellation(Exception):
     pass
 
 
-class UpdaterFailure(StandardError):
+class UpdaterFailure(Exception):
     pass
 
 
-class UpdaterTimeout(StandardError):
+class UpdaterTimeout(Exception):
     pass
 
 
 def validatePath(path):
     try:
         # Supcom only supports Ascii Paths
-        if not path.decode("ascii"): return False
+        try:
+            path.encode().decode("ascii")
+        except UnicodeDecodeError:
+            return False
 
         #We check whether the base path and a gamedata/lua.scd file exists. This is a mildly naive check, but should suffice
         if not os.path.isdir(path): return False
@@ -106,7 +109,7 @@ def validatePath(path):
         return True
     except:
         _, value, _ = sys.exc_info()
-        logger.error(u"Path validation failed: " + unicode(value))
+        logger.error("Path validation failed: " + str(value))
         return False
 
 
@@ -127,7 +130,7 @@ def getPathFromSettings():
     """
     settings = QtCore.QSettings("ForgedAllianceForever", "FA Lobby")
     settings.beginGroup("ForgedAlliance")
-    path = unicode(settings.value("app/path"))
+    path = str(settings.value("app/path"))
     settings.endGroup()
     return path
 
@@ -149,7 +152,7 @@ def getPathFromSettingsSC():
     """
     settings = QtCore.QSettings("ForgedAllianceForever", "FA Lobby")
     settings.beginGroup("SupremeCommanderVanilla")
-    path = unicode(settings.value("app/path"))
+    path = str(settings.value("app/path"))
     settings.endGroup()
     return path
 
@@ -177,8 +180,8 @@ def mostProbablePaths():
     #Construe path from registry traces - this is not a very safe method, but it seems to work for plain installs
     try:
         regkey = "SOFTWARE\\Classes\\SCFAReplayType\\Shell\\Open\\Command"
-        key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, regkey)
-        path = _winreg.QueryValue(key, "")
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, regkey)
+        path = winreg.QueryValue(key, "")
         if "ForgedAlliance.exe" in path:
             path = path[:path.rfind("bin")]
             path = path.rstrip('"/\\')
@@ -213,8 +216,8 @@ def mostProbablePathsSC():
     #Construe path from registry traces - this is not a very safe method, but it seems to work for plain installs 
     try:
         regkey = "SOFTWARE\\Classes\\SCReplayType\\Shell\\Open\\Command"
-        key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, regkey)
-        path = _winreg.QueryValue(key, "")
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, regkey)
+        path = winreg.QueryValue(key, "")
         if "SupremeCommander.exe" in path:
             path = path[:path.rfind("bin")]
             path = path.rstrip('"/\\')
@@ -368,8 +371,8 @@ class Updater(QtCore.QObject):
             progress.setAutoClose(True)
             progress.setAutoReset(False)
 
-            req = urllib2.Request(url, headers={'User-Agent': "FAF Client"})
-            downloadedfile = urllib2.urlopen(req)
+            req = urllib.request.Request(url, headers={'User-Agent': "FAF Client"})
+            downloadedfile = urllib.request.urlopen(req)
             meta = downloadedfile.info()
 
             #Fix for #241, sometimes the server sends an error and no content-length.
@@ -408,8 +411,7 @@ class Updater(QtCore.QObject):
             shutil.move(output.name, toFile)
 
             if toFile.endswith('.exe'):
-                from stat import *
-                os.chmod(toFile, os.stat(toFile).st_mode | S_IEXEC)
+                os.chmod(toFile, os.stat(toFile).st_mode | stat.S_IEXEC)
 
             if (progress.value() == file_size) or progress.value() == -1:
                 logger.debug("File downloaded successfully.")
@@ -612,13 +614,13 @@ class Updater(QtCore.QObject):
                         self.updateFiles("bin", self.mod)
                         self.updateFiles("gamedata", self.mod + "Gamedata")
 
-            except UpdaterTimeout, et:
+            except UpdaterTimeout as et:
                 log("TIMEOUT: %s(%s)" % (et.__class__.__name__, str(et.args)))
                 self.result = self.RESULT_FAILURE
-            except UpdaterCancellation, ec:
+            except UpdaterCancellation as ec:
                 log("CANCELLED: %s(%s)" % (ec.__class__.__name__, str(ec.args)))
                 self.result = self.RESULT_CANCEL
-            except Exception, e:
+            except Exception as e:
                 log("EXCEPTION: %s(%s)" % (e.__class__.__name__, str(e.args)))
                 self.result = self.RESULT_FAILURE
             else:
@@ -880,13 +882,13 @@ class Updater(QtCore.QObject):
         out.writeQString(action)
 
         for arg in args:
-            if type(arg) is IntType:
+            if isinstance(arg, int):
                 out.writeInt(arg)
-            elif isinstance(arg, basestring):
+            elif isinstance(arg, str):
                 out.writeQString(arg)
-            elif type(arg) is FloatType:
+            elif isinstance(arg, float):
                 out.writeFloat(arg)
-            elif type(arg) is ListType:
+            elif isinstance(arg, list):
                 out.writeQVariantList(arg)
             else:
                 log("Uninterpreted Data Type: " + str(type(arg)) + " of value: " + str(arg))

@@ -20,7 +20,7 @@
 
 
 
-from HashMap import *
+from .HashMap import *
 
 
 class RatingContainer(object):

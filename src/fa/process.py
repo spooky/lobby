@@ -41,7 +41,7 @@ class Process(QtCore.QProcess):
         if self.info and not self.info.setdefault('complete', False):
             if self.info['uid'] == message['uid']:
                 if message['state'] == "playing":
-                    self.info = dict(self.info.items() + message.items())   # don't we all love python?
+                    self.info = dict(list(self.info.items()) + list(message.items()))   # don't we all love python?
                     self.info['complete'] = True
                     logger.info("Game Info Complete: " + str(self.info))
 

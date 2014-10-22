@@ -1,7 +1,7 @@
 import os
 import sys
 import tempfile
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from PyQt5 import QtGui, QtCore
 
 import logging
@@ -25,8 +25,8 @@ def fetchClientUpdate(url):
             progress.setAutoClose(True)
             progress.setAutoReset(False)
 
-            req = urllib2.Request(url, headers={'User-Agent' : "FAF Client"})
-            msifile  = urllib2.urlopen(req)
+            req = urllib.request.Request(url, headers={'User-Agent' : "FAF Client"})
+            msifile  = urllib.request.urlopen(req)
             meta = msifile.info()
 
             #Fix for #241, sometimes the server sends an error and no content-length.

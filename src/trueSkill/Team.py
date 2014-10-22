@@ -20,7 +20,7 @@
 
 
 
-from RatingContainer import *
+from .RatingContainer import *
 
 class Team(RatingContainer) :
     def __init__(self, player = None, rating = None):

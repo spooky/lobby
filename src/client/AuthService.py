@@ -1,5 +1,5 @@
 
-from IRESTService import IRESTService
+from .IRESTService import IRESTService
 
 from client import AUTH_SERVICE_URL
 

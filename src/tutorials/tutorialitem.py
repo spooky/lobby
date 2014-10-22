@@ -88,7 +88,7 @@ class TutorialItem(QListWidgetItem):
     #DATA_PLAYERS = 32
     
     
-    FORMATTER_TUTORIAL = unicode(util.readfile("tutorials/formatters/tutorials.qthtml"))
+    FORMATTER_TUTORIAL = str(util.readfile("tutorials/formatters/tutorials.qthtml"))
     
     
     def __init__(self, uid, *args, **kwargs):

@@ -20,7 +20,7 @@
 
 
 
-from sys import maxint
+from sys import maxsize
 
 class Range(object):
     '''The whole purpose of this class is to make the code for the SkillCalculator(s)

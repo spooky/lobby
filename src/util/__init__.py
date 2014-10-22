@@ -21,7 +21,7 @@ from PyQt5.QtMultimedia import *
 
 import sys
 import os
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 # Developer mode flag
 def developer():
@@ -30,7 +30,7 @@ def developer():
 try:
     with open("RELEASE-VERSION", "r") as version_file:
             VERSION_STRING = version_file.read()
-except (BaseException, IOError), e:
+except (BaseException, IOError) as e:
     VERSION_STRING = "(unknown version)"
 
 VERSION = 0  # FIXME: causes the updater to always skip.
@@ -100,7 +100,7 @@ try:
     if dll.SHGetSpecialFolderPathW(None, buf, 0x0005, False):
         PERSONAL_DIR = (buf.value)
     else:
-        raise StandardError
+        raise Exception
 except:
     PERSONAL_DIR = os.path.join(APPDATA_DIR, "user")
 
@@ -360,13 +360,13 @@ def readlines(filename, themed=True):
     if themed:
         if __themedir and os.path.isfile(os.path.join(__themedir, filename)):
             result = open(os.path.join(__themedir, filename))
-            logger.debug(u"Read themed file: " + filename)
+            logger.debug("Read themed file: " + filename)
         else:
             result = open(os.path.join(COMMON_DIR, filename))
-            logger.debug(u"Read common file: " + filename)
+            logger.debug("Read common file: " + filename)
     else:
         result = open(filename)
-        logger.debug(u"Read unthemed file: " + filename)
+        logger.debug("Read unthemed file: " + filename)
 
     lines = result.readlines()
     result.close()
@@ -376,11 +376,11 @@ def readlines(filename, themed=True):
 def readstylesheet(filename):
     if __themedir and os.path.isfile(os.path.join(__themedir, filename)):
         result = open(os.path.join(__themedir, filename)).read().replace("%THEMEPATH%", __themedir.replace("\\", "/"))
-        logger.info(u"Read themed stylesheet: " + filename)
+        logger.info("Read themed stylesheet: " + filename)
     else:
         baseDir = os.path.join(COMMON_DIR, os.path.dirname(filename))
         result = open(os.path.join(COMMON_DIR, filename)).read().replace("%THEMEPATH%", baseDir.replace("\\", "/"))
-        logger.info(u"Read common stylesheet: " + filename)
+        logger.info("Read common stylesheet: " + filename)
 
     return result
 
@@ -405,13 +405,13 @@ def readfile(filename, themed=True):
     if themed:
         if __themedir and os.path.isfile(os.path.join(__themedir, filename)):
             result = open(os.path.join(__themedir, filename))
-            logger.debug(u"Read themed file: " + filename)
+            logger.debug("Read themed file: " + filename)
         else:
             result = open(os.path.join(COMMON_DIR, filename))
-            logger.debug(u"Read common file: " + filename)
+            logger.debug("Read common file: " + filename)
     else:
         result = open(filename)
-        logger.debug(u"Read unthemed file: " + filename)
+        logger.debug("Read unthemed file: " + filename)
 
     data = result.read()
     result.close()
@@ -427,9 +427,9 @@ def __downloadPreviewFromWeb(unitname):
 
     logger.debug("Searching web preview for: " + unitname)
 
-    url = UNITS_PREVIEW_ROOT + urllib2.quote(unitname)
-    header = urllib2.Request(url, headers={'User-Agent': "FAF Client"})
-    req = urllib2.urlopen(header)
+    url = UNITS_PREVIEW_ROOT + urllib.parse.quote(unitname)
+    header = urllib.request.Request(url, headers={'User-Agent': "FAF Client"})
+    req = urllib.request.urlopen(header)
     img = os.path.join(CACHE_DIR, unitname)
     with open(img, 'wb') as fp:
         shutil.copyfileobj(req, fp)
@@ -512,7 +512,7 @@ def openInExplorer(location):
     '''
     import subprocess
 
-    _command = (u'explorer  "%s"' % location).encode(sys.getfilesystemencoding())
+    _command = ('explorer  "%s"' % location).encode(sys.getfilesystemencoding())
     subprocess.Popen(_command)
 
 
@@ -522,7 +522,7 @@ def showInExplorer(location):
     """
     import subprocess
 
-    _command = (u'explorer  /select, "%s"' % location).encode(sys.getfilesystemencoding())
+    _command = ('explorer  /select, "%s"' % location).encode(sys.getfilesystemencoding())
     subprocess.Popen(_command)
 
 
@@ -612,8 +612,8 @@ def now():
     return _dateDummy.now()
 
 
-from crash import CrashDialog
-from report import ReportDialog
+from .crash import CrashDialog
+from .report import ReportDialog
 
 from PyQt5.QtCore import QEventLoop
 

@@ -98,9 +98,9 @@ class GameItem(QListWidgetItem):
     #DATA_PLAYERS = 32
     
     
-    FORMATTER_FAF       = unicode(util.readfile("games/formatters/faf.qthtml"))
-    FORMATTER_MOD       = unicode(util.readfile("games/formatters/mod.qthtml"))
-    FORMATTER_TOOL      = unicode(util.readfile("games/formatters/tool.qthtml"))
+    FORMATTER_FAF       = str(util.readfile("games/formatters/faf.qthtml"))
+    FORMATTER_MOD       = str(util.readfile("games/formatters/mod.qthtml"))
+    FORMATTER_TOOL      = str(util.readfile("games/formatters/tool.qthtml"))
     
     def __init__(self, uid, *args, **kwargs):
         QListWidgetItem.__init__(self, *args, **kwargs)
@@ -398,8 +398,8 @@ class GameItem(QListWidgetItem):
             if not self.mods:
                 modstr = self.mod
             else:
-                if self.mod == 'faf': modstr = ", ".join(self.mods.values())
-                else: modstr = self.mod + " & " + ", ".join(self.mods.values())
+                if self.mod == 'faf': modstr = ", ".join(list(self.mods.values()))
+                else: modstr = self.mod + " & " + ", ".join(list(self.mods.values()))
                 if len(modstr) > 20: modstr = modstr[:15] + "..."
             self.setText(self.FORMATTER_MOD.format(color=color, mapslots = self.slots, mapdisplayname=self.mapdisplayname, title=self.title, host=self.host, players=self.numplayers, playerstring=playerstring, gamequality = strQuality, playerincluded = self.playerIncludedTxt, mod=modstr))
         
@@ -509,7 +509,7 @@ class GameItem(QListWidgetItem):
                 else :
                     mods += ": Off<br/>"
 
-        if self.mods: mods += "<br/><br/>With " + "<br/>".join(self.mods.values())
+        if self.mods: mods += "<br/><br/>With " + "<br/>".join(list(self.mods.values()))
 
         self.setToolTip(self.FORMATTER_TOOL.format(teams = teams, observers=observers, mods = mods)) 
 
@@ -575,7 +575,7 @@ class GameItem(QListWidgetItem):
         bestTeams[1] = []
         bestTeams[2] = []
         
-        for key, value in sorted(playerlist.iteritems(), key=lambda (k,v): (v,k), reverse=True):
+        for key, value in sorted(iter(playerlist.items()), key=lambda k_v: (k_v[1],k_v[0]), reverse=True):
             bestTeams[self.assignToTeam(i)].append(key)
             i = i + 1
 

@@ -31,8 +31,8 @@ GPGNET_PORT = 8000
 
 
 # We only want one instance of Forged Alliance to run, so we use a singleton here (other modules may wish to connect to its signals so it needs persistence)
-from process import instance as instance
-from play import play as play
+from .process import instance as instance
+from .play import play as play
 
 
 # This is the game path, a string pointing to the player's actual install of Forged Alliance
@@ -80,19 +80,19 @@ def writeFAPathLua():
     """
     Writes a small lua file to disk that helps the new SupComDataPath.lua find the actual install of the game
     """
-    name = os.path.join(util.APPDATA_DIR, u"fa_path.lua")
+    name = os.path.join(util.APPDATA_DIR, "fa_path.lua")
 
     # Naive Wine cross-platform
     gamepath_ = gamepath
     if os.name != 'nt':
         gamepath_ = 'Z:'+gamepath
 
-    code = u"fa_path = '" + gamepath_.replace(u"\\", u"\\\\") + u"'\n"
+    code = "fa_path = '" + gamepath_.replace("\\", "\\\\") + "'\n"
 
     if gamepathSC:
-        code = code + u"sc_path = '" + gamepathSC.replace(u"\\", u"\\\\") + u"'\n"
+        code = code + "sc_path = '" + gamepathSC.replace("\\", "\\\\") + "'\n"
 
-    lua = open(name, "w+")
+    lua = open(name, "w+b")
     lua.write(code.encode("utf-8"))
     lua.flush()
     os.fsync(lua.fileno())  # Ensuring the file is absolutely, positively on disk.
@@ -103,11 +103,11 @@ def writeFAPathLua():
 loadPath()
 loadPathSC()
 
-import check
-import maps
-import replayserver
-import relayserver
-import proxies
-import updater
-import upnp
-import faction
+from . import check
+from . import maps
+from . import replayserver
+from . import relayserver
+from . import proxies
+from . import updater
+from . import upnp
+from . import faction

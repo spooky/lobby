@@ -27,4 +27,4 @@ logger.setLevel(logging.DEBUG)
 
 
 # For use by other modules
-from _coopwidget import CoopWidget as Coop
+from ._coopwidget import CoopWidget as Coop

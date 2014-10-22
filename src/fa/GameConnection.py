@@ -30,7 +30,7 @@ class GameConnection(QObject):
 
         # Header
         ds.writeUInt32(len(command))
-        ds.writeRawData(command)
+        ds.writeRawData(command.encode())
 
         # Chunks
         ds.writeUInt32(len(args))
@@ -41,8 +41,8 @@ class GameConnection(QObject):
     def _packLuaVal(self, val):
         if isinstance(val, int):
             return pack("=bi", 0, val)
-        elif isinstance(val, basestring):
-            return pack("=bi%ds" % len(val), 1, len(val), val)
+        elif isinstance(val, str):
+            return pack("=bi%ds" % len(val), 1, len(val), val.encode())
         else:
             raise Exception("Unknown GameConnection Field Type: %s" % type(val))
 
@@ -61,7 +61,7 @@ class GameConnection(QObject):
 
             ds.readRawData(5)
 
-            datastring = ds.readRawData(fieldSize)
+            datastring = ds.readRawData(fieldSize).decode()
             fixedStr = datastring.replace("/t","\t").replace("/n","\n")
 
             return fixedStr
@@ -84,7 +84,7 @@ class GameConnection(QObject):
                 #Omit size
                 ds.readUInt32()
 
-                self.header = ds.readRawData(size)
+                self.header = ds.readRawData(size).decode()
 
             # Chunks packet
             else:

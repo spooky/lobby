@@ -24,7 +24,7 @@ def replay(source, detach=False):
         arg_string = None
         replay_id = None
         # Convert strings to URLs
-        if isinstance(source, basestring):
+        if isinstance(source, str):
             if os.path.isfile(source):
                 if source.endswith(".fafreplay"):  # the new way of doing things
                     replay = open(source, "rt")

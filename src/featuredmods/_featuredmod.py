@@ -161,7 +161,7 @@ class FeaturedModsWidget(FormClass, BaseClass):
                 
         if ok and text != '':
             
-            version = filter(lambda x: x.isdigit(), text)
+            version = [x for x in text if x.isdigit()]
             
             if len(version) != 0 :
                 self.version = int(version)

@@ -24,5 +24,5 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-from _replayswidget import ReplaysWidget as Replays
+from ._replayswidget import ReplaysWidget as Replays
 

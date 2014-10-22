@@ -77,7 +77,7 @@ class CoopMapItemDelegate(QStyledItemDelegate):
 class CoopMapItem(QTreeWidgetItem):
 
     
-    FORMATTER_COOP        = unicode(util.readfile("coop/formatters/coop.qthtml"))
+    FORMATTER_COOP        = str(util.readfile("coop/formatters/coop.qthtml"))
 
     
     def __init__(self, uid, parent, *args, **kwargs):

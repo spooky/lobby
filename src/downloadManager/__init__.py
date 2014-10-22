@@ -16,7 +16,7 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import logging
 import os
 
@@ -91,7 +91,7 @@ class downloadManager(QtCore.QObject):
             return
         
 
-        url = QtCore.QUrl(VAULT_PREVIEW_ROOT + urllib2.quote(name) + ".png")
+        url = QtCore.QUrl(VAULT_PREVIEW_ROOT + urllib.parse.quote(name) + ".png")
         if not url.toString() in self.mapRequests:
             logger.debug("Searching map preview for: " + name)
             self.mapRequests[url.toString()] = []

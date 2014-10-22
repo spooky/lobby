@@ -135,7 +135,7 @@ class ChatWidget(FormClass, BaseClass, SimpleIRCClient):
     def connect(self):
         #Do the actual connecting, join all important channels
         try:
-            self.irc_connect(self.ircServer, self.ircPort, self.client.login, ssl=True)
+            self.irc_connect(self.ircServer, self.ircPort, self.client.login, ssl=False)
             self.timer.start()
 
         except:
@@ -444,7 +444,7 @@ class ChatWidget(FormClass, BaseClass, SimpleIRCClient):
             elif e.arguments()[0].find("hold on") >= 0:
                 self.connection.nick(self.client.login)
         elif source and source.lower() == 'botserv':
-            print "botserv", notice
+            print("botserv", notice)
 
 
         message = "\n".join(e.arguments()).lstrip(prefix)

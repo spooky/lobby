@@ -17,10 +17,10 @@
 #-------------------------------------------------------------------------------
 import time
 
-from Team import *
-from Teams import *
+from .Team import *
+from .Teams import *
 
-from TrueSkill.FactorGraphTrueSkillCalculator import *
+from .TrueSkill.FactorGraphTrueSkillCalculator import *
 from trueSkill.GameInfo import GameInfo
 from trueSkill.Player import Player
 
@@ -52,10 +52,10 @@ test2.addPlayer(player2, Rating(1500.0,500.0))
 #test5.addPlayer(player5, Rating(32.0,2.0))
 #test6.addPlayer(player6, Rating(24.0,4.0))
 
-print "player 1 : "
-print test1.getRating(player1)
-print "player 2 : "
-print test2.getRating(player2)
+print("player 1 : ")
+print(test1.getRating(player1))
+print("player 2 : ")
+print(test2.getRating(player2))
 #print "player 3 : "
 #print test3.getRating(player3)
 #print "player 4 : "
@@ -75,7 +75,7 @@ players.append(test2)
 
 nTeams = 3
 
-print "configuration : %i teams" % nTeams
+print("configuration : %i teams" % nTeams)
 
 if len(players) % nTeams :
     players.append(None)
@@ -148,22 +148,22 @@ for item in matchs:
         #print Teams
         #print "match quality iteration :" + str(calculator.calculateMatchQuality(gameInfo, Teams) * 100) + "%"
             
-print "\nthe best composition for teams is "
+print("\nthe best composition for teams is ")
 
 
 i  = 1
-print len(winningTeam)
+print(len(winningTeam))
 for teams in winningTeam :
-    print 'team %i' %i
+    print('team %i' %i)
 
     for player in teams.getAllPlayers() :
         
-        print "player "  + str(player.getId()) + "(" + str(teams.getRating(player)) + ")"
+        print("player "  + str(player.getId()) + "(" + str(teams.getRating(player)) + ")")
     i = i + 1
 
 
-print "Game Quality ; " + str(matchQuality * 100) + '%' 
+print("Game Quality ; " + str(matchQuality * 100) + '%') 
 time2 = time.time()
 
 running = time2 - time1
-print "\nexecution time %f seconds" % running
+print("\nexecution time %f seconds" % running)

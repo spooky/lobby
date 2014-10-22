@@ -30,7 +30,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import util
-from AuthService import AuthService
+from .AuthService import AuthService
 
 
 PASSWORD_RECOVERY_URL = "http://www.faforever.com/faf/forgotPass.php"
@@ -421,7 +421,7 @@ class AccountCreationPage(QWizardPage):
         self.client.session_id = resp["session_id"]
 
         self.done = True
-        self.wizard().next()
+        next(self.wizard())
 
     def onRegisterReply(self, resp):
         QEventLoop.exit()

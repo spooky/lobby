@@ -151,7 +151,7 @@ class CommentItemDelegate(QStyledItemDelegate):
         return QtCore.QSize(self.TEXTWIDTH, self.TEXTHEIGHT)
 
 class CommentItem(QListWidgetItem):
-    FORMATTER_COMMENT = unicode(util.readfile("modvault/comment.qthtml"))
+    FORMATTER_COMMENT = str(util.readfile("modvault/comment.qthtml"))
     def __init__(self, parent, uid, *args, **kwargs):
         QListWidgetItem.__init__(self, *args, **kwargs)
 

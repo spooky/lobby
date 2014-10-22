@@ -21,11 +21,11 @@
 import re
 
 ERRORS = {
-    'unexp_end_string': u'Unexpected end of string while parsing Lua string.',
-    'unexp_end_table': u'Unexpected end of table while parsing Lua string.',
-    'mfnumber_minus': u'Malformed number (no digits after initial minus).',
-    'mfnumber_dec_point': u'Malformed number (no digits after decimal point).',
-    'mfnumber_sci': u'Malformed number (bad scientific format).',
+    'unexp_end_string': 'Unexpected end of string while parsing Lua string.',
+    'unexp_end_table': 'Unexpected end of table while parsing Lua string.',
+    'mfnumber_minus': 'Malformed number (no digits after initial minus).',
+    'mfnumber_dec_point': 'Malformed number (no digits after decimal point).',
+    'mfnumber_sci': 'Malformed number (bad scientific format).',
 }
 
 
@@ -139,7 +139,7 @@ class SLPP:
                     if start != "[" or self.ch == ']':
                         return s
                 s += self.ch
-        print ERRORS['unexp_end_string']
+        print(ERRORS['unexp_end_string'])
 
     def object(self):
         o = {}
@@ -193,7 +193,7 @@ class SLPP:
                         o[idx] = k
                         idx += 1
                         k = ''
-        print ERRORS['unexp_end_table'] #Bad exit here
+        print(ERRORS['unexp_end_table']) #Bad exit here
 
     def word(self):
         s = ''
@@ -239,7 +239,7 @@ class SLPP:
                     n += next_digit(ERRORS['mfnumber_sci'])
                     n += self.digit()
         except ParseError as e:
-            print e
+            print(e)
             return 0
         try:
             return int(n, 0)

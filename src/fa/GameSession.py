@@ -16,7 +16,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-from GameConnection import GameConnection
+from .GameConnection import GameConnection
 
 class SessionSetupFailed(Exception):
     pass
@@ -63,7 +63,7 @@ class GameSession(QObject):
     # Session command-line arguments
     def addArg(self, key, *args):
 
-        assert key and isinstance(key, basestring)
+        assert key and isinstance(key, str)
 
         self._arguments[key] = args
 
@@ -108,7 +108,7 @@ class GameSession(QObject):
         logger.info("Launching FA: %s", program)
         arguments = []
 
-        for key, value in self._arguments.items():
+        for key, value in list(self._arguments.items()):
             arguments.append('/'+str(key))
             arguments.extend([ (str(x) if isinstance(x, int) else '%s' % str(x))
                                        for x in value])

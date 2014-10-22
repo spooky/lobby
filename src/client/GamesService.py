@@ -1,5 +1,5 @@
 
-from IRESTService import IRESTService
+from .IRESTService import IRESTService
 
 from client import GAMES_SERVICE_URL
 

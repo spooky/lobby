@@ -25,7 +25,7 @@ Created on Dec 1, 2011
 @author: thygrrr
 '''
 
-from types import IntType, FloatType, ListType, DictType
+#from types import IntType, FloatType, ListType, DictType
 import struct
 
 from PyQt5 import QtCore, QtNetwork, QtWebKit
@@ -56,16 +56,16 @@ import os
 import random
 import notificatation_system as ns
 
-from LobbyServerContext import LobbyServerContext
+from .LobbyServerContext import LobbyServerContext
 
-import loginwizards
+from . import loginwizards
 
 try:
     from profile import playerstats
 except:
     pass
 
-class ClientOutdated(StandardError):
+class ClientOutdated(Exception):
     pass
 
 
@@ -788,7 +788,7 @@ class ClientWindow(FormClass, BaseClass):
 
     @QtCore.pyqtSlot()
     def switchPort(self):
-        import loginwizards
+        from . import loginwizards
         loginwizards.gameSettingsWizard(self).exec_()
 
     @QtCore.pyqtSlot()
@@ -797,7 +797,7 @@ class ClientWindow(FormClass, BaseClass):
 
     @QtCore.pyqtSlot()
     def setMumbleOptions(self):
-        import loginwizards
+        from . import loginwizards
         loginwizards.mumbleOptionsWizard(self).exec_()
 
     @QtCore.pyqtSlot()
@@ -1233,7 +1233,7 @@ class ClientWindow(FormClass, BaseClass):
 
         #Determine if a login wizard needs to be displayed and do so
         if self.autologin and self.login and self.password:
-            from AuthService import AuthService
+            from .AuthService import AuthService
 
             self._login_reply = reply = AuthService.Login(self.login, self.password)
 
@@ -1583,7 +1583,7 @@ class ClientWindow(FormClass, BaseClass):
         for arg in args :
             if type(arg) is IntType:
                 out.writeInt(arg)
-            elif isinstance(arg, basestring):
+            elif isinstance(arg, str):
                 out.writeQString(arg)
             elif type(arg) is FloatType:
                 out.writeFloat(arg)
@@ -1618,7 +1618,7 @@ class ClientWindow(FormClass, BaseClass):
         for arg in args :
             if type(arg) is IntType:
                 out.writeInt(arg)
-            elif isinstance(arg, basestring):
+            elif isinstance(arg, str):
                 out.writeQString(arg)
             elif type(arg) is FloatType:
                 out.writeFloat(arg)
@@ -1702,7 +1702,7 @@ class ClientWindow(FormClass, BaseClass):
             # stop hearbeat
             #self.heartbeatTimer.stop()
             #Clear the online users lists
-            oldplayers = self.players.keys()
+            oldplayers = list(self.players.keys())
             self.players = {}
             self.urls = {}
             self.usersUpdated.emit(oldplayers)
@@ -1847,7 +1847,7 @@ class ClientWindow(FormClass, BaseClass):
     #
     def send(self, command, message):
 
-        assert isinstance(command, basestring)
+        assert isinstance(command, str)
 
         data = json.dumps({'id':command, 'data': message})
 
@@ -1869,8 +1869,8 @@ class ClientWindow(FormClass, BaseClass):
 
     @pyqtSlot(str, dict)
     def _new_dispatch(self, subsystem, command, args):
-        assert isinstance(subsystem, basestring)
-        assert isinstance(command, basestring)
+        assert isinstance(subsystem, str)
+        assert isinstance(command, str)
 
         faf_subsys = 'faf_%s' % subsystem
         try:
@@ -1923,7 +1923,7 @@ class ClientWindow(FormClass, BaseClass):
                 logger.warn("Server says that Updating is needed.")
                 self.progress.close()
                 self.state = ClientState.OUTDATED
-                import updater
+                from . import updater
                 updater.fetchClientUpdate(message["update"])
 
             else:
@@ -2095,11 +2095,11 @@ class ClientWindow(FormClass, BaseClass):
     def handle_social(self, message):
         if "friends" in message:
             self.friends = message["friends"]
-            self.usersUpdated.emit(self.players.keys())
+            self.usersUpdated.emit(list(self.players.keys()))
 
         if "foes" in message:
             self.foes = message["foes"]
-            self.usersUpdated.emit(self.players.keys())
+            self.usersUpdated.emit(list(self.players.keys()))
 
         if "autojoin" in message:
             self.autoJoin.emit(message["autojoin"])

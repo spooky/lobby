@@ -22,7 +22,7 @@
 
 from copy import copy
 
-from GaussianFactor import *
+from .GaussianFactor import *
 
 
 class GaussianWeightedSumFactor(GaussianFactor) :

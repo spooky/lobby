@@ -24,7 +24,7 @@ class ReportDialog(QDialog):
         
         dialog = self
                 
-        self.title = u"[auto] Report from " + BUGREPORT_USER
+        self.title = "[auto] Report from " + BUGREPORT_USER
         self.hash = hashlib.md5(self.title)
         
         dialog.setWindowTitle(self.title)
@@ -53,33 +53,33 @@ class ReportDialog(QDialog):
         box.setReadOnly(True)
         try:
             box.setFont(QFont("Lucida Console", 8))
-            box.append(u"\n**FAF Username:** " + BUGREPORT_USER)
-            box.append(u"\n**FAF Version:** " + VERSION_STRING)
-            box.append(u"\n**FAF Directory:** " + APPDATA_DIR)
-            box.append(u"\n**FA Path:** " + str(fa.gamepath))
-            box.append(u"\n**Home Directory:** " + PERSONAL_DIR)
-            box.append(u"")
-            box.append(u"\n**FA Forever Log (last 128 lines):**")
-            box.append(u"{{{")
+            box.append("\n**FAF Username:** " + BUGREPORT_USER)
+            box.append("\n**FAF Version:** " + VERSION_STRING)
+            box.append("\n**FAF Directory:** " + APPDATA_DIR)
+            box.append("\n**FA Path:** " + str(fa.gamepath))
+            box.append("\n**Home Directory:** " + PERSONAL_DIR)
+            box.append("")
+            box.append("\n**FA Forever Log (last 128 lines):**")
+            box.append("{{{")
             try:
                 box.append("\n".join(readlines(LOG_FILE_FAF, False)[-128:]))
             except:
-                box.append(unicode(LOG_FILE_FAF))
-                box.append(u"empty or not readable")
+                box.append(str(LOG_FILE_FAF))
+                box.append("empty or not readable")
                 
-            box.append(u"}}}")
-            box.append(u"")
-            box.append(u"\n**Forged Alliance Log (full):**")
-            box.append(u"{{{")
+            box.append("}}}")
+            box.append("")
+            box.append("\n**Forged Alliance Log (full):**")
+            box.append("{{{")
             try:
                 box.append(readfile(LOG_FILE_GAME, False))
             except:
-                box.append(unicode(LOG_FILE_GAME))
-                box.append(u"empty or not readable")
-            box.append(u"}}}")
-            box.append(u"")
+                box.append(str(LOG_FILE_GAME))
+                box.append("empty or not readable")
+            box.append("}}}")
+            box.append("")
         except:
-            box.append(u"\n**(Exception raised while writing debug vars)**")
+            box.append("\n**(Exception raised while writing debug vars)**")
             pass
 
         dialog.layout().addWidget(box)
@@ -116,20 +116,20 @@ class ReportDialog(QDialog):
             self.sendButton.setText("\nSending...\n")
             QApplication.processEvents()
             
-            import urllib
-            import urllib2
+            import urllib.request, urllib.parse, urllib.error
+            import urllib.request, urllib.error, urllib.parse
 
             #A simple POST forwarder sends these to the REST Api of Bitbucket
             url = BUGREPORT_URL
             
-            content = self.report.toPlainText() + u'\n\n\n' + self.box.toPlainText()
-            data = urllib.urlencode({
+            content = self.report.toPlainText() + '\n\n\n' + self.box.toPlainText()
+            data = urllib.parse.urlencode({
                                         'title': self.title.encode("utf-8"),
                                         'content': content.encode("utf-8"),
                                         'hash' : self.hash
                                      })
-            request = urllib2.Request(url=url, data=data)
-            urllib2.urlopen(request)
+            request = urllib.request.Request(url=url, data=data)
+            urllib.request.urlopen(request)
             self.sendButton.setText("\nThanks!\n")
         except:
             logger.error("Error sending bug report!", exc_info = sys.exc_info())

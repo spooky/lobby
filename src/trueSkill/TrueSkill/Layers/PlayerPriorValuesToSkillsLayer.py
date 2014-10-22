@@ -70,7 +70,7 @@ class PlayerPriorValuesToSkillsLayer(TrueSkillFactorGraphLayer) :
     def createPriorSchedule(self) :
 
         localFactors = self.getLocalFactors()
-        return self.scheduleSequence( map(self.getPriorScheduleStep,localFactors),"All priors")
+        return self.scheduleSequence( list(map(self.getPriorScheduleStep,localFactors)),"All priors")
 
 
     def createPriorFactor(self, player, priorRating, skillsVariable) :

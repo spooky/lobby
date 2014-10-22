@@ -63,14 +63,14 @@ The tempAddMods function should be removed after the server can return mods in t
 """
 
 from modvault.utils import *
-from modwidget import ModWidget
-from uploadwidget import UploadModWidget
-from uimodwidget import UIModWidget
+from .modwidget import ModWidget
+from .uploadwidget import UploadModWidget
+from .uimodwidget import UIModWidget
 import util
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 d = util.datetostr(util.now())
 '''
@@ -307,8 +307,8 @@ class ModItem(QListWidgetItem):
     #DATA_PLAYERS = 32
     
     
-    FORMATTER_MOD = unicode(util.readfile("modvault/modinfo.qthtml"))
-    FORMATTER_MOD_UI = unicode(util.readfile("modvault/modinfoui.qthtml"))
+    FORMATTER_MOD = str(util.readfile("modvault/modinfo.qthtml"))
+    FORMATTER_MOD_UI = str(util.readfile("modvault/modinfoui.qthtml"))
     
     def __init__(self, parent, uid, *args, **kwargs):
         QListWidgetItem.__init__(self, *args, **kwargs)
@@ -357,7 +357,7 @@ class ModItem(QListWidgetItem):
         if self.thumbstr == "":
             self.setIcon(util.icon("games/unknown_map.png"))
         else:
-            img = getIcon(os.path.basename(urllib2.unquote(self.thumbstr)))
+            img = getIcon(os.path.basename(urllib.parse.unquote(self.thumbstr)))
             if img:
                 self.setIcon(util.icon(img, False))
             else:
