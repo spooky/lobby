@@ -11,3 +11,6 @@ def checkout_featured_mod(featured_mod, featured_repo, featured_version="faf/mas
     mod_repo = git.Repository(os.path.join(repo_dir, featured_mod), featured_repo)
     mod_repo.fetch()
     mod_repo.checkout(featured_version)
+
+def featured_versions_to_repo_tag(featured_versions_hash):
+    return str(reduce(max, featured_versions_hash.itervalues(), 0))
