@@ -4,10 +4,18 @@ import os
 import git
 import util
 import logging
+import urllib2
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)
 
+FEATURED_MOD_TO_REPO_NAME = {
+    "faf": "fa",
+    "coop": "fa-coop",
+    "gw": "fa-coop"
+}
+
+DEFAULT_REPO_BASE = "FAForever"
 
 FeaturedModVersion = namedtuple('FeaturedModVersion', ['repo', 'tag', 'hash'])
 
@@ -20,6 +28,6 @@ def featured_versions_to_repo_tag(featured_versions_hash):
     return str(reduce(max, featured_versions_hash.itervalues(), 0))
 
 def replay_info_to_featured_mod_version(replay_info):
-    return FeaturedModVersion("FAForever/fa",
+    return FeaturedModVersion("/".join([DEFAULT_REPO_BASE, FEATURED_MOD_TO_REPO_NAME[replay_info["featured_mod"]]]),
                               featured_versions_to_repo_tag(replay_info["featured_mod_versions"]),
                               None)
