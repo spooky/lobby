@@ -155,3 +155,6 @@ def test_retrieves_correct_hex_on_branch_checkout(prefetched_repo):
     prefetched_repo.checkout(TEST_BRANCH)
     assert prefetched_repo.current_head.hex == TEST_BRANCH_COMMIT
 
+def test_repo_has_version(prefetched_repo):
+    prefetched_repo.checkout(TEST_TAG)
+    assert prefetched_repo.has_version(Version("thygrrr/test", TEST_TAG, None, TEST_TAG_COMMIT))
