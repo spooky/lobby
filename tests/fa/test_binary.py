@@ -13,12 +13,6 @@ from fa import binary
 
 __author__ = 'Thygrrr'
 
-
-def test_updater_has_signal_finished(application):
-    updater = binary.Updater(application)
-    assert type(updater.finished) == QtCore.pyqtBoundSignal
-
-
 def test_updater_has_method_run(application):
     updater = binary.Updater(application)
     assert callable(updater.run)
