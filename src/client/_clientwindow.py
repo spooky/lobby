@@ -208,7 +208,7 @@ class ClientWindow(FormClass, BaseClass):
         self.lobby_ctx.reconnected.connect(lambda: self.push_reconnected.emit())
 
         self.lobby_ctx.eventReceived.connect(self._event_dispatch)
-        self.lobby_ctx.messageReceived.connect(self._new_dispatch)
+        #self.lobby_ctx.messageReceived.connect(self._new_dispatch)
 
         self.lobby_ctx.start()
 

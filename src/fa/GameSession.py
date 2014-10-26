@@ -101,7 +101,7 @@ class GameSession(QObject):
         if command_id == 'open_resp' and args['success'] == False:
             raise RuntimeError("Failed to open game on server. Should not happen here.")
         elif command_id in ['ConnectToPeer', 'JoinGame']:
-            self._conn.send(command_id, args)
+            self._conn.send(command_id, *args)
 
     # Start the session (FA)
     def start(self, program=None):
