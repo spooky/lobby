@@ -1,4 +1,5 @@
-from fa.version import GameVersion,FeaturedMod
+from fa.version import GameVersion
+from fa.featured import FeaturedMod
 from git import Repository,Version
 
 import pytest
@@ -32,4 +33,8 @@ def test_game_version_requires_valid_binary_patch_version(version):
 
 def test_game_version_requires_valid_featured_mods(version):
     version['featured-mods'] = []
+    assert not GameVersion(version).is_valid()
+
+def test_game_version_requires_existing_featured_mods(version):
+    version['featured-mods'] = [FeaturedMod("non-existing-featured-mod", Version('example', 'example'))]
     assert not GameVersion(version).is_valid()

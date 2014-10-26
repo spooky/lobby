@@ -88,14 +88,14 @@ def game(parent):
 def check_version(game_version):
     """
     Check if we have all the required versions of things required to launch the given
-    game description.
+    game version.
 
     If not, fetch them.
 
     Arguments:
         game_version is a dictionary of the form:
             binary-patch: Version
-            featured-mods: [Version]
+            featured-mods: [(modname, Version)]
             mods: [Version]
             map: Version
     """

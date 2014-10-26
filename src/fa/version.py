@@ -1,10 +1,9 @@
 __author__ = 'Sheeo'
 
 from git import Repository, Version
+from fa import featured
 
 from collections import namedtuple
-
-FeaturedMod = namedtuple("FeaturedMod", "mod version")
 
 class GameVersion():
     """
@@ -24,7 +23,7 @@ class GameVersion():
             return isinstance(version, Version)
 
         def valid_featured_mod(mod):
-            return valid_version(mod.version)
+            return valid_version(mod.version) and featured.is_featured_mod(mod)
 
         valid = "binary-patch" in self._versions
         valid = valid and "featured-mods" in self._versions
