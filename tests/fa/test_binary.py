@@ -1,12 +1,15 @@
 from PyQt4.QtCore import pyqtSlot
 from PyQt4 import QtCore
 
+import sys
+print sys.path
+
 import bsdiff4
 import pytest
 import os
 import pygit2
-import binary
-import sys
+from fa import binary
+
 
 __author__ = 'Thygrrr'
 
