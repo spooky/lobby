@@ -85,7 +85,21 @@ def game(parent):
 
     return True
 
+def check_version(game_version):
+    """
+    Check if we have all the required versions of things required to launch the given
+    game description.
 
+    If not, fetch them.
+
+    Arguments:
+        game_version is a dictionary of the form:
+            binary-patch: Version
+            featured-mods: [Version]
+            mods: [Version]
+            map: Version
+    """
+    return True
 
 def check(featured_mod, mapname=None, version=None, modVersions=None, sim_mods=None, silent=False):
     """
