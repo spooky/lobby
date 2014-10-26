@@ -45,6 +45,7 @@ class Version():
     def repo(self):
         return self._version.repo
 
+
     @property
     def is_stable(self):
         return self._version.hash is not None
