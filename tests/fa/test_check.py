@@ -1,4 +1,4 @@
-from check import check_version
+from fa.check import check_version
 
 from git import Version
 __author__ = 'Sheeo'
