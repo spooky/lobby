@@ -68,7 +68,8 @@ class GameSession(QObject):
         self._arguments[key] = args
 
     # Session parameters
-    def setJoinGame(self, joinGameAddress):
+    def setJoinGame(self, game_id, joinGameAddress):
+        self._joinGameId = game_id
         self._joinGameAddr = joinGameAddress
 
     def setMods(self, gameMods):
@@ -99,6 +100,8 @@ class GameSession(QObject):
 
         if command_id == 'open_resp' and args['success'] == False:
             raise RuntimeError("Failed to open game on server. Should not happen here.")
+        elif command_id in ['ConnectToPeer', 'JoinGame']:
+            self._conn.send(command_id, args)
 
     # Start the session (FA)
     def start(self, program=None):
@@ -160,7 +163,7 @@ class GameSession(QObject):
                 return # Only initialize the game
             elif args[0] == 'Lobby':
                 if self._joinGameAddr: # We're joining
-                    self._conn.send('JoinGame', self._joinGameAddr, self.playerName, self.playerUID)
+                    self._sendFAF('join', [self._joinGameId, self.gamePort])
                     #self._conn.send("JoinGame")
 
                 else: # We're hosting

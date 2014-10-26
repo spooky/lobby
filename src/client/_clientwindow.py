@@ -524,7 +524,7 @@ class ClientWindow(FormClass, BaseClass):
         self.downloader = downloadManager.downloadManager(self)
 
         # Initialize chat
-        self.chat = chat.Lobby(self)
+        self.chat = None #chat.Lobby(self)
 
         #build main window with the now active client
         self.ladder = stats.Stats(self)
@@ -1013,6 +1013,7 @@ class ClientWindow(FormClass, BaseClass):
                 logger.info("Using alternative port %i for FA." % testResult['alternative_port'])
                 self.gamePort = testResult['alternative_port']
             self.udpTest = True
+        del self._portTest
 
     # # NOT USED
     def testGamePort(self):
@@ -1307,7 +1308,7 @@ class ClientWindow(FormClass, BaseClass):
                 raise RuntimeError("Local ip not found.")
             #self.localIP = str(self.lobby_ctx.socket.localAddress().toString())
 
-            portTest = PortTester(self.login, self.localIP, self.gamePort)
+            self._portTest = portTest = PortTester(self.login, self.localIP, self.gamePort)
 
             # TODO: make an actual handler
             portTest.testDone.connect(self.udpPortTestComplete)

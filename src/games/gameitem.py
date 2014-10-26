@@ -210,6 +210,7 @@ class GameItem(QListWidgetItem):
         
         self.client  = client
 
+        self.uid        = message.get('id', 0)
         self.title      = message['Title']
         self.host       = message['host']['username']
         self.hoster     = message['host']
@@ -220,7 +221,7 @@ class GameItem(QListWidgetItem):
         self.mods       = {}#message.get('GameMods',{})
         self.options    = message.get('options', [])
         self.numplayers = message.get('num_players', 0) 
-        self.slots      = message.get('max_players',12)
+        self.slots      = message["GameOption"].get("Slots", -1)
         
         oldstate = self.state
         self.state  = message['GameState']
@@ -256,15 +257,14 @@ class GameItem(QListWidgetItem):
             self.players.extend(self.teams[team])
 
         refresh_icon = False
-        if 'GameOption' in message:
-            if 'ScenarioFile' in message['GameOption']:
-                mapname = message['GameOption']['ScenarioFile'].split('/')[2]
-                # Map preview code
-                if self.mapname != mapname:
-                    self.mapname = mapname
-                    self.mapdisplayname = maps.getDisplayName(self.mapname)
-                    refresh_icon = True
-                    
+        if 'GameOption' in message and 'ScenarioFile' in message['GameOption']:
+            mapname = message['GameOption']['ScenarioFile'].split('/')[2]
+            # Map preview code
+            if self.mapname != mapname:
+                self.mapname = mapname
+                self.mapdisplayname = maps.getDisplayName(self.mapname)
+                refresh_icon = True
+
         #Resolve pretty display name
         self.moddisplayname = self.mod
         self.modoptions = []
@@ -294,10 +294,25 @@ class GameItem(QListWidgetItem):
         
        
         self.playerIncluded = False
-        
-        
-        if self.state == "open" :
-            if "1" in self.teams and "2" in self.teams and self.client.login != None and self.client.login not in self.teams["1"] and self.client.login not in self.teams["2"] :
+
+        self.players = []
+
+        # Set up teams
+        for slot, player in message["PlayerOption"].items():
+            slot = int(slot)
+            if slot < 0: # Spectator
+                pass
+            else: # Player
+                self.players += [player["PlayerName"]]
+                if not str(player["Team"]) in self.teams:
+                    self.teams[str(player["Team"])] = []
+                self.teams[str(player["Team"])] += [player["PlayerName"]]
+
+        self.numplayers = len(self.players)
+
+
+        if self.state == "Lobby" and  "1" in self.teams and "2" in self.teams:
+            if self.client.login != None and self.client.login not in self.teams["1"] and self.client.login not in self.teams["2"]:
                 if len(self.teams["1"]) < len(self.teams["2"]) :
                     self.teams["1"].append(self.client.login)
                     self.playerIncluded = True
@@ -306,7 +321,6 @@ class GameItem(QListWidgetItem):
                     self.teams["2"].append(self.client.login)
                     self.playerIncluded = True
 
-        if self.state == "open" and  "1" in self.teams and "2" in self.teams :
             for team in self.teams:
                 if team != "-1" :
                     self.realPlayers.extend(self.teams[team])

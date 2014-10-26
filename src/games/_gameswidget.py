@@ -738,7 +738,7 @@ class GamesWidget(FormClass, BaseClass):
             host_addr = '%s:%d' % (hostInfo['ip'], hostInfo['port'])
 
             sess.setLocalPlayer(self.client.login, qrand() % 2**16)
-            sess.setJoinGame( host_addr )
+            sess.setJoinGame( item.uid, host_addr )
 
             sess.start()
             # TODO: NAT Joins

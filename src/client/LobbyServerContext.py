@@ -117,14 +117,14 @@ from util.WebSocket import WebSocket
 
 class LobbyServerContext(QObject):
     # subsystem, command_id, args
-    messageReceived = pyqtSignal(str, str, dict)
+    messageReceived = pyqtSignal(str, str, object)
 
     # command_id, args
-    faf_auth = pyqtSignal(str, dict)
-    faf_games = pyqtSignal(str, dict)
+    faf_auth = pyqtSignal(str, object)
+    faf_games = pyqtSignal(str, object)
 
     # event_id, args
-    eventReceived = pyqtSignal(list, dict)
+    eventReceived = pyqtSignal(list, object)
 
     reconnected = pyqtSignal()
 

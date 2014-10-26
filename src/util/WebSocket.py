@@ -92,8 +92,9 @@ class WebSocket(QThread):
         try:
             while True:
                 data = self._ws.sock.recv(1024)
-                self._ws.process(data)
-
+                if not self._ws.process(data):
+                    self._ws.terminate()
+                    break
         except BlockingIOError:
             return
 
@@ -115,9 +116,12 @@ class WebSocket(QThread):
 
         self._socket_connected = False
 
+        self._read_timer.stop()
+        self._heartbeat_timer.stop()
+
         QTimer.singleShot(500, self._reconnect)
 
     def received_message(self, m_):
-        logger.info("Recv: %s", m_)
+        logger.debug("Recv: %s", m_)
 
         self.messageReceived.emit(str(m_))

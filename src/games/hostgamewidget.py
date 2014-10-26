@@ -74,7 +74,9 @@ class HostgameWidget(FormClass, BaseClass):
         self.game = GameItem(0)
         self.gamePreview.setItemDelegate(GameItemDelegate(self))
         self.gamePreview.addItem(self.game)
-        
+
+        nickname = self.parent.client.login
+
         self.message = {}
         self.message['Title'] = self.parent.gamename
         self.message['host'] = {'username':self.parent.client.login}
@@ -82,8 +84,14 @@ class HostgameWidget(FormClass, BaseClass):
 #        self.message.get('access', 'public')
         self.message['featured_mod'] = "faf"
         self.message['mapname'] = self.parent.gamemap
-        self.message['GameState'] = "open"
+        self.message['GameState'] = "Lobby"
+        self.message["GameOption"] = {"Slots": 12}
 
+        msg = self.message
+
+        msg["PlayerOption"] = {}
+        msg["PlayerOption"][1] = {"PlayerName": nickname,
+                                  "Team": 1}
         self.game.update(self.message, self.parent.client)
         
         i = 0
