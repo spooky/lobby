@@ -12,6 +12,7 @@ class GameVersion():
     def __init__(self, dict):
         self._versions = dict
 
+    @property
     def is_valid(self):
         """
         Validity means that the dictionary contains the
@@ -23,15 +24,20 @@ class GameVersion():
             return isinstance(version, Version)
 
         def valid_featured_mod(mod):
-            return valid_version(mod.version) and featured.is_featured_mod(mod)
+            return isinstance(mod, featured.FeaturedMod) \
+                   and valid_version(mod.version) and featured.is_featured_mod(mod)
 
-        valid = "binary-patch" in self._versions
-        valid = valid and "featured-mods" in self._versions
+        def valid_mod(mod):
+            return True
+
+        valid = "engine" in self._versions
+        valid = valid and "game" in self._versions
         for key,value in self._versions.iteritems():
             valid = valid and {
-                'binary-patch': lambda version: valid_version(version),
-                'featured-mods': lambda versions: any(versions)
-                                                  and all(map(lambda v: valid_featured_mod(v), versions)),
+                'engine': lambda version: valid_version(version),
+                'game': lambda mod: valid_featured_mod(mod),
+                'mods': lambda versions: any(versions)
+                                         and all(map(lambda v: valid_mod(v), versions)),
             }.get(key, lambda k: True)(value)
 
         return valid
