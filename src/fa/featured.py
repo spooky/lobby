@@ -35,6 +35,7 @@ FEATURED_MOD_TO_REPO_NAME = {
 DEFAULT_REPO_BASE = "FAForever"
 
 FeaturedMod = namedtuple('FeaturedMod', 'name version')
+Mod = namedtuple('Mod', 'name version')
 
 def checkout_featured_mod(featured_mod, featured_repo, featured_version="faf/master", repo_dir=util.REPO_DIR):
     mod_repo = git.Repository(os.path.join(repo_dir, featured_mod), featured_repo)

@@ -13,6 +13,20 @@ class GameVersion():
         self._versions = dict
 
     @property
+    def is_stable(self):
+        """
+        Stable means that this version of the game is a fixed pointer, i.e.:
+
+            No refs point to a branch and we have commit hashes
+            for every repo version.
+        :return: bool
+        """
+        return self.is_valid \
+               and self._versions['engine'].is_stable \
+               and self._versions['game'].version.is_stable \
+               and all(map(lambda x: x.version.is_stable, self._versions['mods']))
+
+    @property
     def is_valid(self):
         """
         Validity means that the dictionary contains the
