@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 import sys
 
 from PyQt5 import QtCore
+from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtNetwork import QNetworkAccessManager
@@ -135,11 +136,11 @@ class ChatWidget(FormClass, BaseClass, SimpleIRCClient):
     def connect(self):
         #Do the actual connecting, join all important channels
         try:
-            self.irc_connect(self.ircServer, self.ircPort, self.client.login, ssl=False)
+            self.irc_connect(self.ircServer, self.ircPort, self.client.login, ssl=True)
             self.timer.start()
 
-        except:
-            logger.debug("Unable to connect to IRC server.")
+        except Exception as e:
+            logger.debug("Unable to connect to IRC server: %s",e)
             self.serverLogArea.appendPlainText("Unable to connect to the chat server, but you should still be able to host and join games.")
             logger.error("IRC Exception", exc_info=sys.exc_info())
 
@@ -466,10 +467,10 @@ class ChatWidget(FormClass, BaseClass, SimpleIRCClient):
 
     def on_disconnect(self, c, e):
         if not self.canDisconnect:
-            logger.warn("IRC disconnected - reconnecting.")
+            logger.warn("IRC disconnected: %s", e.arguments()[0])
             self.identified = False
             self.timer.stop()
-            self.connect()
+            QTimer.singleShot(5*1000, self.connect)
 
     def on_privmsg(self, c, e):
         name = user2name(e.source())

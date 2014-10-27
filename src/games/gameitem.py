@@ -303,10 +303,14 @@ class GameItem(QListWidgetItem):
             if slot < 0: # Spectator
                 pass
             else: # Player
-                self.players += [player["PlayerName"]]
-                if not str(player["Team"]) in self.teams:
-                    self.teams[str(player["Team"])] = []
-                self.teams[str(player["Team"])] += [player["PlayerName"]]
+                if "PlayerName" in player:
+                    playerName = player["PlayerName"]
+                    self.players += [playerName]
+                    team = str(player["Team"])
+                    if not team in self.teams:
+                        self.teams[team] = [playerName]
+                    else:
+                        self.teams[team] += [playerName]
 
         self.numplayers = len(self.players)
 

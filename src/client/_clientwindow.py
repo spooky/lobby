@@ -524,7 +524,7 @@ class ClientWindow(FormClass, BaseClass):
         self.downloader = downloadManager.downloadManager(self)
 
         # Initialize chat
-        self.chat = None #chat.Lobby(self)
+        self.chat = chat.Lobby(self)
 
         #build main window with the now active client
         self.ladder = stats.Stats(self)

@@ -78,7 +78,7 @@ class WebSocket(QThread):
 
             self._heartbeat_timer = QTimer(self)
             self._heartbeat_timer.timeout.connect(self._heartbeat)
-            self._heartbeat_timer.start(10*60*1000)
+            self._heartbeat_timer.start(60*1000)
 
             self._socket_connected = True
         except OSError as e:

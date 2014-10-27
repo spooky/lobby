@@ -397,7 +397,6 @@ class ServerConnection(Connection):
         Connection.__init__(self, irclibobj)
         self.connected = 0  # Not connected yet.
         self.socket = None
-        self.ssl = None
 
     def connect(self, server, port, nickname, password=None, username=None,
                 ircname=None, localaddress="", localport=0, ssl=False, ipv6=False):
@@ -453,7 +452,9 @@ class ServerConnection(Connection):
             self.socket.bind((self.localaddress, self.localport))
             self.socket.connect((self.server, self.port))
             if ssl:
-                self.ssl = socket.ssl(self.socket)
+                import ssl as _ssl
+                self.socket = _ssl.wrap_socket(self.socket)
+                self.socket.do_handshake()
         except OSError as x:
             self.socket.close()
             self.socket = None
@@ -507,10 +508,7 @@ class ServerConnection(Connection):
     def process_data(self):
         """[Internal]"""
         try:
-            if self.ssl:
-                new_data = self.ssl.read(2**14)
-            else:
-                new_data = self.socket.recv(2**14)
+            new_data = self.socket.recv(2**14)
         except OSError as x:
             # The server hung up.
             self.disconnect("Connection reset by peer")
@@ -810,10 +808,7 @@ class ServerConnection(Connection):
         if self.socket is None:
             raise ServerNotConnectedError("Not connected.")
         try:
-            if self.ssl:
-                self.ssl.write((string + "\r\n").encode("utf-8"))     #FIXME utf-8 support hacked in by thygrrrc(may break in some scenarios)
-            else:
-                self.socket.send((string + "\r\n").encode("utf-8"))   #FIXME utf-8 support hacked in by thygrrr (may break in some scenarios)
+            self.socket.send((string + "\r\n").encode("utf-8"))   #FIXME utf-8 support hacked in by thygrrr (may break in some scenarios)
             if DEBUG:
                 print("TO SERVER:", string)
         except OSError as x:
