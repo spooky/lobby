@@ -737,7 +737,7 @@ class GamesWidget(FormClass, BaseClass):
 
             host_addr = '%s:%d' % (hostInfo['ip'], hostInfo['port'])
 
-            sess.setLocalPlayer(self.client.login, qrand() % 2**16)
+            sess.setLocalPlayer(self.client.login, self.client.user_id)
             sess.setJoinGame( item.uid, host_addr )
 
             sess.start()

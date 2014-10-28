@@ -1254,6 +1254,8 @@ class ClientWindow(FormClass, BaseClass):
                     self._onLoggedIn()
 
             def onSuccess(resp):
+                self.user_id = resp['user_id']
+                self.email = resp['email'] # necessary for irc register currently
                 self.session_id = resp['session_id']
                 self._onLoggedIn()
 

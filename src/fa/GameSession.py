@@ -45,7 +45,7 @@ class GameSession(QObject):
         # Session parameter defaults
         self._joinGameAddr = None
         self.gameMods = []
-        self.mapName = 'scmp_009'
+        self.mapName = None #'scmp_009'
         self.gameTitle = "No title."
         self.playerName = "Player"
         self.playerUID = 0
@@ -171,7 +171,10 @@ class GameSession(QObject):
                         self._sendFAF("open", { 'port': self.gamePort,
                                                 'title': self.gameTitle})
 
-                    self._conn.send("HostGame")#"scmp_009"])
+                    if self.mapName:
+                        self._conn.send("HostGame", self.mapName)
+                    else:
+                        self._conn.send("HostGame")
 
                 #self._conn.send("SendNatPacket", "127.0.0.1:8002", "foot")
                 #self._conn.send("HasSupcom", 0)

@@ -153,9 +153,10 @@ class HostgameWidget(FormClass, BaseClass):
 
         sess.addArg('init', 'init_test.lua')
 
-        sess.setTitle( self.message['Title'])
+        sess.setTitle(self.message['Title'])
 
-        sess.setLocalPlayer(self.client.login, 0)
+        sess.setMap(self.message["mapname"])
+        sess.setLocalPlayer(self.client.login, self.client.user_id)
 
         sess.setFAFConnection(self.client.lobby_ctx)
 

@@ -18,7 +18,7 @@ import _thread
 from queue import Queue, Empty
 
 from ws4py.client import WebSocketBaseClient
-from ws4py.messaging import PongControlMessage
+from ws4py.messaging import PingControlMessage
 
 class WebSocket(QThread):
     def __init__(self, socket_addr, parent=None):
@@ -78,7 +78,7 @@ class WebSocket(QThread):
 
             self._heartbeat_timer = QTimer(self)
             self._heartbeat_timer.timeout.connect(self._heartbeat)
-            self._heartbeat_timer.start(60*1000)
+            self._heartbeat_timer.start(30*1000)
 
             self._socket_connected = True
         except OSError as e:
@@ -86,7 +86,7 @@ class WebSocket(QThread):
             QTimer.singleShot(10*1000, self._reconnect)
 
     def _heartbeat(self):
-        self._ws.send(PongControlMessage(data='beep'))
+        self._ws.send(PingControlMessage(data='beep'))
 
     def _read_some(self):
         try:

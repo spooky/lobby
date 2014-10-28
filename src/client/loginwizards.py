@@ -89,6 +89,8 @@ class LoginWizard(QWizard):
         QMessageBox.information(self, "Login Failed", resp['statusMessage'])
 
     def _onLoginReply(self, resp):
+        self.client.user_id = resp['user_id']
+        self.client.email = resp['email'] # necessary for irc register currently
         self.client.session_id = resp["session_id"]
         QWizard.accept(self)
 
