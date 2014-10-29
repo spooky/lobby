@@ -10,7 +10,6 @@ import os
 import pygit2
 from fa import binary
 
-
 __author__ = 'Thygrrr'
 
 def test_updater_has_method_run(application):
