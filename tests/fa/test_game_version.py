@@ -23,14 +23,17 @@ VALID_GAME_VERSION_INFO = {
 def version():
     return VALID_GAME_VERSION_INFO.copy()
 
+
 def test_game_version_can_be_created_from_valid_dict():
     assert GameVersion(VALID_GAME_VERSION_INFO).is_valid
+
 
 def test_game_version_requires_valid_binary_patch_version(version):
     version.pop('engine')
     assert not GameVersion(version).is_valid
-    version['engine']  = {"a":"b"}
+    version['engine'] = {"a": "b"}
     assert not GameVersion(version).is_valid
+
 
 def test_game_version_requires_valid_featured_mods(version):
     version.pop('game')
@@ -38,12 +41,15 @@ def test_game_version_requires_valid_featured_mods(version):
     version['game'] = []
     assert not GameVersion(version).is_valid
 
+
 def test_game_version_requires_existing_featured_mods(version):
     version['game'] = FeaturedMod("non-existing-featured-mod", Version('example', 'example'))
     assert not GameVersion(version).is_valid
 
+
 def test_game_version_is_unstable_iff_contains_unstable_pointer(version):
     assert not GameVersion(version).is_stable
+
 
 def test_game_version_with_stable_pointers_is_stable(version):
     version['engine'] = Version('FAForever/binary-patch', 'master', None, 'a41659780460fd8829fce87b479beaa8ac78e474')
