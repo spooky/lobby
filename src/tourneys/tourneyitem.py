@@ -16,9 +16,10 @@
 # GNU General Public License for more details.
 #-------------------------------------------------------------------------------
 
-from PyQt5 import QtCore, QtWebKit, QtWebKitWidgets
+from PyQt5 import QtCore
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtWebKitWidgets import *
 
 import util
 
@@ -58,9 +59,9 @@ class TourneyItemDelegate(QStyledItemDelegate):
         html.setHtml(option.text)
         return QtCore.QSize(int(html.size().width()), int(html.size().height()))
 
-class QWebPageChrome(QtWebKitWidgets.QWebPage):
+class QWebPageChrome(QWebPage):
     def __init__(self, *args, **kwargs):
-        QtWebKitWidgets.QWebPage.__init__(self, *args, **kwargs)
+        QWebPage.__init__(self, *args, **kwargs)
         
     def userAgentForUrl(self, url):
         return "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.874.121 Safari/535.2"
@@ -104,7 +105,7 @@ class TourneyItem(QListWidgetItem):
         self.players        = message.get('participants', [])
 
         if old_state != self.state and self.state == "started" :
-            widget = QtWebKit.QWebView()
+            widget = QWebView()
             webPage = QWebPageChrome()
             widget.setPage(webPage)
             widget.setUrl(QtCore.QUrl(self.url))

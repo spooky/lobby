@@ -214,7 +214,8 @@ class GameItem(QListWidgetItem):
         self.title      = message['Title']
         self.host       = message['host']['username']
         self.hoster     = message['host']
-        self.teams      = {}#dict.copy(message['teams'])
+        self.teams      = {}
+        self.observers  = []
         self.access     = message.get('access', 'public')
         self.mod        = 'faf'#message['featured_mod']
         self.modVersion = message.get('featured_mod_versions', [])
@@ -251,10 +252,6 @@ class GameItem(QListWidgetItem):
         if self.state == "closed":
             client.usersUpdated.emit(self.players)
             return
-            
-        self.players = []
-        for team in self.teams:
-            self.players.extend(self.teams[team])
 
         refresh_icon = False
         if 'GameOption' in message and 'ScenarioFile' in message['GameOption']:
@@ -301,12 +298,14 @@ class GameItem(QListWidgetItem):
         for slot, player in message["PlayerOption"].items():
             slot = int(slot)
             if slot < 0: # Spectator
-                pass
+                if "PlayerName" in player:
+                    playerName = player["PlayerName"]
+                    self.observers += [playerName]
             else: # Player
                 if "PlayerName" in player:
                     playerName = player["PlayerName"]
                     self.players += [playerName]
-                    team = str(player["Team"])
+                    team = player["Team"]
                     if not team in self.teams:
                         self.teams[team] = [playerName]
                     else:
@@ -314,75 +313,74 @@ class GameItem(QListWidgetItem):
 
         self.numplayers = len(self.players)
 
+        def ratingFromUser(user_info):
+            return Rating(user_info.rating.mean, user_info.rating.deviation)
 
-        if self.state == "Lobby" and  "1" in self.teams and "2" in self.teams:
-            if self.client.login != None and self.client.login not in self.teams["1"] and self.client.login not in self.teams["2"]:
-                if len(self.teams["1"]) < len(self.teams["2"]) :
-                    self.teams["1"].append(self.client.login)
+        if self.state == "Lobby" and 1 in self.teams and 2 in self.teams:
+            if all(map(lambda t: self.client.login not in t, self.teams.values())):
+                if len(self.teams[1]) < len(self.teams[2]) :
+                    self.teams[1].append(self.client.login)
                     self.playerIncluded = True
 
-                elif len(self.teams["1"]) > len(self.teams["2"]) :
-                    self.teams["2"].append(self.client.login)
+                elif len(self.teams[1]) > len(self.teams[2]) :
+                    self.teams[2].append(self.client.login)
                     self.playerIncluded = True
 
-            for team in self.teams:
-                if team != "-1" :
-                    self.realPlayers.extend(self.teams[team])
-                    if team == 0 :
-                        for player in self.teams[team] :
-                            curTeam = Team()
-                            if player in self.client.players :
-                                mean = self.client.players[player]["rating_mean"]
-                                dev = self.client.players[player]["rating_deviation"]
-                                curTeam.addPlayer(player, Rating(mean, dev))
-                            else :
-                                self.invalidTS = True
-                            self.teamsTrueskill.append(curTeam)
-                    else :
+            for team, players in self.teams.items():
+                self.realPlayers.extend(self.teams[team])
+                if team == 0:
+                    for player in players:
                         curTeam = Team()
-
-                        if team == "1" and (len(self.teams["1"]) < len(self.teams["2"])) and self.playerIncluded == True :
-                            if self.client.login in self.client.players :
-                                curTeam.addPlayer(self.client.login, Rating(self.client.players[self.client.login]["rating_mean"], self.client.players[self.client.login]["rating_deviation"]))
-                        
-                        if team == "2" and (len(self.teams["1"]) > len(self.teams["2"])) and self.playerIncluded == True :
-                            if self.client.login in self.client.players :
-                                curTeam.addPlayer(self.client.login, Rating(self.client.players[self.client.login]["rating_mean"], self.client.players[self.client.login]["rating_deviation"]))
-
-
-                        for player in self.teams[team] :          
-                            if player in self.client.players :
-                                if self.client.isFoe(player) :
-                                    self.hasFoe = True
-                                mean = self.client.players[player]["rating_mean"]
-                                dev = self.client.players[player]["rating_deviation"]
-                                curTeam.addPlayer(player, Rating(mean, dev))
-                            else :
-                                self.invalidTS = True
-                                
-
+                        playerInfo = self.client.getUser(player)
+                        if playerInfo.rating:
+                            curTeam.addPlayer(player, ratingFromUser(playerInfo))
+                        else:
+                            self.invalidTS = True
                         self.teamsTrueskill.append(curTeam)
+                else:
+                    curTeam = Team()
+
+                    for player in players:
+                        playerInfo = self.client.getUser(player)
+
+                        if self.client.isFoe(player) :
+                            self.hasFoe = True
+
+                        if playerInfo.rating:
+                            curTeam.addPlayer(player, ratingFromUser(playerInfo))
+                        else :
+                            self.invalidTS = True
+
+
+                    self.teamsTrueskill.append(curTeam)
+
+
+            if self.playerIncluded == True:
+                ourInfo = self.client.getUser(self.client.login)
+                if ourInfo.rating:
+                    if len(self.teams[1]) < len(self.teams[2]):
+                        self.teamsTrueskill[0].addPlayer(self.client.login,
+                                                           ratingFromUser(ourInfo))
+
+                    elif len(self.teams[1]) > len(self.teams[2]):
+                        self.teamsTrueskill[1].addPlayer(self.client.login,
+                                                           ratingFromUser(ourInfo))
+
                     
-                # computing game quality :
-                if len(self.teamsTrueskill) > 1 and self.invalidTS == False :
-                    self.nTeams = 0
-                    for t in self.teams :
-                        if int(t) != -1 :
-                            self.nTeams += 1
+            # computing game quality :
+            if len(self.teamsTrueskill) > 1 and self.invalidTS == False:
+                self.nTeams = len(self.teams)
 
-                    realPlayers = len(self.realPlayers)
+                realPlayers = len(self.realPlayers)
 
-                    if realPlayers % self.nTeams == 0 :
-
-                        gameInfo = GameInfo()
-                        calculator = FactorGraphTrueSkillCalculator()
-                        gamequality = calculator.calculateMatchQuality(gameInfo, self.teamsTrueskill)
-                        if gamequality < 1 :
-                            self.gamequality = round((gamequality * 100), 2)
-
-        strQuality = ""
+                if realPlayers % self.nTeams == 0:
+                    gameInfo = GameInfo()
+                    calculator = FactorGraphTrueSkillCalculator()
+                    gamequality = calculator.calculateMatchQuality(gameInfo, self.teamsTrueskill)
+                    if gamequality < 1 :
+                        self.gamequality = round((gamequality * 100), 2)
         
-        if self.gamequality == 0 :
+        if self.gamequality == 0:
             strQuality = "? %"
         else :
             strQuality = str(self.gamequality)+" %"
@@ -407,11 +405,12 @@ class GameItem(QListWidgetItem):
                 color = client.getUserColor(player)
 
         self.editTooltip()
-        
-        
 
         if self.mod == "faf" and not self.mods:
-            self.setText(self.FORMATTER_FAF.format(color=color, mapslots = self.slots, mapdisplayname=self.mapdisplayname, title=self.title, host=self.host, players=self.numplayers, playerstring=playerstring, gamequality = strQuality, playerincluded = self.playerIncludedTxt))
+            self.setText(self.FORMATTER_FAF.format(color=color, mapslots = self.slots, mapdisplayname=self.mapdisplayname,
+                                                   title=self.title, host=self.host, players=self.numplayers,
+                                                   playerstring=playerstring, gamequality = strQuality,
+                                                   playerincluded = self.playerIncludedTxt))
         else:
             if not self.mods:
                 modstr = self.mod
@@ -419,17 +418,20 @@ class GameItem(QListWidgetItem):
                 if self.mod == 'faf': modstr = ", ".join(list(self.mods.values()))
                 else: modstr = self.mod + " & " + ", ".join(list(self.mods.values()))
                 if len(modstr) > 20: modstr = modstr[:15] + "..."
-            self.setText(self.FORMATTER_MOD.format(color=color, mapslots = self.slots, mapdisplayname=self.mapdisplayname, title=self.title, host=self.host, players=self.numplayers, playerstring=playerstring, gamequality = strQuality, playerincluded = self.playerIncludedTxt, mod=modstr))
+            self.setText(self.FORMATTER_MOD.format(color=color, mapslots = self.slots, mapdisplayname=self.mapdisplayname,
+                                                   title=self.title, host=self.host, players=self.numplayers,
+                                                   playerstring=playerstring, gamequality = strQuality,
+                                                   playerincluded = self.playerIncludedTxt, mod=modstr))
         
         if self.uid == 0:
             return
                 
         #Spawn announcers: IF we had a gamestate change, show replay and hosting announcements 
         if (oldstate != self.state):            
-            if (self.state == "playing"):
-                QtCore.QTimer.singleShot(5*60000, self.announceReplay) #The delay is there because we have a 5 minutes delay in the livereplay server
-            elif (self.state == "open"):
-                QtCore.QTimer.singleShot(35000, self.announceHosting)   #The delay is there because we currently the host needs time to choose a map
+            if (self.state == "Live"):
+                QTimer.singleShot(5*60000, self.announceReplay) #The delay is there because we have a 5 minutes delay in the livereplay server
+            elif (self.state == "Lobby"):
+                QTimer.singleShot(0, self.announceHosting)   #The delay is there because we currently the host needs time to choose a map
 
         # Update player URLs
         for player in self.players:
@@ -442,94 +444,69 @@ class GameItem(QListWidgetItem):
         
         
     def editTooltip(self):
-        
-        observerlist    = []
-        teamlist        = []
 
-        teams = ""
+        def teamsGenerator(teams):
+            yield '<table border="0" cellpadding="0" cellspacing="5"><tr>'
+            first = True
+            for team_id, team in teams.items():
+                if first:
+                    first = False
+                else:
+                    yield '<td><b>VS</b></td>'
+                yield '<td><table>'
+                for player in team:
+                    yield "<tr>"
 
-        i = 0
-        for team in self.teams:
-            
-            if team != "-1" :
-                i = i + 1
-                teamtxt = "<table>"
+                    playerInfo = self.client.getUser(player)
 
-                    
-                teamDisplay    = []
-                for player in self.teams[team] :
-                    displayPlayer = ""
-                    if player in self.client.players :
-                        
-                        playerStr = player
-                        
-                        if player == self.client.login :
-                            playerStr = ("<b><i>%s</b></i>" % player)
-                            
-                        dev     = self.client.players[player]["rating_deviation"]
-                        if dev < 200 :
-                            playerStr += " ("+str(self.client.getUserRanking(player))+")"
+                    if playerInfo.country:
+                        country = os.path.join(util.COMMON_DIR, "chat/countries/%s.png" % playerInfo.country.lower())
+                        yield '<td width="16"><img src="%s" width="16"></td>' % country
+                    else:
+                        yield "<td></td>"
 
-                        if i == 1 :
-                            displayPlayer = ("<td align = 'left' valign='center' width = '150'>%s</td>" % playerStr)
-                        elif i == self.nTeams :
-                            displayPlayer = ("<td align = 'right' valign='center' width = '150'>%s</td>" % playerStr)
-                        else :
-                            displayPlayer = ("<td align = 'center' valign='center' width = '150'>%s</td>" % playerStr)
-                        
-                        
-                        country = os.path.join(util.COMMON_DIR, "chat/countries/%s.png" % self.client.players[player]["country"].lower())
-                        
-                        if i == self.nTeams : 
-                            displayPlayer += '<td width="16"><img src = "'+country+'" width="16" height="16"></td>'
-                        else :
-                            displayPlayer = '<td width="16"><img src = "'+country+'" width="16" height="16"></td>' + displayPlayer
-                            
-                    else :
-                        if i == 1 :
-                            displayPlayer = ("<td align = 'left' valign='center' width = '150'>%s</td>" % player)
-                        elif i == self.nTeams :
-                            displayPlayer = ("<td align = 'right' valign='center' width = '150'>%s</td>" % player)
-                        else :
-                            displayPlayer = ("<td align = 'center' valign='center' width = '150'>%s</td>" % player)
-                        
+                    if player == self.client.login:
+                        yield "<td><b><i>%s</i></b></td>" % player
+                    else:
+                        yield "<td>%s</td>" % player
 
-                        
-                    display = ("<tr>%s</tr>" % displayPlayer)
-                    teamDisplay.append(display)
-                        
-                members = "".join(teamDisplay)
-                
-                teamlist.append("<td>" +teamtxt + members + "</table></td>")
-                
-                    
-                
-            else :
-                observerlist.append(",".join(self.teams[team]))
+                    if playerInfo.rating and playerInfo.rating.deviation < 200 :
+                        yield "<td>(%d)</td>" % playerInfo.rating.deviation
+                    else:
+                        yield "<td></td>"
+                    yield "</tr>"
+                yield '</table></td>'
 
-        teams += "<td valign='center' height='100%'><font valign='center' color='black' size='+5'>VS</font></td>".join(teamlist)
+            yield "</tr></table>"
 
-        self.numplayers = self.numplayers - len(observerlist)
+        def tooltipGenerator(teams, observers, options, mods):
+            for x in teamsGenerator(teams):
+                yield x
 
-        observers = ""
-        if len(observerlist) != 0 :
-            observers = "Observers : "
-            observers += ",".join(observerlist)        
+            if observers:
+                yield "Observers: "
+                yield ", ".join(observers)
 
-        mods = "" 
-        if len(self.modoptions)!= 0 and len(self.modoptions) == len(self.options):
-            mods  += "<br/>Options :<br/>"
-   
-            for i in range(len(self.modoptions)) :
-                mods += self.modoptions[i]
-                if self.options[i] == True :                  
-                    mods += ": On<br/>"
-                else :
-                    mods += ": Off<br/>"
+            if len(options):
+                yield "<br/>Options :<br/>"
 
-        if self.mods: mods += "<br/><br/>With " + "<br/>".join(list(self.mods.values()))
+                for opt, val in options.items():
+                    on = "On" if val else "Off"
+                    yield "%s: %s<br/>" % (opt, on)
 
-        self.setToolTip(self.FORMATTER_TOOL.format(teams = teams, observers=observers, mods = mods)) 
+            if mods:
+                yield "<br/><br/>With "
+
+                yield "<br/>".join(mods.values())
+
+        options = {}
+        for i in range(len(self.modoptions)):
+            options[self.modoptions[i]] = self.options[i]
+
+        html = "".join(tooltipGenerator(self.teams, self.observers, options, self.mods))
+        self.setToolTip(html)
+
+        return
 
     def permutations(self, items):
         """Yields all permutations of the items."""

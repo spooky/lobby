@@ -237,7 +237,10 @@ class Chatter(QTableWidgetItem):
         else:
                 self.rankItem.setIcon(util.icon("chat/rank/civilian.png"))
                 self.rankItem.setToolTip("IRC User")
-            
+
+    def update(self):
+        self.userInfo.update()
+
     def joinChannel(self):
         channel, ok = QInputDialog.getText(self.lobby.client, "QInputDialog.getText()", "Channel :", QLineEdit.Normal, "#tournament")
         if ok and channel != '':
