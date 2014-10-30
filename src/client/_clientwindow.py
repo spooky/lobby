@@ -58,6 +58,8 @@ import notificatation_system as ns
 
 from .LobbyServerContext import LobbyServerContext
 
+from .UserService import UserInfo
+
 from . import loginwizards
 
 try:
@@ -328,6 +330,7 @@ class ClientWindow(FormClass, BaseClass):
         #Verrry important step!
         self.loadSettingsPrelogin()
 
+        self.users = {}
         self.players = {}       # Player names known to the client, contains the player_info messages sent by the server
         self.urls = {}          # user game location URLs - TODO: Should go in self.players
 
@@ -1238,9 +1241,9 @@ class ClientWindow(FormClass, BaseClass):
 
             self._login_reply = reply = AuthService.Login(self.login, self.password)
 
-            def onError():
+            def onError(resp):
                 self.password = None
-                QMessageBox.information(self, "Auto-login failed", "Did your nickname or password change?")
+                QMessageBox.information(self, "Auto-login failed", resp["statusMessage"])
 
                 self.autologin = False
                 self.password = None
@@ -1385,6 +1388,17 @@ class ClientWindow(FormClass, BaseClass):
     # CAVEAT: This will break if the theme is loaded after the client package is imported
     colors = json.loads(util.readfile("client/colors.json"))
     randomcolors = json.loads(util.readfile("client/randomcolors.json"))
+
+    def getUser(self, id_or_name):
+        try:
+            return self.users[id_or_name]
+        except KeyError:
+            user = UserInfo(id_or_name)
+            user.update()
+
+            self.users[id_or_name] = user
+
+            return user
 
     def getUserClan(self, name):
         '''

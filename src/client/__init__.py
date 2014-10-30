@@ -44,6 +44,7 @@ GAME_TEST_PORT = 8002
 # Service URLs
 AUTH_SERVICE_URL = "http://faforever.tk:44343/auth"
 GAMES_SERVICE_URL = "http://faforever.tk:8080/games"
+USER_SERVICE_URL = "http://faforever.tk:8080/user"
 
 # Important URLs
 MUMBLE_URL = "mumble://{login}@faforever.com/Games?version=1.2.0" 

@@ -56,13 +56,16 @@ class Chatter(QTableWidgetItem):
             self.elevation = None
 
         self.name = user2name(user)
-        
+
+        self.userInfo = client.instance.getUser(self.name)
+        self.userInfo.updated.connect(self.onUpdate)
+
         self.avatar = None
         self.status = None
         self.rating = None
         self.country = None
         self.league = None
-        self.clan = ""
+        self.clan = None
         self.avatarTip = ""
         
         self.setup()
@@ -94,7 +97,7 @@ class Chatter(QTableWidgetItem):
         self.parent.setItem(self.row(), Chatter.AVATAR_COLUMN, self.avatarItem)
         self.parent.setItem(self.row(), Chatter.STATUS_COLUMN, self.statusItem)
 
-        self.update()        
+        self.onUpdate(self.userInfo)
 
 
     def isFiltered(self, filter):
@@ -141,8 +144,8 @@ class Chatter(QTableWidgetItem):
     def updateAvatar(self):
         if self.avatar:        
             
-            self.avatarTip = self.avatar["tooltip"]           
-            url = self.avatar["url"]
+            self.avatarTip = self.avatar.tooltip
+            url = self.avatar.url
             
             
             avatarPix = util.respix(url) 
@@ -157,29 +160,27 @@ class Chatter(QTableWidgetItem):
             # No avatar set.
             self.avatarItem.setIcon(QIcon())
             self.avatarItem.setToolTip(None)
-            
-                        
-                            
-    def update(self):
+
+    def onUpdate(self, userInfo):
         '''
         updates the appearance of this chatter in the nicklist according to its lobby and irc states 
-        '''        
+        '''
+        avatar = userInfo.avatar
+        country = userInfo.country
+        self.clan = userInfo.clan or ""
 
-        country = self.lobby.client.getUserCountry(self.name)
-
-        if  country != None :
+        if country:
             self.setIcon(util.icon("chat/countries/%s.png" % country.lower()))
             self.setToolTip(country)
-            
-        
-        if self.lobby.client.getUserAvatar(self.name) != self.avatar:            
-            self.avatar = self.lobby.client.getUserAvatar(self.name)
+
+        if avatar != self.avatar:
+            self.avatar = avatar
             self.updateAvatar()
 
-        self.rating = self.lobby.client.getUserRanking(self.name)
+        if userInfo.rating:
+            self.rating = userInfo.rating.readable()
 
-        self.clan = self.lobby.client.getUserClan(self.name)
-        if self.clan != "":
+        if self.clan:
             self.setText("[%s]%s" % (self.clan,self.name))
 
         # Color handling
@@ -190,8 +191,6 @@ class Chatter(QTableWidgetItem):
                 self.setForeground(QColor(self.lobby.client.getColor(self.name)))
             else :
                 self.setForeground(QColor(self.lobby.client.getUserColor(self.name)))
-
-        rating = self.rating
 
         # Status icon handling
         if self.name in client.instance.urls:
@@ -206,30 +205,29 @@ class Chatter(QTableWidgetItem):
         else:
                 self.statusItem.setIcon(QIcon())
                 self.statusItem.setToolTip("Idle")
-            
 
         #Rating icon choice
         #TODO: These are very basic and primitive
-        if rating != None:            
-                league = self.lobby.client.getUserLeague(self.name)
-                
-                self.rankItem.setToolTip("Global Rating: " + str(int(rating)))  
-                
+        if self.rating != None:
+                self.rankItem.setToolTip("Global Rating: %d" % self.rating)
+
+                league = userInfo.league.league
+                division = userInfo.league.division
                 if league != None :        
-                    self.rankItem.setToolTip("Division : " + league["division"]+ "\nGlobal Rating: " + str(int(rating)))
-                    if league["league"] == 1 :
+                    self.rankItem.setToolTip("Division: %s" % division+ "\nGlobal Rating: %s" % self.rating)
+                    if league == 1 :
                         self.league = "chat/rank/Aeon_Scout.png"
                         self.rankItem.setIcon(util.icon("chat/rank/Aeon_Scout.png"))
-                    elif league["league"] == 2 :
+                    elif league == 2 :
                         self.league = "chat/rank/Aeon_T1.png"
                         self.rankItem.setIcon(util.icon("chat/rank/Aeon_T1.png"))
-                    elif league["league"] == 3 :
+                    elif league == 3 :
                         self.league = "chat/rank/Aeon_T2.png"
                         self.rankItem.setIcon(util.icon("chat/rank/Aeon_T2.png"))
-                    elif league["league"] == 4 :
+                    elif league == 4 :
                         self.league = "chat/rank/Aeon_T3.png"
                         self.rankItem.setIcon(util.icon("chat/rank/Aeon_T3.png"))
-                    elif league["league"] == 5 :                
+                    elif league == 5 :
                         self.league = "chat/rank/Aeon_XP.png"        
                         self.rankItem.setIcon(util.icon("chat/rank/Aeon_XP.png"))
                 else :

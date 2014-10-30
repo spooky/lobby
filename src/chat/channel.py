@@ -502,9 +502,7 @@ class Channel(FormClass, BaseClass):
 
         if name not in self.chatters:
             item = Chatter(self.nickList, user, self.lobby, None)                        
-            self.chatters[name] = item        
-            
-        self.chatters[name].update()
+            self.chatters[name] = item
 
         self.updateUserCount()
         
