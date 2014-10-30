@@ -114,8 +114,9 @@ class StatsWidget(BaseClass, FormClass):
         
     def createDivisionsTabs(self, divisions):
         userDivision = ""
-        if  self.client.getUserLeague(self.client.login) :
-            userDivision = self.client.getUserLeague(self.client.login)["division"]
+        league = self.client.getUser(self.client.login).league
+        if league:
+            userDivision = league.division
        
         pages = QTabWidget()
 
@@ -227,9 +228,10 @@ class StatsWidget(BaseClass, FormClass):
     def updating(self):
     
         self.client.statsServer.send(dict(command="stats", type="ladder_maps"))
-    
-        if  self.client.getUserLeague(self.client.login) :
-            self.leagues.setCurrentIndex(self.client.getUserLeague(self.client.login)["league"]-1)
+
+        league = self.client.getUser(self.client.login).league
+        if league:
+            self.leagues.setCurrentIndex(league.league-1)
         else :
             self.leagues.setCurrentIndex(0)
             self.client.statsServer.send(dict(command="stats", type="league_table", league=1))

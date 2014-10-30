@@ -251,27 +251,31 @@ class Channel(FormClass, BaseClass):
                 cursor.movePosition(QTextCursor.Down, QTextCursor.KeepAnchor, CHAT_REMOVEBLOCK)
                 cursor.removeSelectedText()
                 self.lines = self.lines - CHAT_REMOVEBLOCK
-            
+
+            if name in self.chatters:
+                chatter = self.chatters[name]
+            else:
+                chatter = None
+
             avatar = None
             
             displayName = name
-            
+
             if self.lobby.client.isFoe(name) :
                 text = self.quackerize(text)
-            
-            clan = self.lobby.client.getUserClan(name)
-            if clan != "":
-                displayName = "<b>[%s]</b>%s" % (clan, name)
+
+            if chatter:
+                if chatter.clan != "":
+                    displayName = "<b>[%s]</b>%s" % (chatter.clan, name)
             
             if name.lower() in self.lobby.specialUserColors:
                 color = self.lobby.specialUserColors[name.lower()]
             else:
-                if name in self.chatters:
-                    chatter = self.chatters[name]                
+                if chatter:
                     color = chatter.foreground().color().name()
                     if chatter.avatar:
-                        avatar = chatter.avatar["url"] 
-                        avatarTip = chatter.avatarTip or ""
+                        avatar = chatter.avatar.url
+                        avatarTip = chatter.avatar.tooltip
                     
                 else:
                     color = self.lobby.client.getUserColor(name) #Fallback and ask the client. We have no Idea who this is.
@@ -329,8 +333,13 @@ class Channel(FormClass, BaseClass):
                 cursor.movePosition(QTextCursor.Start)
                 cursor.movePosition(QTextCursor.Down, QTextCursor.KeepAnchor, CHAT_REMOVEBLOCK)
                 cursor.removeSelectedText()
-                self.lines = self.lines - CHAT_REMOVEBLOCK        
-            
+                self.lines = self.lines - CHAT_REMOVEBLOCK
+
+            if name in self.chatters:
+                chatter = self.chatters[name]
+            else:
+                chatter = None
+
             if server_action :
                 color = self.lobby.client.getColor("server")
             elif name.lower() in self.lobby.specialUserColors:
@@ -343,17 +352,14 @@ class Channel(FormClass, BaseClass):
                 self.pingWindow()
     
             displayName = name
-            clan = self.lobby.client.getUserClan(name)
-            if clan != "":
-                displayName = "<b>[%s]</b>%s" % (clan, name)
+            if chatter and chatter.clan != "":
+                displayName = "<b>[%s]</b>%s" % (chatter.clan, name)
     
             avatar = None
     
-            if name in self.chatters:
-                chatter = self.chatters[name]                
-                if chatter.avatar :
-                    avatar = chatter.avatar["url"] 
-                    avatarTip = chatter.avatarTip or ""
+            if chatter and chatter.avatar:
+                avatar = chatter.avatar.url
+                avatarTip = chatter.avatar.tooltip
                 
             # scroll if close to the last line of the log
             scroll_current = self.chatArea.verticalScrollBar().value()
@@ -363,7 +369,7 @@ class Channel(FormClass, BaseClass):
             cursor.movePosition(QTextCursor.End)
             self.chatArea.setTextCursor(cursor)
     
-            if avatar :
+            if avatar:
                 pix = util.respix(avatar)
                 if pix:            
                     if not self.chatArea.document().resource(QTextDocument.ImageResource, QtCore.QUrl(avatar)) :

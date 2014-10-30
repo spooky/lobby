@@ -1389,7 +1389,7 @@ class ClientWindow(FormClass, BaseClass):
         '''
         Convenience function for other modules to inquire about a user's civilian status.
         '''
-        return name in self.players or name == self.login
+        return self.getUser(name).id or name == self.login
 
 
 
@@ -1408,48 +1408,6 @@ class ClientWindow(FormClass, BaseClass):
             self.users[id_or_name] = user
 
             return user
-
-    def getUserClan(self, name):
-        '''
-        Returns a user's clan if any
-        '''
-        if name in self.players:
-            if "clan" in self.players[name]:
-                return self.players[name]["clan"]
-        return ""
-
-    def getUserLeague(self, name):
-        '''
-        Returns a user's league if any
-        '''
-        if name in self.players:
-            if "league" in self.players[name] :
-                return self.players[name]["league"]
-
-
-        return None
-
-    def getUserCountry(self, name):
-        '''
-        Returns a user's country if any
-        '''
-        if name in self.players:
-            if "country" in self.players[name] :
-                return self.players[name]["country"]
-
-
-        return None
-
-    def getUserAvatar(self, name):
-        '''
-        Returns a user's avatar if any
-        '''
-        if name in self.players:
-            return self.players[name]["avatar"]
-        else:
-            return None
-
-
     def getUserColor(self, name):
         '''
         Returns a user's color depending on their status with relation to the FAF client
@@ -1460,7 +1418,7 @@ class ClientWindow(FormClass, BaseClass):
             return self.getColor("friend")
         elif name in self.foes:
             return self.getColor("foe")
-        elif name in self.players:
+        elif self.isPlayer(name):
             if self.coloredNicknames:
                 return self.getRandomColor(name)
             else:
@@ -1482,20 +1440,6 @@ class ClientWindow(FormClass, BaseClass):
             return self.colors[name]
         else:
             return self.colors["default"]
-
-
-
-    def getUserRanking(self, name):
-        '''
-        Returns a user's ranking (trueskill rating) as a float.
-        '''
-        if name in self.players:
-
-            return int(max(0, round((self.players[name]["rating_mean"] - 3 * self.players[name]["rating_deviation"])/100.0)*100))
-        else:
-            return None
-
-
 
     @QtCore.pyqtSlot()
     def startedFA(self):
