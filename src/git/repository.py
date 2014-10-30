@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 from PyQt4 import QtCore, QtGui
 
+
 class Repository(QtCore.QObject):
 
     transfer_progress_value = QtCore.pyqtSignal(int)
@@ -84,7 +85,14 @@ class Repository(QtCore.QObject):
         QtGui.QApplication.processEvents()
 
     def has_hex(self, hex):
-        return self.repo.__contains__(hex)
+        return hex in self.repo
+
+    def has_version(self, version):
+        ref_object = self.repo.get(self.repo.lookup_reference("refs/tags/"+version.ref).target)
+        if isinstance(ref_object, pygit2.Tag):
+            if ref_object.target:
+                return self.has_hex(version.hash) and ref_object.target.hex == version.hash
+        return False
 
     def has_version(self, version):
         ref_object = self.repo.get(self.repo.lookup_reference("refs/tags/"+version.ref).target)

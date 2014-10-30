@@ -2,7 +2,7 @@ import pytest
 import py
 import os
 import pygit2
-from git import Repository,Version
+from git import Repository, Version
 
 __author__ = 'Thygrrr'
 
@@ -154,6 +154,7 @@ def test_retrieves_correct_hex_on_tag_checkout(prefetched_repo):
 def test_retrieves_correct_hex_on_branch_checkout(prefetched_repo):
     prefetched_repo.checkout(TEST_BRANCH)
     assert prefetched_repo.current_head.hex == TEST_BRANCH_COMMIT
+
 
 def test_repo_has_version(prefetched_repo):
     prefetched_repo.checkout(TEST_TAG)
