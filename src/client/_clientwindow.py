@@ -207,6 +207,7 @@ class ClientWindow(FormClass, BaseClass):
         #self.lobby_ctx = LobbyServerContext()
         self.lobby_ctx = LobbyServerContext("ws://%s:8080/notify/ws" % LOBBY_HOST, self)
 
+        self.lobby_ctx.reconnected.connect(self._onPushReconnected)
         self.lobby_ctx.reconnected.connect(lambda: self.push_reconnected.emit())
 
         self.lobby_ctx.eventReceived.connect(self._event_dispatch)
@@ -331,14 +332,12 @@ class ClientWindow(FormClass, BaseClass):
         self.loadSettingsPrelogin()
 
         self.users = {}
-        self.players = {}       # Player names known to the client, contains the player_info messages sent by the server
         self.urls = {}          # user game location URLs - TODO: Should go in self.players
 
         self.friends = []       # names of the client's friends
         self.foes = []       # names of the client's foes
 
         self.power = 0          # current user power
-        self.email = None
         self.coloredNicknames = False
         #Initialize the Menu Bar according to settings etc.
         self.initMenus()
@@ -357,6 +356,11 @@ class ClientWindow(FormClass, BaseClass):
 
         QtWebKit.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.PluginsEnabled, True)
 
+        # User information
+
+        self.user_id = None
+        self.email = None
+        self.session_id = None
 
         #for moderator
         self.modMenu = None
@@ -1346,6 +1350,11 @@ class ClientWindow(FormClass, BaseClass):
             # A more profound error has occurrect (cancellation or disconnection)
             return False
 
+    def _onPushReconnected(self):
+        self.lobby_ctx.sendNotify('subscribe', 'games')
+
+        if self.session_id:
+            self.lobby_ctx.sendMessage("auth", "login", self.session_id)
 
 
 
