@@ -720,7 +720,7 @@ class GamesWidget(FormClass, BaseClass):
         passw = None
 
         if fa.check.check('faf', item.mapname, None, item.mods):
-            from fa.GameSession import GameSession
+            from session import GameSession
             self.client.game_session = sess = GameSession()
 
             sess.addArg('windowed', 1024, 768)

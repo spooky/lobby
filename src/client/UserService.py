@@ -1,5 +1,5 @@
 
-from .IRESTService import IRESTService
+from session.IRESTService import IRESTService
 
 from client import USER_SERVICE_URL
 

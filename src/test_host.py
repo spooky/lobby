@@ -1,6 +1,12 @@
 import sys
+try:
+    import signal
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+except ImportError:
+    pass
+
 from PyQt5.QtCore import QCoreApplication
-from session import LobbyServerContext, GameSession, AuthService, LOBBY_HOST, LOBBY_PORT
+from session import AuthService, LobbyServerContext, GameSession, LOBBY_HOST, LOBBY_PORT
 
 
 def login(login, password):
@@ -39,11 +45,10 @@ def main():
     response = login(user, password)
 
     def on_done(body):
-        print(body)
-
         lobby_ctx = init_context(app, body['session_id'])
 
         sess = GameSession(app)
+        sess.setFAFConnection(lobby_ctx)
 
         sess.addArg('showlog')
         sess.addArg('mean', 1000)
@@ -55,7 +60,6 @@ def main():
         sess.setMap('scmp_009')
         sess.setLocalPlayer(user, body['user_id'])
 
-        sess.setFAFConnection(lobby_ctx)
         sess.start()
 
     response.done.connect(on_done)

@@ -30,7 +30,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import util
-from .AuthService import AuthService
+from session.AuthService import AuthService
 
 
 PASSWORD_RECOVERY_URL = "http://www.faforever.com/faf/forgotPass.php"

@@ -138,7 +138,7 @@ class HostgameWidget(FormClass, BaseClass):
         self.modList.itemClicked.connect(self.modclicked)
 
     def _onHostButtonClicked(self):
-        from fa.GameSession import GameSession
+        from session.GameSession import GameSession
 
         from fa.check import check
 

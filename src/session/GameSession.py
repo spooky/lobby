@@ -8,8 +8,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtNetwork import *
 
-# from client import instance as client
-from . import GAME_PORT_DEFAULT, BIN_DIR, LOG_FILE_GAME, LOG_FILE_REPLAY
+# TODO: THIS IS VERY VERY WEAK - importing the client module instantiates ClientWindow class 
+import client
+import settings
 
 import logging
 logger = logging.getLogger(__name__)
@@ -36,8 +37,8 @@ class GameSession(QObject):
         self._proc.readyReadStandardOutput.connect(self._onReadyReadStandardOutput)
         self._proc.readyReadStandardError.connect(self._onReadyReadStandardError)
 
-        # self.gamePort = client.gamePort
-        self.gamePort = GAME_PORT_DEFAULT
+        self.gamePort = client.instance.gamePort
+        # self.gamePort = settings.GAME_PORT_DEFAULT
 
         self._GameState = None
         self._arguments = dict()
@@ -106,7 +107,7 @@ class GameSession(QObject):
     # Start the session (FA)
     def start(self, program=None):
 
-        program = program or path.join(BIN_DIR, "ForgedAlliance.exe")
+        program = program or path.join(settings.BIN_DIR, 'ForgedAlliance.exe')
 
         logger.info("Launching FA: %s", program)
         arguments = []
@@ -118,7 +119,7 @@ class GameSession(QObject):
 
         logger.info("Launching FA: %s", arguments)
 
-        self._proc.setWorkingDirectory(BIN_DIR)
+        self._proc.setWorkingDirectory(settings.BIN_DIR)
 
         if os.name != 'nt':
             # Naive Wine cross-platform
@@ -225,7 +226,7 @@ class GameSession(QObject):
     def Matchmaker():
         session = GameSession()
 
-        session.addArg("log", LOG_FILE_GAME)
+        session.addArg('log', settings.LOG_FILE_GAME)
 
         return session
 
@@ -235,7 +236,7 @@ class GameSession(QObject):
 
         session.setJoinGame(joinGameURL)
 
-        session.addArg("log", LOG_FILE_GAME)
+        session.addArg('log', settings.LOG_FILE_GAME)
 
         return session
 
@@ -243,6 +244,6 @@ class GameSession(QObject):
     def _Replay_faf_v1():
         session = GameSession()
 
-        session.addArg("log", LOG_FILE_REPLAY)
+        session.addArg('log', settings.LOG_FILE_REPLAY)
 
         return session

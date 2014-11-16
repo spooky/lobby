@@ -1,7 +1,6 @@
-
+import settings
 from .IRESTService import IRESTService
 
-from . import AUTH_SERVICE_URL
 
 class AuthService(IRESTService):
     @staticmethod
@@ -11,7 +10,7 @@ class AuthService(IRESTService):
                     'username': username,
                     'password': password}
 
-        return IRESTService._post(AUTH_SERVICE_URL + "/register", postData)
+        return IRESTService._post(settings.AUTH_SERVICE_URL + "/register", postData)
 
     @staticmethod
     def Login(username, password):
@@ -19,4 +18,4 @@ class AuthService(IRESTService):
         postData = {'username': username,
                     'password': password}
 
-        return IRESTService._post(AUTH_SERVICE_URL + "/login", postData)
+        return IRESTService._post(settings.AUTH_SERVICE_URL + "/login", postData)

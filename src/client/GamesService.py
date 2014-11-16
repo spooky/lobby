@@ -1,5 +1,4 @@
-
-from .IRESTService import IRESTService
+from session.IRESTService import IRESTService
 
 from client import GAMES_SERVICE_URL
 
