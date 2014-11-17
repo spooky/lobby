@@ -1,8 +1,8 @@
 
 import json
 
-from PyQt5.QtCore import *
-from PyQt5.QtNetwork import *
+from PyQt5.QtCore import QObject, QUrl, pyqtSignal
+from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager
 
 # from client import networkAccessManager
 networkAccessManager = QNetworkAccessManager()

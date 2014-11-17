@@ -3,9 +3,8 @@ import json
 from datetime import datetime
 import logging
 
-from PyQt5.QtCore import *
-
-from PyQt5.QtNetwork import *
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
+from PyQt5.QtNetwork import QTcpSocket
 
 logger = logging.getLogger(__name__)
 

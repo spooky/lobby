@@ -4,9 +4,8 @@ import os
 from os import path
 import shutil
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtNetwork import *
+from PyQt5.QtCore import QObject, QProcess, pyqtSignal
+from PyQt5.QtNetwork import QTcpServer, QHostAddress
 
 # TODO: THIS IS VERY VERY WEAK - importing the client module instantiates ClientWindow class 
 import client
