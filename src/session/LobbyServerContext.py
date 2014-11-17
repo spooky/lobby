@@ -113,7 +113,7 @@ class LobbyServerContext_vTCP(QObject):
         logger.info("Disconnected from server.")
 
 
-from util.WebSocket import WebSocket
+from session.WebSocket import WebSocket
 
 class LobbyServerContext(QObject):
     # subsystem, command_id, args

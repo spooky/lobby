@@ -4,7 +4,8 @@ import json
 from PyQt5.QtCore import *
 from PyQt5.QtNetwork import *
 
-from client import networkAccessManager
+# from client import networkAccessManager
+networkAccessManager = QNetworkAccessManager()
 
 class RESTResponse(QObject):
 
