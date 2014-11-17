@@ -4,6 +4,7 @@ from struct import pack, unpack
 import logging
 logger = logging.getLogger(__name__)
 
+
 class GameConnection(QObject):
 
     messageReceived = pyqtSignal(str, list)
@@ -23,7 +24,7 @@ class GameConnection(QObject):
         self.chunks = None
 
     def send(self, command, *args):
-        logger.debug("GC << : %s : %s", command, args)
+        logger.debug('GC << : {} : {}'.format(command, args))
         ds = QDataStream(self._socket)
         ds.setByteOrder(QDataStream.LittleEndian)
 
@@ -39,11 +40,11 @@ class GameConnection(QObject):
 
     def _packLuaVal(self, val):
         if isinstance(val, int):
-            return pack("=bi", 0, val)
+            return pack('=bi', 0, val)
         elif isinstance(val, str):
-            return pack("=bi%ds" % len(val), 1, len(val), val.encode())
+            return pack('=bi{}s'.format(len(val)), 1, len(val), val.encode())
         else:
-            raise Exception("Unknown GameConnection Field Type: %s" % type(val))
+            raise Exception('Unknown GameConnection Field Type: {}'.format(type(val)))
 
     def _readLuaVal(self, ds):
         if self._socket.bytesAvailable() < 5:
@@ -61,11 +62,11 @@ class GameConnection(QObject):
             ds.readRawData(5)
 
             datastring = ds.readRawData(fieldSize).decode()
-            fixedStr = datastring.replace("/t","\t").replace("/n","\n")
+            fixedStr = datastring.replace('/t', '\t').replace('/n', '\n')
 
             return fixedStr
         else:
-            raise Exception("Unknown GameConnection Field Type: %d" % fieldType)
+            raise Exception('Unknown GameConnection Field Type: {}'.format(fieldType))
 
     # Non-reentrant
     def _onReadyRead(self):
@@ -80,7 +81,7 @@ class GameConnection(QObject):
                 if self._socket.bytesAvailable() < size + 4:
                     return
 
-                #Omit size
+                # Omit size
                 ds.readUInt32()
 
                 self.header = ds.readRawData(size).decode()
@@ -100,10 +101,8 @@ class GameConnection(QObject):
                     self.chunks.append(chunk)
 
                 # Packet pair reading done.
-                logger.debug("GC >> : %s : %s", self.header, self.chunks)
+                logger.debug('GC >> : {} : {}'.format(self.header, self.chunks))
                 self.messageReceived.emit(self.header, self.chunks)
                 self.header = None
                 self.nchunks = -1
                 self.chunks = None
-
-

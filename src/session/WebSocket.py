@@ -16,14 +16,14 @@ from queue import Queue, Empty
 from ws4py.client import WebSocketBaseClient
 from ws4py.messaging import PingControlMessage
 
+
 class WebSocket(QThread):
+
     def __init__(self, socket_addr, parent=None):
         super(WebSocket, self).__init__(parent)
 
         self.addr = socket_addr
-
         self.w_queue = Queue()
-
         self.moveToThread(self)
 
         self._read_timer = None
@@ -36,7 +36,7 @@ class WebSocket(QThread):
 
     @pyqtSlot(str)
     def sendMessage(self, message):
-        logger.debug("Send: %s", message)
+        logger.debug('Send: {}'.format(message))
 
         self.w_queue.put(message.encode())
 
@@ -49,7 +49,7 @@ class WebSocket(QThread):
         self._ws.close()
 
     def _reconnect(self):
-        logger.info("Reconnecting to %s...", self.addr)
+        logger.info('Reconnecting to {}...'.format(self.addr))
 
         self._ws = WebSocketBaseClient(self.addr)
 
@@ -62,7 +62,7 @@ class WebSocket(QThread):
             self._ws.connect()
             self._ws.sock.setblocking(0)
 
-            logger.info("Connected to %s.", self.addr)
+            logger.info('Connected to {}.'.format(self.addr))
             self._socket_connected = True
 
             self.reconnected.emit()
@@ -74,12 +74,12 @@ class WebSocket(QThread):
 
             self._heartbeat_timer = QTimer(self)
             self._heartbeat_timer.timeout.connect(self._heartbeat)
-            self._heartbeat_timer.start(30*1000)
+            self._heartbeat_timer.start(30 * 1000)
 
             self._socket_connected = True
         except OSError as e:
-            logger.debug("Failed to connect to %s", str(e))
-            QTimer.singleShot(10*1000, self._reconnect)
+            logger.debug('Failed to connect to {}'.format(e))
+            QTimer.singleShot(10 * 1000, self._reconnect)
 
     def _heartbeat(self):
         self._ws.send(PingControlMessage(data='beep'))
@@ -94,7 +94,6 @@ class WebSocket(QThread):
         except BlockingIOError:
             return
 
-
     def _write_thread(self):
         while self._socket_connected:
             try:
@@ -108,16 +107,15 @@ class WebSocket(QThread):
 
     # WebSocketClient callbacks
     def closed(self, code, reason=None):
-        logger.info("Closed WebSocket to %s: %s, %s", self.addr, code, reason)
+        logger.info('Closed WebSocket to {}: {}, {}'.format(self.addr, code, reason))
 
         self._socket_connected = False
-
         self._read_timer.stop()
         self._heartbeat_timer.stop()
 
         QTimer.singleShot(500, self._reconnect)
 
     def received_message(self, m_):
-        logger.debug("Recv: %s", m_)
+        logger.debug('Recv: {}'.format(m_))
 
         self.messageReceived.emit(str(m_))

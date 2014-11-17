@@ -2,13 +2,12 @@ __author__ = 'vytautas'
 
 import os
 from os import path
-import shutil
 
 from PyQt5.QtCore import QObject, QProcess, pyqtSignal
 from PyQt5.QtNetwork import QTcpServer, QHostAddress
 
 # TODO: THIS IS VERY VERY WEAK - importing the client module instantiates ClientWindow class 
-import client
+# import client
 import settings
 
 import logging
@@ -17,8 +16,10 @@ logger.setLevel(logging.DEBUG)
 
 from .GameConnection import GameConnection
 
+
 class SessionSetupFailed(Exception):
     pass
+
 
 class GameSession(QObject):
 
@@ -36,8 +37,8 @@ class GameSession(QObject):
         self._proc.readyReadStandardOutput.connect(self._onReadyReadStandardOutput)
         self._proc.readyReadStandardError.connect(self._onReadyReadStandardError)
 
-        self.gamePort = client.instance.gamePort
-        # self.gamePort = settings.GAME_PORT_DEFAULT
+        # self.gamePort = client.instance.gamePort
+        self.gamePort = settings.GAME_PORT_DEFAULT
 
         self._GameState = None
         self._arguments = dict()
@@ -45,9 +46,9 @@ class GameSession(QObject):
         # Session parameter defaults
         self._joinGameAddr = None
         self.gameMods = []
-        self.mapName = None #'scmp_009'
-        self.gameTitle = "No title."
-        self.playerName = "Player"
+        self.mapName = None  # 'scmp_009'
+        self.gameTitle = 'No title.'
+        self.playerName = 'Player'
         self.playerUID = 0
 
         self._faf_conn = None
@@ -58,7 +59,7 @@ class GameSession(QObject):
         self._game_listener.newConnection.connect(self._onNewGameConnection)
 
         self.addArg('nobugreport')
-        self.addArg('gpgnet', '127.0.0.1:%d' % self._game_listener.serverPort())
+        self.addArg('gpgnet', '127.0.0.1:{}'.format(self._game_listener.serverPort()))
 
     # Session command-line arguments
     def addArg(self, key, *args):
@@ -92,14 +93,15 @@ class GameSession(QObject):
 
     def _sendFAF(self, command_id, args):
         if self._faf_conn:
-            logger.debug("FAF S: %s : %s", command_id, args)
+            logger.debug('FAF S: {} : {}'.format(command_id, args))
             self._faf_conn.sendGames(command_id, args)
 
     def _onFAFMessage(self, command_id, args):
-        logger.debug("FAF R: %s : %s", command_id, args)
+        logger.debug('FAF R: {} : {}'.format(command_id, args))
 
-        if command_id == 'open_resp' and args['success'] == False:
-            raise RuntimeError("Failed to open game on server. Should not happen here.")
+        if command_id == 'open_resp' and args['success'] is False:
+            logger.debug('response {}'.format(args))
+            raise RuntimeError('Failed to open game on server. Should not happen here.')
         elif command_id in ['ConnectToPeer', 'JoinGame']:
             self._conn.send(command_id, *args)
 
@@ -108,15 +110,14 @@ class GameSession(QObject):
 
         program = program or path.join(settings.BIN_DIR, 'ForgedAlliance.exe')
 
-        logger.info("Launching FA: %s", program)
+        logger.info('Launching FA: {}'.format(program))
         arguments = []
 
         for key, value in list(self._arguments.items()):
-            arguments.append('/'+str(key))
-            arguments.extend([ (str(x) if isinstance(x, int) else '%s' % str(x))
-                                       for x in value])
+            arguments.append('/' + str(key))
+            arguments.extend(['{}'.format(x) for x in value])
 
-        logger.info("Launching FA: %s", arguments)
+        logger.info('Launching FA: {}'.format(arguments))
 
         self._proc.setWorkingDirectory(settings.BIN_DIR)
 
@@ -152,74 +153,71 @@ class GameSession(QObject):
         self._conn = GameConnection(self._game_listener.nextPendingConnection())
         self._conn.messageReceived.connect(self._onGameConnectionMessage)
         self._conn.closed.connect(self._onGameConnectionClosed)
-        logger.info("GC: connected.")
+        logger.info('GC: connected.')
 
     def _onGameConnectionMessage(self, command, args):
-        if command == "GameState":
+        if command == 'GameState':
             if args[0] == 'Idle':
                                        # autolobby, port, nickname, uid, hasSupcom
-                self._conn.send("CreateLobby", 0, self.gamePort,
-                                                  self.playerName, self.playerUID, 1)
-                return # Only initialize the game
+                self._conn.send('CreateLobby', 0, self.gamePort,
+                                self.playerName, self.playerUID, 1)
+                return  # Only initialize the game
             elif args[0] == 'Lobby':
-                if self._joinGameAddr: # We're joining
+                if self._joinGameAddr:  # We're joining
                     self._sendFAF('join', [self._joinGameId, self.gamePort])
-                    #self._conn.send("JoinGame")
+                    # self._conn.send('JoinGame')
 
-                else: # We're hosting
-                    if self._faf_conn: # Tell FAF
-                        self._sendFAF("open", { 'port': self.gamePort,
-                                                'title': self.gameTitle})
+                else:  # We're hosting
+                    if self._faf_conn:  # Tell FAF
+                        self._sendFAF('open', {'port': self.gamePort,
+                                               'title': self.gameTitle})
 
                     if self.mapName:
-                        self._conn.send("HostGame", self.mapName)
+                        self._conn.send('HostGame', self.mapName)
                     else:
-                        self._conn.send("HostGame")
+                        self._conn.send('HostGame')
 
-                #self._conn.send("SendNatPacket", "127.0.0.1:8002", "foot")
-                #self._conn.send("HasSupcom", 0)
-                #self._conn.send("Test", "Banana", "Foot", "Kiwi")
-                #self._conn.send("SetGameOption", "OmniCheat", "on")
+                #self._conn.send('SendNatPacket', '127.0.0.1:8002', 'foot')
+                #self._conn.send('HasSupcom', 0)
+                #self._conn.send('Test', 'Banana', 'Foot', 'Kiwi')
+                #self._conn.send('SetGameOption', 'OmniCheat', 'on')
             self._GameState = args[0]
 
-        if command in ["GameState", "GameOption", "GameMods", "PlayerOption", "Chat"]:
+        if command in ['GameState', 'GameOption', 'GameMods', 'PlayerOption', 'Chat']:
             self._sendFAF(command, args)
 
     def _onGameConnectionClosed(self):
-        logger.info("GC: disconnected.")
+        logger.info('GC: disconnected.')
 
     # FA Process events
     def _onStarted(self):
-        logger.info("FA started.")
+        logger.info('FA started.')
 
     def _onError(self, error):
-        logger.error("FA failed to start: %s", self._proc.errorString())
+        logger.error('FA failed to start: {}'.format(self._proc.errorString()))
 
     def _onFinished(self, exitCode, exitStatus):
-        logger.info("FA Finished: %d, %s", exitCode, exitStatus)
+        logger.info('FA Finished: {}, {}'.format(exitCode, exitStatus))
         self._sendFAF('close', {})
         self.finished.emit()
 
     def _onReadyReadStandardOutput(self):
         while self._proc.canReadLine():
-            logger.info("FA Out: %s" % self._proc.readLine())
+            logger.info('FA Out: {}'.format(self._proc.readLine()))
 
     def _onReadyReadStandardError(self):
         while self._proc.canReadLine():
-            logger.info("FA Err: %s" % self._proc.readLine())
+            logger.info('FA Err: {}'.format(self._proc.readLine()))
 
     # Game Session Starters
     @staticmethod
     def Replay(version='faf_v1'):
-        versions = { 'faf_v1': GameSession._Replay_faf_v1}
+        versions = {'faf_v1': GameSession._Replay_faf_v1}
 
         if version in versions:
             return versions[version]()
         else:
-            QMessageBox.error("Game Launch", 'Unknown replay version: "%s"' % version)
-            raise SessionSetupFailed('Unknown replay version: "%s"' % version)
-
-
+            raise SessionSetupFailed('Unknown replay version: "{}"'.format(version))
 
     @staticmethod
     def Matchmaker():
@@ -230,7 +228,7 @@ class GameSession(QObject):
         return session
 
     @staticmethod
-    def CustomGame(joinGameURL = None):
+    def CustomGame(joinGameURL=None):
         session = GameSession()
 
         session.setJoinGame(joinGameURL)

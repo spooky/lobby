@@ -1,20 +1,21 @@
-import struct
 import json
-from datetime import datetime
 import logging
+import struct
+from datetime import datetime
 
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 from PyQt5.QtNetwork import QTcpSocket
 
-logger = logging.getLogger(__name__)
-
 PROTOCOL_VERSION = 0
-
 STATE_HANDSHAKE = 0
 STATE_LOGIN = 1
 STATE_LOBBY = 2
 
+logger = logging.getLogger(__name__)
+
+
 class ProtocolError(Exception):
+
     def __init__(self, message):
         super(ProtocolError, self).__init__(message)
 
@@ -28,7 +29,7 @@ class LobbyServerContext_vTCP(QObject):
 
         assert isinstance(command_id, str)
 
-        logger.info("Send: %s : %s", command_id, message)
+        logger.info('Send: {} : {}'.format(command_id, message))
 
         self._send(command_id, message)
 
@@ -50,7 +51,7 @@ class LobbyServerContext_vTCP(QObject):
     def login(self, username, session_id):
         self.socket.waitForConnected(5000)
         if self.socket.state() != QTcpSocket.ConnectedState and not self.socket.isValid():
-            raise ProtocolError("FAF Connection timed out.")
+            raise ProtocolError('FAF Connection timed out.')
 
         self.sendMessage('login', {'username': username, 'session_id': session_id})
 
@@ -61,11 +62,11 @@ class LobbyServerContext_vTCP(QObject):
 
     def _onMessage(self, command_id, message):
 
-        logger.debug('Recv: %s : %s', command_id, message)
+        logger.debug('Recv: {} : {}'.format(command_id, message))
 
         if self.state == STATE_HANDSHAKE:
             if command_id != 'handshake_resp':
-                raise ProtocolError("Wrong state.")
+                raise ProtocolError('Wrong state.')
 
             if not message['success']:
                 raise ProtocolError(message['reason'])
@@ -74,13 +75,13 @@ class LobbyServerContext_vTCP(QObject):
             return
 
         # Keep Alive
-        if command_id == "keep_alive":
-            self._send("keep_alive", {'time': datetime.now().isoformat()})
+        if command_id == 'keep_alive':
+            self._send('keep_alive', {'time': datetime.now().isoformat()})
             return
 
         if self.state == STATE_LOGIN:
             if command_id != 'login_resp':
-                raise ProtocolError("Wrong state.")
+                raise ProtocolError('Wrong state.')
 
             if not message['success']:
                 # Our session_id should normally succeed
@@ -90,7 +91,7 @@ class LobbyServerContext_vTCP(QObject):
         elif self.state == STATE_LOBBY:
             self.messageReceived.emit(command_id, message)
         else:
-            raise ProtocolError("Unknown state.")
+            raise ProtocolError('Unknown state.')
 
     def _onReadyRead(self):
         while self.socket.bytesAvailable() >= 4:
@@ -105,14 +106,15 @@ class LobbyServerContext_vTCP(QObject):
             self._onMessage(msg['id'], msg['data'])
 
     def _onError(self):
-        logger.warning("Error with lobby socket: %s.", self.socket.errorString())
+        logger.warning('Error with lobby socket: {}.'.format(self.socket.errorString()))
         pass
 
     def _onDisconnected(self):
-        logger.info("Disconnected from server.")
+        logger.info('Disconnected from server.')
 
 
 from session.WebSocket import WebSocket
+
 
 class LobbyServerContext(QObject):
     # subsystem, command_id, args
@@ -149,13 +151,14 @@ class LobbyServerContext(QObject):
 
     @pyqtSlot(str, str, dict)
     def sendMessage(self, subsystem, command_id, args):
-        msg = { 'subsystem': subsystem,
-                'id': command_id,
-                'data': args }
+        msg = {'subsystem': subsystem,
+               'id': command_id,
+               'data': args}
 
         self._ws.sendMessage(json.dumps(msg))
 
     pyqtSlot(str)
+
     def _dispatch(self, msg_):
         msg = json.loads(msg_)
 
@@ -166,8 +169,8 @@ class LobbyServerContext(QObject):
         else:
             self.messageReceived.emit(subsystem, msg['id'], msg['data'])
 
-            faf_subsystem = 'faf_%s' % subsystem
+            faf_subsystem = 'faf_{}'.format(subsystem)
             try:
-                getattr(self, faf_subsystem).emit( msg['id'], msg['data'])
+                getattr(self, faf_subsystem).emit(msg['id'], msg['data'])
             except KeyError:
-                logger.warning("Subsystem '%s' not handled." % faf_subsystem)
+                logger.warning('Subsystem "{}" not handled.'.format(faf_subsystem))
