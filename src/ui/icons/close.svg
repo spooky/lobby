@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+    <g>
+        <title>close</title>
+        <line id="line1" x1="0" y1="0" x2="64" y2="64" stroke-width="8" stroke="#969696" fill="none"/>
+        <line id="line2" x1="0" y1="64" x2="64" y2="0" stroke-width="8" stroke="#969696" fill="none"/>
+    </g>
+</svg>

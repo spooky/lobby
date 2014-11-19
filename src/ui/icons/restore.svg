@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+    <g>
+        <path id="square1" d="M4,12 L4,4 L48,4 L48,48 L40,48" stroke-width="8" stroke="#969696" fill="none" transform="translate(12,0)" />
+        <path id="square2" d="M4,4 L48,4 L48,48 L4,48 L4,4 Z" stroke-width="8" stroke="#969696" fill="none" transform="translate(0,12)" />
+    </g>
+</svg>

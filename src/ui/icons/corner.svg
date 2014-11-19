@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+    <g>
+        <line id="h_line" x1="0" y1="64" x2="68" y2="64" stroke-width="8" stroke="#969696" fill="none"/>
+        <line id="v_line" x1="64" y1="68" x2="64" y2="0" stroke-width="8" stroke="#969696" fill="none"/>
+        <path id="triangle" d="M46,46 L46,16 L16,46 L46,46 Z" stroke-width="1" stroke="#969696" fill="#969696"/>
+    </g>
+</svg>
