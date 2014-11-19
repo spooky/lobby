@@ -132,7 +132,7 @@ class LobbyServerContext(QObject):
     def __init__(self, lobby_ws_url, parent=None):
         super(LobbyServerContext, self).__init__(parent)
 
-        self._ws = WebSocket(lobby_ws_url, self)
+        self._ws = WebSocket(lobby_ws_url)
 
         self._ws.reconnected.connect(lambda: self.reconnected.emit())
 
