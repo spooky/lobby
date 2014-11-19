@@ -56,7 +56,7 @@ import os
 import random
 import notificatation_system as ns
 
-from session import LobbyServerContext
+from session.LobbyServerContext import LobbyServerContext
 
 from .UserService import UserInfo
 
@@ -1241,7 +1241,7 @@ class ClientWindow(FormClass, BaseClass):
 
         #Determine if a login wizard needs to be displayed and do so
         if self.autologin and self.login and self.password:
-            from session import AuthService
+            from session.AuthService import AuthService
 
             self._login_reply = reply = AuthService.Login(self.login, self.password)
 
