@@ -1,5 +1,7 @@
 import logging
-from PyQt5.QtCore import QObject, pyqtProperty, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QObject, QCoreApplication, pyqtProperty, pyqtSignal, pyqtSlot
+
+from session.GameSession import GameSession
 from utils.async import async_slot
 
 
@@ -162,8 +164,11 @@ class LoginViewModel(QObject):
             self.log.info('logging in...')
             self.logged_in = yield from self.client.login(user, pass_hash)
             self.panel_visible = not self.logged_in
+
             self._store_credentials(user, pass_hash, remember)
+
             self.log.debug('login successful? {}'.format(self.logged_in))
+
         except Exception as ex:
             self.log.warn('login failed: {}'.format(ex))
 
@@ -173,7 +178,9 @@ class LoginViewModel(QObject):
         try:
             self.log.info('logging out...')
             self.logged_in = not (yield from self.client.logout())
+
             self.log.debug('logout successful? {}'.format(not self.logged_in))
+
         except Exception as ex:
             self.log.warn('logout failed: {}'.format(ex))
 
@@ -193,10 +200,31 @@ class LoginViewModel(QObject):
 class GamesViewModel(QObject):
     hostGame = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, server_context, parent=None):
         super().__init__(parent)
+        self.log = logging.getLogger(__name__)
+        self.server_context = server_context
+
         self.hostGame.connect(self.on_hostGame)
 
     @pyqtSlot()
     def on_hostGame(self):
-        pass
+        # TODO: report activity in status bar
+        session = QCoreApplication.instance().session
+        if not session:
+            # TODO: display 'not logged' error
+            return None
+        game = GameSession(QCoreApplication.instance())
+        game.setFAFConnection(self.server_context)
+
+        game.addArg('showlog')
+        game.addArg('mean', 1000)
+        game.addArg('deviation', 0)
+        game.addArg('windowed', 1024, 768)
+        game.addArg('init', 'init_test.lua')
+
+        game.setTitle('test')
+        game.setMap('scmp_009')
+        game.setLocalPlayer(session.user, session.user_id)
+
+        game.start()

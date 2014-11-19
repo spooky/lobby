@@ -22,6 +22,7 @@ class Application(QGuiApplication):
             self.setWindowIcon(QIcon('ui/icons/faf.ico'))
         except AttributeError:
             pass
+        self.session = None
 
     def start(self):
         self.mainWindow = MainWindow(self)
@@ -38,15 +39,17 @@ class MainWindow(QObject):
         self.log = logging.getLogger(__name__)
         self._read_settings()
 
-        self.client = Client(self)
+        self.client = Client(app=Application.instance(), parent=self)
 
         if self.remember:
             self._autologin()
 
-        self.model = MainWindowViewModel(self)
-        self.loginModel = LoginViewModel(self.client, self.user, self.password, self.remember, self)
+        self.model = MainWindowViewModel(parent=self)
+
+        self.loginModel = LoginViewModel(self.client, self.user, self.password, self.remember, parent=self)
         self.loginModel.panel_visible = not self.remember
-        self.gamesModel = GamesViewModel(self)
+
+        self.gamesModel = GamesViewModel(self.client.server_context, parent=self)
 
         self.engine = QQmlApplicationEngine(self)
         self.engine.rootContext().setContextProperty('windowModel', self.model)
