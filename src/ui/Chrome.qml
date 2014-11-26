@@ -1,3 +1,4 @@
+
 import QtQuick 2.2
 import QtQuick.Controls 1.1
 import QtQuick.Window 2.1
@@ -18,6 +19,12 @@ Window {
     property string highlightColor: "#2f2f2f"
     property string altHighlightColor: "#454545"
     property string textColor: "#969696"
+    property string textHighlightColor: "#cccccc"
+
+    property string uefBlue: "#2d78b2"
+    property string cybRed: "#df2d0e"
+    property string aeonGreen: "#0a9d2f"
+    property string seraGold: "#f1c240"
 
     // remember window geometry
     Settings {
