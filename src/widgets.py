@@ -7,7 +7,7 @@ from PyQt5.QtQuick import QQuickItem
 
 import settings
 from utils.async import async_slot
-from view_models import MainWindowViewModel, LoginViewModel, GamesViewModel
+from view_models import MainWindowViewModel, LoginViewModel
 from session.Client import Client
 
 
