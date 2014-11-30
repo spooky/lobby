@@ -104,6 +104,7 @@ class ViewManager(QObject):
         super().__init__(parent)
         self._context = context
         self._window = windowViewModeModel
+        self._cache = dict()
 
     def get_view(self, name, *args, **kwargs):
         '''
@@ -111,11 +112,15 @@ class ViewManager(QObject):
         1) the ui file which should be the camel cased .qml file in the ui directory. Path should be relative to Chrome.qml
         2) the view model which should be a class in the view_models module
         '''
-        n = self._convert_name(name)
-        vm_name = '{}ViewModel'.format(n)
-        # equivalent of from view_models import <part>
-        vm = __import__('view_models', globals(), locals(), [vm_name], 0)
-        return ('{}.qml'.format(n), (getattr(vm, vm_name))(parent=self, *args, **kwargs))
+
+        if name not in self._cache:
+            n = self._convert_name(name)
+            vm_name = '{}ViewModel'.format(n)
+            # equivalent of from view_models import <part>
+            vm = __import__('view_models', globals(), locals(), [vm_name], 0)
+            self._cache[name] = ('{}.qml'.format(n), (getattr(vm, vm_name))(parent=self, *args, **kwargs))
+
+        return self._cache[name]
 
     def load_view(self, name, *args, **kwargs):
         view_path, view_model = self.get_view(name, *args, **kwargs)
