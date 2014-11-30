@@ -1,4 +1,5 @@
 import logging
+import re
 from PyQt5.QtCore import QObject, QUrl, pyqtSignal, pyqtSlot
 from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtGui import QGuiApplication, QIcon
@@ -44,25 +45,26 @@ class MainWindow(QObject):
         if self.remember:
             self._autologin()
 
-        self.model = MainWindowViewModel(parent=self)
+        self.windowModel = MainWindowViewModel(parent=self)
 
         self.loginModel = LoginViewModel(self.client, self.user, self.password, self.remember, parent=self)
         self.loginModel.panel_visible = not self.remember
 
-        self.gamesModel = GamesViewModel(self.client.server_context, parent=self)
-
         self.engine = QQmlApplicationEngine(self)
-        self.engine.rootContext().setContextProperty('windowModel', self.model)
+        self.engine.rootContext().setContextProperty('windowModel', self.windowModel)
         self.engine.rootContext().setContextProperty('loginModel', self.loginModel)
-        self.engine.rootContext().setContextProperty('contentModel', self.gamesModel)
         self.engine.quit.connect(parent.quit)
         self.engine.load(QUrl.fromLocalFile('ui/Chrome.qml'))
 
+        self.view_manager = ViewManager(self.engine.rootContext(), self.windowModel, parent=self)
         self.window = self.engine.rootObjects()[0]
 
         # wire up logging console
         self.console = self.window.findChild(QQuickItem, 'console')
         parent.log_changed.connect(self._log)
+
+        # set content view
+        self.view_manager.load_view('games', self.client.server_context)
 
     def show(self):
         self.window.show()
@@ -94,3 +96,31 @@ class MainWindow(QObject):
             self.console.remove(0, line_end)
 
         self.console.append(msg)
+
+
+class ViewManager(QObject):
+
+    def __init__(self, context, windowViewModeModel, parent=None):
+        super().__init__(parent)
+        self._context = context
+        self._window = windowViewModeModel
+
+    def get_view(self, name, *args, **kwargs):
+        '''
+        Works on a convention. The view requires 2 thins:
+        1) the ui file which should be the camel cased .qml file in the ui directory. Path should be relative to Chrome.qml
+        2) the view model which should be a class in the view_models module
+        '''
+        n = self._convert_name(name)
+        vm_name = '{}ViewModel'.format(n)
+        # equivalent of from view_models import <part>
+        vm = __import__('view_models', globals(), locals(), [vm_name], 0)
+        return ('{}.qml'.format(n), (getattr(vm, vm_name))(parent=self, *args, **kwargs))
+
+    def load_view(self, name, *args, **kwargs):
+        view_path, view_model = self.get_view(name, *args, **kwargs)
+        self._window.currentView = view_path
+        self._context.setContextProperty('model', view_model)
+
+    def _convert_name(self, name):
+        return re.sub('([_\s]?)([A-Z]?[a-z]+)', lambda m: m.group(2).title(), name)

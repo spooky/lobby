@@ -349,7 +349,12 @@ Window {
             color: "#202025"
             anchors.fill: parent
 
-            Games { }
+            Loader {
+                id: contentViewLoader
+                anchors.fill: parent
+
+                source: windowModel.currentView
+            }
         }
     }
 

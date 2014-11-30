@@ -17,6 +17,8 @@ class MainWindowViewModel(QObject):  # TODO: use MetaClass(ish) model to handle 
         self._taskStatusIsIndefinite = True  # wether to hide the progress bar
         self._taskStatusProgress = 0  # progress bar progress value - makes sense only if taskStatusIsIndefinite == True
 
+        self._currentView = None
+
     @pyqtProperty(str, constant=True)
     def label(self):
         return self._label
@@ -80,6 +82,17 @@ class MainWindowViewModel(QObject):  # TODO: use MetaClass(ish) model to handle 
         self.taskStatusIsIndefinite = True
         self.taskStatusText = None
         self.taskStatusProgress = 0.0
+
+    currentView_changed = pyqtSignal(str)
+
+    @pyqtProperty(str, notify=currentView_changed)
+    def currentView(self):
+        return self._currentView
+
+    @currentView.setter
+    def currentView(self, value):
+        self._currentView = value
+        self.currentView_changed.emit(value)
 
 
 class LoginViewModel(QObject):

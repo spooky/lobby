@@ -6,7 +6,7 @@ Flow {
     spacing: 5
 
     NewGame {
-        onClicked: contentModel.hostGame()
+        onClicked: model.hostGame()
     }
 
     GameTile {}
