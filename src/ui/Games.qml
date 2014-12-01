@@ -6,12 +6,26 @@ Flow {
     spacing: 5
 
     NewGame {
-        onClicked: model.hostGame()
+        onClicked: contentModel.hostGame()
     }
 
-    GameTile {}
-    GameTile {}
-    GameTile {}
-    GameTile {}
-    GameTile {}
+    GameTile {
+        title: "join here if you dare"
+        host: "me"
+        players: 1
+        slots: 4
+        balance: 25
+    }
+
+    // Repeater {
+    //     model: contentModel.games
+
+    //     delegate: GameTile {
+    //         title: "one"
+    //         host: "me"
+    //         players: 1
+    //         slots: 4
+    //         balance: 11
+    //     }
+    // }
 }

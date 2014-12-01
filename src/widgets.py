@@ -118,14 +118,14 @@ class ViewManager(QObject):
             vm_name = '{}ViewModel'.format(n)
             # equivalent of from view_models import <part>
             vm = __import__('view_models', globals(), locals(), [vm_name], 0)
-            self._cache[name] = ('{}.qml'.format(n), (getattr(vm, vm_name))(parent=self, *args, **kwargs))
+            self._cache[name] = ('{}.qml'.format(n), (getattr(vm, vm_name))(*args, parent=self, **kwargs))
 
         return self._cache[name]
 
     def load_view(self, name, *args, **kwargs):
         view_path, view_model = self.get_view(name, *args, **kwargs)
         self._window.currentView = view_path
-        self._context.setContextProperty('model', view_model)
+        self._context.setContextProperty('contentModel', view_model)
 
     def _convert_name(self, name):
         return re.sub('([_\s]?)([A-Z]?[a-z]+)', lambda m: m.group(2).title(), name)

@@ -1,6 +1,15 @@
 import QtQuick 2.0
 
 Rectangle {
+    property string map: "icons/_temp_map.png" // "icons/unknown_map.svg"
+    property string title: "Game title that is 25 chr"
+    property string host: "spooky"
+    property int players: 8
+    property int slots: 12
+    property int balance: 66
+
+    // TODO: mods
+
     property int padding: 5
     property string textColor: root.textColor
     property string headingColor: root.textHighlightColor
@@ -19,9 +28,9 @@ Rectangle {
         anchors.margins: padding
 
         Image {
-            id: map
+            id: mapThumb
             fillMode: Image.PreserveAspectCrop
-            source: "icons/_temp_map.png"
+            source: map
             sourceSize: Qt.size(parent.height, parent.height)
             anchors.top: parent.top
             anchors.bottom: parent.bottom
@@ -33,12 +42,12 @@ Rectangle {
             anchors.top: parent.top
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.left: map.right
+            anchors.left: mapThumb.right
             anchors.leftMargin: padding
 
             Text {
-                id: title
-                text: qsTr("Game title that is 25 chr")
+                id: titleText
+                text: title
                 color: headingColor
                 wrapMode: Text.Wrap
                 font.pixelSize: 14
@@ -48,12 +57,11 @@ Rectangle {
             }
 
             Text {
-                id: host
-                text: qsTr("by spooky")
+                text: qsTr("by %1").arg(host)
                 font.pixelSize: 10
                 color: textColor
                 anchors.topMargin: padding
-                anchors.top: title.bottom
+                anchors.top: titleText.bottom
                 anchors.right: parent.right
                 anchors.left: parent.left
             }
@@ -95,7 +103,7 @@ Rectangle {
                 spacing: padding
 
                 Text {
-                    text: qsTr("10/12")
+                    text: qsTr("%1/%2").arg(players).arg(slots)
                     color: textColor
                     font.pixelSize: 12
                 }
@@ -106,7 +114,7 @@ Rectangle {
                     font.pixelSize: 10
                 }
                 Text {
-                    text: qsTr("21%")
+                    text: balance + "%"
                     color: balanceColor // TODO
                     font.pixelSize: 12
                 }
