@@ -14,8 +14,8 @@ class MainWindowViewModel(QObject):  # TODO: use MetaClass(ish) model to handle 
 
         self._taskRunning = False  # wether to show the task indicator
         self._taskStatusText = None  # text to show while task is running
-        self._taskStatusIsIndefinite = True  # wether to hide the progress bar
-        self._taskStatusProgress = 0  # progress bar progress value - makes sense only if taskStatusIsIndefinite == True
+        self._taskStatusIsIndefinite = True  # wether to hide the progress bar progress bar progress value - makes sense only if taskStatusIsIndefinite == True
+        self._taskStatusProgress = 0
 
         self._currentView = None
 
@@ -216,9 +216,11 @@ class GamesViewModel(QObject):
     def __init__(self, server_context, parent=None):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
-        self.server_context = server_context
 
         self.hostGame.connect(self.on_hostGame)
+
+        self.server_context = server_context
+        self.server_context.eventReceived.connect(self.on_eventReceived)
 
     @pyqtSlot()
     def on_hostGame(self):
@@ -241,3 +243,47 @@ class GamesViewModel(QObject):
         game.setLocalPlayer(session.user, session.user_id)
 
         game.start()
+
+    @pyqtSlot(list, dict)
+    def on_eventReceived(self, event_id, args):
+        subs, cmd = event_id
+        if subs != 'games':
+            return
+
+        getattr(self, 'on_'+cmd)(args)
+
+    def on_opened(self, args):
+        pass  # no value in this...
+
+    def on_updated(self, args):
+        g = GameViewModel(args)
+        self.log.debug('updating game id: {}'.format(g.id))
+
+    def on_closed(self, args):
+        g = GameViewModel(args)
+        self.log.debug('closed game id: {}'.format(g.id))
+
+
+class GameViewModel(QObject):
+
+    def __init__(self, source, parent=None):
+        super().__init__(parent)
+        self.id = source['id']
+        self.map = self.get_map(source)
+        self.title = source['Title']
+        self.host = source['host']['username']
+        self.slots = source['GameOption']['Slots']
+        self.players = self.get_player_count(source)
+        # TODO
+        self.balance = 0.0
+        self.featured = None
+        self.mods = []
+
+    @staticmethod
+    def get_map(source):
+        scenario = source['GameOption']['ScenarioFile']
+        return scenario.split('/')[2]
+
+    @staticmethod
+    def get_player_count(source):
+        return len(source['PlayerOption'])
