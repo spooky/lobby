@@ -21,7 +21,7 @@ def test_ViewManager_convert_name():
 
 def test_ViewManager_get_view_on_games_view():
     from widgets import ViewManager
-    from view_models import GamesViewModel
+    from view_models.games import GamesViewModel
 
     vm = ViewManager(None, None)
     path, view_model = vm.get_view('games', ServerContextStub())

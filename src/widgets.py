@@ -7,7 +7,7 @@ from PyQt5.QtQuick import QQuickItem
 
 import settings
 from utils.async import async_slot
-from view_models import MainWindowViewModel, LoginViewModel
+from view_models.chrome import MainWindowViewModel, LoginViewModel
 from session.Client import Client
 
 
@@ -117,7 +117,7 @@ class ViewManager(QObject):
             n = self._convert_name(name)
             vm_name = '{}ViewModel'.format(n)
             # equivalent of from view_models import <part>
-            vm = __import__('view_models', globals(), locals(), [vm_name], 0)
+            vm = __import__('view_models.'+name, globals(), locals(), [vm_name], 0)
             self._cache[name] = ('{}.qml'.format(n), (getattr(vm, vm_name))(*args, parent=self, **kwargs))
 
         return self._cache[name]

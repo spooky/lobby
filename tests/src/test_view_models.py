@@ -4,10 +4,10 @@ data = json.loads('{"id": 93, "host": {"ip": "89.64.254.67", "port": 6112, "user
 
 
 def test_GameViewModel_get_map():
-    from view_models import GameViewModel
+    from view_models.games import GameViewModel
     assert GameViewModel.get_map(data) == 'scmp_009'
 
 
 def test_GameViewModel_get_player_count():
-    from view_models import GameViewModel
+    from view_models.games import GameViewModel
     assert GameViewModel.get_player_count(data) == 1

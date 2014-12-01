@@ -9,23 +9,15 @@ Flow {
         onClicked: contentModel.hostGame()
     }
 
-    GameTile {
-        title: "join here if you dare"
-        host: "me"
-        players: 1
-        slots: 4
-        balance: 25
+    Repeater {
+        model: 2
+
+        delegate: GameTile {
+            title: "join here if you dare"
+            host: "me"
+            players: 1
+            slots: 4
+            balance: 66
+        }
     }
-
-    // Repeater {
-    //     model: contentModel.games
-
-    //     delegate: GameTile {
-    //         title: "one"
-    //         host: "me"
-    //         players: 1
-    //         slots: 4
-    //         balance: 11
-    //     }
-    // }
 }
