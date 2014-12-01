@@ -124,8 +124,8 @@ class ViewManager(QObject):
 
     def load_view(self, name, *args, **kwargs):
         view_path, view_model = self.get_view(name, *args, **kwargs)
-        self._window.currentView = view_path
         self._context.setContextProperty('contentModel', view_model)
+        self._window.currentView = view_path
 
     def _convert_name(self, name):
         return re.sub('([_\s]?)([A-Z]?[a-z]+)', lambda m: m.group(2).title(), name)
