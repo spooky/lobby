@@ -2,11 +2,11 @@ import QtQuick 2.0
 
 Rectangle {
     property string map: "icons/_temp_map.png" // "icons/unknown_map.svg"
-    property string title
-    property string host
-    property int players
-    property int slots
-    property int balance
+    property string gameTitle
+    property string gameHost
+    property int slotsTaken
+    property int slotsTotal
+    property int gameBalance
 
     // TODO: mods
 
@@ -47,7 +47,7 @@ Rectangle {
 
             Text {
                 id: titleText
-                text: title
+                text: gameTitle
                 color: headingColor
                 wrapMode: Text.Wrap
                 font.pixelSize: 14
@@ -57,7 +57,7 @@ Rectangle {
             }
 
             Text {
-                text: qsTr("by %1").arg(host)
+                text: qsTr("by %1").arg(gameHost)
                 font.pixelSize: 10
                 color: textColor
                 anchors.topMargin: padding
@@ -103,7 +103,7 @@ Rectangle {
                 spacing: padding
 
                 Text {
-                    text: qsTr("%1/%2").arg(players).arg(slots)
+                    text: qsTr("%1/%2").arg(slotsTaken).arg(slotsTotal)
                     color: textColor
                     font.pixelSize: 12
                 }
@@ -114,7 +114,7 @@ Rectangle {
                     font.pixelSize: 10
                 }
                 Text {
-                    text: balance + "%"
+                    text: gameBalance + "%"
                     color: balanceColor // TODO
                     font.pixelSize: 12
                 }

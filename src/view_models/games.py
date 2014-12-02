@@ -1,13 +1,17 @@
 import logging
-from PyQt5.QtCore import QObject, QVariant, QCoreApplication, pyqtProperty, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QObject, QCoreApplication, pyqtProperty, pyqtSignal, pyqtSlot
 
 from session.GameSession import GameSession
+from .adapters import ListModelFor
 
 
 class GameViewModel(QObject):
 
-    def __init__(self, source, parent=None):
+    def __init__(self, source=None, parent=None):
         super().__init__(parent)
+        if not source:
+            return
+
         self._id = source.get('id')
         self._map = self.get_map(source)
         self._title = source.get('Title')
@@ -115,6 +119,13 @@ class GameViewModel(QObject):
         self.balance_changed.emit(value)
 
 
+class GameListModel(ListModelFor(GameViewModel)):
+
+    def update(self, item):
+        index = self._items.index(item)
+        super().update(index, item)
+
+
 class GamesViewModel(QObject):
     hostGame = pyqtSignal()
     joinGame = pyqtSignal(int)
@@ -129,11 +140,11 @@ class GamesViewModel(QObject):
         self.server_context = server_context
         self.server_context.eventReceived.connect(self.on_eventReceived)
 
-        self._games = list()
+        self._games = GameListModel()
 
-    games_changed = pyqtSignal(QVariant)
+    games_changed = pyqtSignal(GameListModel)
 
-    @pyqtProperty(QVariant, notify=games_changed)
+    @pyqtProperty(GameListModel, notify=games_changed)
     def games(self):
         return self._games
 
@@ -178,21 +189,15 @@ class GamesViewModel(QObject):
 
     def on_opened(self, args):
         g = GameViewModel(args)
-        self._games.append(g)
-        self.games_changed.emit(self._games)
+        self.games.append(g)
         self.log.debug('added game id: {}'.format(g.id))
 
     def on_updated(self, args):
         g = GameViewModel(args)
-
-        idx = self._games.index(g)
-        self._games[idx] = g
-
-        self.games_changed.emit(self._games)
+        self.games.update(g)
         self.log.debug('updated game id: {}'.format(g.id))
 
     def on_closed(self, args):
         g = GameViewModel(args)
-        self._games.remove(g)
-        self.games_changed.emit(self._games)
+        self.games.remove(g)
         self.log.debug('closed game id: {}'.format(g.id))

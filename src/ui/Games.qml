@@ -13,13 +13,13 @@ Flow {
         model: contentModel.games
 
         GameTile {
-            title: modelData.title
-            host: modelData.host
-            players: modelData.players
-            slots: modelData.slots
-            balance: modelData.balance
+            gameTitle: title
+            gameHost: host
+            slotsTaken: players
+            slotsTotal: slots
+            gameBalance: balance
 
-            onDoubleClicked: contentModel.joinGame(modelData.id)
+            onDoubleClicked: contentModel.joinGame(id)
         }
     }
 }
