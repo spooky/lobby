@@ -10,14 +10,14 @@ Flow {
     }
 
     Repeater {
-        model: 2
+        model: contentModel.games
 
-        delegate: GameTile {
-            title: "join here if you dare"
-            host: "me"
-            players: 1
-            slots: 4
-            balance: 66
+        GameTile {
+            title: modelData.title
+            host: modelData.host
+            players: modelData.players
+            slots: modelData.slots
+            balance: modelData.balance
         }
     }
 }

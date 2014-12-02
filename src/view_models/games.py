@@ -1,5 +1,5 @@
 import logging
-from PyQt5.QtCore import Qt, QObject, QCoreApplication, QAbstractListModel, QModelIndex, pyqtProperty, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QObject, QVariant, QCoreApplication, pyqtProperty, pyqtSignal, pyqtSlot
 
 from session.GameSession import GameSession
 
@@ -8,14 +8,14 @@ class GameViewModel(QObject):
 
     def __init__(self, source, parent=None):
         super().__init__(parent)
-        self.id = source.get('id')
-        self.map = self.get_map(source)
-        self.title = source.get('Title')
-        self.host = source['host'].get('username') if 'host' in source.keys() else None
-        self.slots = source['GameOption'].get('Slots') if 'GameOption' in source.keys() else None
-        self.players = self.get_player_count(source)
+        self._id = source.get('id')
+        self._map = self.get_map(source)
+        self._title = source.get('Title')
+        self._host = source['host'].get('username') if 'host' in source.keys() else None
+        self._slots = source['GameOption'].get('Slots', 0) if 'GameOption' in source.keys() else 0
+        self._players = self.get_player_count(source)
+        self._balance = 0
         # TODO
-        self.balance = 0.0
         self.featured = None
         self.mods = []
 
@@ -37,41 +37,82 @@ class GameViewModel(QObject):
     def get_player_count(source):
         return len(source['PlayerOption']) if 'PlayerOption' in source.keys() else 0
 
+    id_changed = pyqtSignal(int)
 
-class GameListModel(QAbstractListModel):  # QStandardItemModel?
+    @pyqtProperty(int, notify=id_changed)
+    def id(self):
+        return self._id
 
-    def __init__(self):
-        super().__init__()
-        self._items = list()
+    @id.setter
+    def id(self, value):
+        self._id = value
+        self.id_changed.emit(value)
 
-    def rowCount(self, parent=QModelIndex()):
-        return len(self._items)
+    map_changed = pyqtSignal(str)
 
-    def data(self, index, role=Qt.DisplayRole):
-        if index.isValid():
-            return self._items[index.row()]
+    @pyqtProperty(str, notify=map_changed)
+    def map(self):
+        return self._map
 
-        return None
+    @map.setter
+    def map(self, value):
+        self._map = value
+        self.map_changed.emit(value)
 
-    def insert_or_update(self, game):
-        try:
-            idx = self._items.index(game)  # searches by id
-            self._items[idx] = game
-            self.dataChanged.emit(self.index(idx), self.index(idx))
-        except ValueError:
-            count = self.rowCount()
-            self.beginInsertRows(self.index(count), count, count)
-            self._items.append(game)
-            self.endInsertRows()
+    title_changed = pyqtSignal(str)
 
-    def remove(self, game):
-        count = self.rowCount()
-        try:
-            self.beginRemoveRows(self.index(count), count, count)
-            self._items.remove(game)
-            self.endRemoveRows()
-        except ValueError:
-            pass
+    @pyqtProperty(str, notify=title_changed)
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, value):
+        self._title = value
+        self.title_changed.emit(value)
+
+    host_changed = pyqtSignal(str)
+
+    @pyqtProperty(str, notify=host_changed)
+    def host(self):
+        return self._host
+
+    @host.setter
+    def host(self, value):
+        self._host = value
+        self.host_changed.emit(value)
+
+    slots_changed = pyqtSignal(int)
+
+    @pyqtProperty(int, notify=slots_changed)
+    def slots(self):
+        return self._slots
+
+    @slots.setter
+    def slots(self, value):
+        self._slots = value
+        self.slots_changed.emit(value)
+
+    players_changed = pyqtSignal(int)
+
+    @pyqtProperty(int, notify=players_changed)
+    def players(self):
+        return self._players
+
+    @players.setter
+    def players(self, value):
+        self._players = value
+        self.players_changed.emit(value)
+
+    balance_changed = pyqtSignal(int)
+
+    @pyqtProperty(int, notify=balance_changed)
+    def balance(self):
+        return self._balance
+
+    @balance.setter
+    def balance(self, value):
+        self._balance = value
+        self.balance_changed.emit(value)
 
 
 class GamesViewModel(QObject):
@@ -86,13 +127,11 @@ class GamesViewModel(QObject):
         self.server_context = server_context
         self.server_context.eventReceived.connect(self.on_eventReceived)
 
-        self._games = GameListModel()
-        self._games.insert_or_update(GameViewModel(dict(id=1, title='foo', players=99)))
-        self._games.insert_or_update(GameViewModel(dict(id=2, title='bar', players=66)))
+        self._games = list()
 
-    games_changed = pyqtSignal(GameListModel)
+    games_changed = pyqtSignal(QVariant)
 
-    @pyqtProperty(GameListModel, notify=games_changed)
+    @pyqtProperty(QVariant, notify=games_changed)
     def games(self):
         return self._games
 
@@ -133,15 +172,21 @@ class GamesViewModel(QObject):
 
     def on_opened(self, args):
         g = GameViewModel(args)
-        self.games.insert_or_update(g)
+        self._games.append(g)
+        self.games_changed.emit(self._games)
         self.log.debug('added game id: {}'.format(g.id))
 
     def on_updated(self, args):
         g = GameViewModel(args)
-        self.games.insert_or_update(g)
+
+        idx = self._games.index(g)
+        self._games[idx] = g
+
+        self.games_changed.emit(self._games)
         self.log.debug('updated game id: {}'.format(g.id))
 
     def on_closed(self, args):
         g = GameViewModel(args)
-        self.games.remove(g)
+        self._games.remove(g)
+        self.games_changed.emit(self._games)
         self.log.debug('closed game id: {}'.format(g.id))
