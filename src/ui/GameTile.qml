@@ -1,7 +1,7 @@
 import QtQuick 2.0
 
 Rectangle {
-    property string map: "icons/_temp_map.png" // "icons/unknown_map.svg"
+    property string map: "icons/unknown_map.svg"
     property string gameTitle
     property string gameHost
     property int slotsTaken
