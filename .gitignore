@@ -17,6 +17,7 @@ _cache/
 __pycache__/
 build/
 dist/
+local/
 src/aip/Setup Files
 src/aip/faforever-cache
 src/bsdiff.pyd
