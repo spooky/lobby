@@ -11,3 +11,42 @@ def test_GameViewModel_get_map():
 def test_GameViewModel_get_player_count():
     from view_models.games import GameViewModel
     assert GameViewModel.get_player_count(data) == 1
+
+
+def test_test_GameViewModel_data():
+    from view_models.games import GameViewModel
+
+    g = GameViewModel(data)
+    assert g.id == 93
+    assert g.map == 'scmp_009'
+    assert g.title == 'test'
+    assert g.host == 'spooky'
+    assert g.slots == 8
+    assert g.players == 1
+
+
+def test_GameViewModel_equality():
+    from view_models.games import GameViewModel
+
+    g1 = GameViewModel(dict(id=1, Title='title'))
+    g2 = GameViewModel(dict(id=1, TItle='other title'))
+
+    assert g1 == g2
+
+
+def test_GameViewModel_inequality():
+    from view_models.games import GameViewModel
+
+    g1 = GameViewModel(dict(id=1, Title='title'))
+    g2 = GameViewModel(dict(id=2, TItle='other title'))
+
+    assert g1 != g2
+
+
+def test_GameViewModel_list_check():
+    from view_models.games import GameViewModel
+
+    g1 = GameViewModel(dict(id=1, Title='title'))
+    g2 = GameViewModel(dict(id=1, TItle='other title'))
+
+    assert g1 in [g2]
