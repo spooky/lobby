@@ -2,11 +2,11 @@ import QtQuick 2.0
 
 Rectangle {
     property string map: "icons/_temp_map.png" // "icons/unknown_map.svg"
-    property string title: "Game title that is 25 chr"
-    property string host: "spooky"
-    property int players: 8
-    property int slots: 12
-    property int balance: 66
+    property string title
+    property string host
+    property int players
+    property int slots
+    property int balance
 
     // TODO: mods
 
