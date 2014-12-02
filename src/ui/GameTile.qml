@@ -16,7 +16,7 @@ Rectangle {
     property string balanceColor: root.cybRed
     property string highlightColor: root.highlightColor
 
-    signal clicked
+    signal doubleClicked
 
     id: wrapper
     width: 200 + 2*padding
@@ -125,7 +125,7 @@ Rectangle {
             id: mouseArea
             anchors.fill: parent
             hoverEnabled: true
-            onDoubleClicked: wrapper.clicked()
+            onDoubleClicked: wrapper.doubleClicked()
         }
     }
 }

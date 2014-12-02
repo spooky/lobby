@@ -117,12 +117,14 @@ class GameViewModel(QObject):
 
 class GamesViewModel(QObject):
     hostGame = pyqtSignal()
+    joinGame = pyqtSignal(int)
 
     def __init__(self, server_context, parent=None):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
 
         self.hostGame.connect(self.on_hostGame)
+        self.joinGame.connect(self.on_joinGame)
 
         self.server_context = server_context
         self.server_context.eventReceived.connect(self.on_eventReceived)
@@ -161,6 +163,10 @@ class GamesViewModel(QObject):
         game.setLocalPlayer(session.user, session.user_id)
 
         game.start()
+
+    @pyqtSlot(GameViewModel)
+    def on_joinGame(self, id):
+        self.log.debug('joining: {}'.format(id))
 
     @pyqtSlot(list, dict)
     def on_eventReceived(self, event_id, args):

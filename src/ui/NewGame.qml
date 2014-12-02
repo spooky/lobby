@@ -6,7 +6,7 @@ Item {
     property string highlightColor: root.highlightColor
     property int padding: 30
 
-    signal clicked
+    signal doubleClicked
 
     id: wrapper
     width: 210
@@ -52,7 +52,7 @@ Item {
             id: mouseArea
             anchors.fill: parent
             hoverEnabled: true
-            onDoubleClicked: wrapper.clicked()
+            onDoubleClicked: wrapper.doubleClicked()
         }
     }
 }

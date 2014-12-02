@@ -6,7 +6,7 @@ Flow {
     spacing: 5
 
     NewGame {
-        onClicked: contentModel.hostGame()
+        onDoubleClicked: contentModel.hostGame()
     }
 
     Repeater {
@@ -18,6 +18,8 @@ Flow {
             players: modelData.players
             slots: modelData.slots
             balance: modelData.balance
+
+            onDoubleClicked: contentModel.joinGame(modelData.id)
         }
     }
 }
