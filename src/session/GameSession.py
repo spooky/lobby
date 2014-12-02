@@ -93,7 +93,7 @@ class GameSession(QObject):
 
     def _sendFAF(self, command_id, args):
         if self._faf_conn:
-            logger.debug('FAF S: {} : {}'.format(command_id, args))
+            # logger.debug('FAF S: {} : {}'.format(command_id, args))
             self._faf_conn.sendGames(command_id, args)
 
     def _onFAFMessage(self, command_id, args):

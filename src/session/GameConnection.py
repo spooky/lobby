@@ -101,7 +101,7 @@ class GameConnection(QObject):
                     self.chunks.append(chunk)
 
                 # Packet pair reading done.
-                logger.debug('GC >> : {} : {}'.format(self.header, self.chunks))
+                # logger.debug('GC >> : {} : {}'.format(self.header, self.chunks))
                 self.messageReceived.emit(self.header, self.chunks)
                 self.header = None
                 self.nchunks = -1
