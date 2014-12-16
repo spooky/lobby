@@ -7,6 +7,7 @@ Rectangle {
     property int slotsTaken
     property int slotsTotal
     property int gameBalance
+    property var container
 
     // TODO: mods
 
@@ -22,6 +23,30 @@ Rectangle {
     width: 200 + 2*padding
     height: 100 + 2*padding
     color: mouseArea.containsMouse ? highlightColor : "transparent"
+
+    function getX(pos, itemSize, tooltipSize, available, spacing) {
+        if (pos + itemSize + 2*spacing + tooltipSize <= available)
+            return pos + itemSize + 2*spacing;
+        else if (pos - tooltipSize >= 0)
+            return pos - tooltipSize;
+        else
+            return spacing;
+    }
+
+    function getY(pos, itemSize, tooltipSize, available, spacing) {
+        if (pos + tooltipSize > available)
+            return pos + itemSize - tooltipSize + spacing;
+        else
+            return pos + spacing;
+    }
+
+    GameTooltip {
+        parent: container // HACK to force qml z indexing for tooltips to work as expected 
+        x: getX(wrapper.x, wrapper.width, width, container.width, padding)
+        y: getY(wrapper.y, wrapper.height, height, container.height, padding)
+        z: 100
+        visible: mouseArea.containsMouse ? true : false
+    }
 
     Item {
         anchors.fill: parent
