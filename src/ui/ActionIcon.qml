@@ -54,6 +54,7 @@ Item {
         id: mouseArea
         anchors.fill: icon
         hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
         onClicked: wrapper.clicked()
     }
 }
