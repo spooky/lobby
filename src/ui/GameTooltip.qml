@@ -33,7 +33,7 @@ Rectangle {
 
     Column {
         id: contentColumn
-        anchors.margins: padding*1.618
+        anchors.margins: gutter
         spacing: padding
         x: gutter
         y: gutter
