@@ -3,15 +3,16 @@ import QtQuick.Layouts 1.1
 
 Rectangle {
     // data
-    property string map: "icons/unknown_map.svg"
-    property string gameTitle: "game title"
-    property string gameHost: "host name"
-    property string mapName: "map name"
-    property string featuredModName: "featured mod"
-    property variant modNames: ["lorem", "ipsum", "dolor", "sit", "amet"]
-    property int slotsTaken: 4
-    property int slotsTotal: 8
-    property int gameBalance: 66
+    property string map
+    property string gameTitle
+    property string gameHost
+    property string mapName
+    property string featuredModName
+    property variant modNames: []
+    property int slotsTaken
+    property int slotsTotal
+    property int gameBalance
+    property variant teams: []
 
     // ui
     property int padding: 5
@@ -44,7 +45,7 @@ Rectangle {
 
             Image {
                 fillMode: Image.PreserveAspectCrop
-                source: map
+                source: map || "icons/unknown_map.svg"
                 sourceSize: Qt.size(thumbSize, thumbSize)
                 smooth: true
             }
@@ -60,7 +61,7 @@ Rectangle {
 
                     Text { text: qsTr("mod"); font.pixelSize: textSize; color: textColor }
                     Text { text: featuredModName; font.pixelSize: textSize; color: headingColor; font.weight: Font.DemiBold }
-                    Text { text: qsTr("with"); font.pixelSize: textSize; color: textColor }
+                    Text { text: qsTr("with"); font.pixelSize: textSize; color: textColor; visible: modNames.length > 0 }
                 }
 
                 Repeater {
@@ -77,9 +78,7 @@ Rectangle {
 
             Repeater {
                 id: playerSetup
-                // model: [["cruchy (1100)"], ["candy (0)"]]
-                model: [["cruchy (1100)", "cookie (-200)"], ["candy (0)", "cupcake (2600)"]]
-                // model: [["cruchy (1100)", "cookie (-200)"], ["candy (0)", "cupcake (2600)"], ["creamy (0)"]]
+                model: teams
 
                 Row {
                     id: team

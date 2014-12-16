@@ -1,16 +1,16 @@
 import QtQuick 2.0
 
 Rectangle {
-    property string map: "icons/unknown_map.svg"
+    property string map
     property string gameTitle
     property string gameHost
     property int slotsTaken
     property int slotsTotal
     property int gameBalance
-    property var container
 
     // TODO: mods
 
+    property var container
     property int padding: 5
     property string textColor: root.textColor
     property string headingColor: root.textHighlightColor
@@ -46,6 +46,19 @@ Rectangle {
         y: getY(wrapper.y, wrapper.height, height, container.height, padding)
         z: 100
         visible: mouseArea.containsMouse ? true : false
+
+        map: wrapper.map
+        gameTitle: wrapper.gameTitle
+        gameHost: wrapper.gameHost
+        mapName: "TODO"
+        featuredModName: "TODO"
+        modNames: ["TODO", "TODO", "TODODO"]
+        slotsTaken: wrapper.slotsTaken
+        slotsTotal: wrapper.slotsTotal
+        gameBalance: wrapper.gameBalance
+        teams: [["cruchy (1100)"], ["creamy (0)"]]
+        // teams: [["cruchy (1100)", "cookie (-200)"], ["candy (0)", "cupcake (2600)"]]
+        // teams: [["cruchy (1100)", "cookie (-200)"], ["candy (0)", "cupcake (2600)"], ["creamy (0)"]]
     }
 
     Item {
@@ -55,7 +68,7 @@ Rectangle {
         Image {
             id: mapThumb
             fillMode: Image.PreserveAspectCrop
-            source: map
+            source: map || "icons/unknown_map.svg"
             sourceSize: Qt.size(parent.height, parent.height)
             anchors.top: parent.top
             anchors.bottom: parent.bottom
