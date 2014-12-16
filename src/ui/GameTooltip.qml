@@ -32,6 +32,11 @@ Rectangle {
     width: childrenRect.width + 2*gutter
     height: childrenRect.height + 2*gutter
 
+    function getFlag(cc) {
+        // TODO
+        return "../../res/chat/countries/" + cc.toLowerCase() + ".png";
+    }
+ 
     Column {
         id: contentColumn
         anchors.margins: gutter
@@ -101,14 +106,14 @@ Rectangle {
                                 Image {
                                     id: countryFlag
                                     fillMode: Image.PreserveAspectCrop
-                                    source: "../../res/chat/countries/pl.png"
+                                    source: getFlag(modelData.cc)
                                     sourceSize: Qt.size(playerName.height, playerName.height)
                                     smooth: true
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                                 Text {
                                     id: playerName
-                                    text: modelData
+                                    text: modelData.name
                                     color: textColor
                                     font.pixelSize: textSize
                                     horizontalAlignment: team.first ? Text.AlignLeft : team.last ? Text.AlignRight : Text.AlignHCenter

@@ -56,9 +56,9 @@ Rectangle {
         slotsTaken: wrapper.slotsTaken
         slotsTotal: wrapper.slotsTotal
         gameBalance: wrapper.gameBalance
-        teams: [["cruchy (1100)"], ["creamy (0)"]]
-        // teams: [["cruchy (1100)", "cookie (-200)"], ["candy (0)", "cupcake (2600)"]]
-        // teams: [["cruchy (1100)", "cookie (-200)"], ["candy (0)", "cupcake (2600)"], ["creamy (0)"]]
+        teams: [[{name:"cruchy (1100)", cc: "PL"}], [{name:"creamy (0)", cc:"pl"}]]
+        // teams: [[{name:"cruchy (1100)", cc:"pl"}, {name:"cookie (-200)", cc:"pl"}], [{name:"candy (0)", cc:"pl"}, {name:"cupcake (2600)", cc:"pl"}]]
+        // teams: [[{name:"cruchy (1100)", cc:"pl"}, {name:"cookie (-200)", cc:"pl"}], [{name:"candy (0)", cc:"pl"}, {name:"cupcake (2600)", cc:"pl"}], [{name:"creamy (0)", cc:"pl"}]]
     }
 
     Item {
