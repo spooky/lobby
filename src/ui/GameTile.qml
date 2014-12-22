@@ -2,13 +2,14 @@ import QtQuick 2.0
 
 Rectangle {
     property string map
+    property string mapName
     property string gameTitle
     property string gameHost
+    property string featuredModName
+    property var modNames: []
     property int slotsTaken
     property int slotsTotal
     property int gameBalance
-
-    // TODO: mods
 
     property var container
     property int padding: 5
@@ -50,9 +51,9 @@ Rectangle {
         map: wrapper.map
         gameTitle: wrapper.gameTitle
         gameHost: wrapper.gameHost
-        mapName: "TODO"
-        featuredModName: "TODO"
-        modNames: ["TODO", "TODO", "TODODO"]
+        mapName: wrapper.mapName
+        featuredModName: wrapper.featuredModName
+        modNames: wrapper.modNames
         slotsTaken: wrapper.slotsTaken
         slotsTotal: wrapper.slotsTotal
         gameBalance: wrapper.gameBalance
@@ -114,7 +115,7 @@ Rectangle {
 
                 Image {
                     fillMode: Image.PreserveAspectCrop
-                    source: "icons/faf.png"
+                    source: "icons/faf.png" // TODO
                     sourceSize: Qt.size(16, 16)
                     smooth: true
                 }
@@ -124,10 +125,11 @@ Rectangle {
                     border.color: textColor
                     width: 16
                     height: 16
+                    visible: modNames.length > 0
 
                     Text {
                         anchors.centerIn: parent
-                        text: qsTr("10")
+                        text: modNames.length
                         color: textColor
                     }
                 }

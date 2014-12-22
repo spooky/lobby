@@ -18,6 +18,9 @@ Flow {
             id: item
             gameTitle: title
             gameHost: host
+            mapName: map_name
+            featuredModName: featured_mod
+            modNames: mods
             slotsTaken: players
             slotsTotal: slots
             gameBalance: balance

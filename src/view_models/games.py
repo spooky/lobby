@@ -1,7 +1,8 @@
 import logging
-from PyQt5.QtCore import QObject, QCoreApplication, pyqtProperty, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QObject, QVariant, QCoreApplication, pyqtProperty, pyqtSignal, pyqtSlot
 
 from session.GameSession import GameSession
+from models import Map
 from .adapters import ListModelFor
 
 
@@ -13,15 +14,15 @@ class GameViewModel(QObject):
             return
 
         self._id = source.get('id')
-        self._map = self.get_map(source)
+        game_map = self.get_map(source)
+        self._map = game_map.preview_url()[0]
+        self._map_name = game_map.name
         self._title = source.get('Title')
         self._host = source['host'].get('username') if 'host' in source.keys() else None
+        self._featured_mod, self._mods = self.get_mods(source.get('GameMods'))
         self._slots = source['GameOption'].get('Slots', 0) if 'GameOption' in source.keys() else 0
         self._players = self.get_player_count(source)
         self._balance = 0
-        # TODO
-        self.featured = None
-        self.mods = []
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and other.id == self.id
@@ -33,9 +34,13 @@ class GameViewModel(QObject):
     def get_map(source):
         try:
             scenario = source['GameOption']['ScenarioFile']
-            return scenario.split('/')[2]
+            return Map(scenario.split('/')[2])
         except KeyError:
-            return None
+            return Map()
+
+    @staticmethod
+    def get_mods(mods):
+        return ('featured (todo)', ['to', 'doX'])  # (featured, other)
 
     @staticmethod
     def get_player_count(source):
@@ -63,6 +68,17 @@ class GameViewModel(QObject):
         self._map = value
         self.map_changed.emit(value)
 
+    map_name_changed = pyqtSignal(str)
+
+    @pyqtProperty(str, notify=map_name_changed)
+    def map_name(self):
+        return self._map_name
+
+    @map_name.setter
+    def map_name(self, value):
+        self._map_name = value
+        self.map_name_changed.emit(value)
+
     title_changed = pyqtSignal(str)
 
     @pyqtProperty(str, notify=title_changed)
@@ -84,6 +100,28 @@ class GameViewModel(QObject):
     def host(self, value):
         self._host = value
         self.host_changed.emit(value)
+
+    featured_mod_changed = pyqtSignal(str)
+
+    @pyqtProperty(str, notify=featured_mod_changed)
+    def featured_mod(self):
+        return self._featured_mod
+
+    @featured_mod.setter
+    def featured_mod(self, value):
+        self._featured_mod = value
+        self.featured_mod_changed.emit(value)
+
+    mods_changed = pyqtSignal(QVariant)
+
+    @pyqtProperty(QVariant, notify=mods_changed)
+    def mods(self):
+        return self._mods
+
+    @mods.setter
+    def mods(self, value):
+        self._mods = value
+        self.mods_changed.emit(value)
 
     slots_changed = pyqtSignal(int)
 

@@ -13,3 +13,13 @@ class Session(QObject):
 
     def __str__(self):
         return self.__dict__.__str__()
+
+
+class Map(QObject):
+
+    def __init__(self, code=None):
+        self.code = code
+        self.name = code
+
+    def preview_url(self):
+        return (None, None)
