@@ -1,4 +1,3 @@
-
 import QtQuick 2.2
 import QtQuick.Controls 1.1
 import QtQuick.Window 2.1
@@ -345,15 +344,72 @@ Window {
         z: 0
 
         Rectangle {
-            id: centralWidget
             color: "#202025"
             anchors.fill: parent
-
-            Loader {
-                id: contentViewLoader
+            
+            ScrollView {
+                id: centralWidget
                 anchors.fill: parent
 
-                source: windowModel.currentView
+                style: ScrollViewStyle {
+                    decrementControl: Item {
+                        implicitWidth: 14
+                        implicitHeight: 14
+
+                        Rectangle {
+                            anchors.fill: parent
+                            color: styleData.hovered || styleData.pressed ? root.altHighlightColor : root.highlightColor
+
+                            Image {
+                                anchors.fill: parent
+                                anchors.centerIn: parent
+                                anchors.margins: 2
+                                source: "icons/up.svg"
+                                sourceSize: Qt.size(width, width)
+                            }
+                        }
+                    }
+                    handle: Item {
+                        implicitWidth: 14
+                        implicitHeight: 26
+                        Rectangle {
+                            color: root.altHighlightColor
+                            anchors.fill: parent
+                            anchors.margins: 2
+                        }
+                    }
+                    scrollBarBackground: Item {
+                        implicitWidth: 14
+                        implicitHeight: 26
+                        Rectangle {
+                            color: root.highlightColor
+                            anchors.fill: parent
+                        }
+                    }
+                    incrementControl: Item {
+                        implicitWidth: 14
+                        implicitHeight: 14
+
+                        Rectangle {
+                            anchors.fill: parent
+                            color: styleData.hovered || styleData.pressed ? root.altHighlightColor : root.highlightColor
+
+                            Image {
+                                anchors.fill: parent
+                                anchors.centerIn: parent
+                                anchors.margins: 2
+                                rotation: 180
+                                source: "icons/up.svg"
+                                sourceSize: Qt.size(width, width)
+                            }
+                        }
+                    }
+                }
+
+                Loader {
+                    id: contentViewLoader
+                    source: windowModel.currentView
+                }
             }
         }
     }

@@ -1,9 +1,14 @@
 import QtQuick 2.3
+import QtQuick.Controls 1.1
+
 
 Flow {
     id: flow
-    anchors.fill: parent
-    anchors.margins: 5
+    // the 'spacing fun' is here to provide content padding
+    width: centralWidget.viewport.width - 2*spacing
+    height: childrenRect.height + 2*spacing
+    x: spacing
+    y: spacing
     spacing: 5
 
     NewGame {
