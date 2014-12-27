@@ -44,7 +44,7 @@ Rectangle {
     GameTooltip {
         parent: container // HACK to force qml z indexing for tooltips to work as expected 
         x: getX(wrapper.x, wrapper.width, width, container.width, padding)
-        y: getY(wrapper.y, wrapper.height, height, container.height, padding)
+        y: getY(wrapper.y, wrapper.height, height, centralWidget.height, padding)
         z: 100
         visible: mouseArea.containsMouse ? true : false
 
