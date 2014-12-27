@@ -26,8 +26,9 @@ Flow {
             mapName: map_name
             featuredModName: featured_mod
             modNames: mods
-            slotsTaken: players
+            slotsTaken: player_count
             slotsTotal: slots
+            teams: teams_arrangement
             gameBalance: balance
             container: flow.parent
 

@@ -1,4 +1,5 @@
 import logging
+from itertools import groupby
 from PyQt5.QtCore import QObject, QVariant, QCoreApplication, pyqtProperty, pyqtSignal, pyqtSlot
 
 from session.GameSession import GameSession
@@ -21,7 +22,8 @@ class GameViewModel(QObject):
         self._host = source['host'].get('username') if 'host' in source.keys() else None
         self._featured_mod, self._mods = self.get_mods(source.get('GameMods'))
         self._slots = source['GameOption'].get('Slots', 0) if 'GameOption' in source.keys() else 0
-        self._players = self.get_player_count(source)
+        self._player_count = self.get_player_count(source)
+        self._teams_arrangement = self.get_teams_arrangement(source)
         self._balance = 0
 
     def __eq__(self, other):
@@ -45,6 +47,21 @@ class GameViewModel(QObject):
     @staticmethod
     def get_player_count(source):
         return len(source['PlayerOption']) if 'PlayerOption' in source.keys() else 0
+
+    @staticmethod
+    def get_teams_arrangement(source):
+        if 'PlayerOption' not in source.keys():
+            return []
+
+        teams = []
+        players = source['PlayerOption']
+        for gkey, group in groupby(sorted(players.items(), key=lambda x: str(x[1]['Team']) + x[0]), key=lambda x: x[1]['Team']):
+            team = []
+            for k, v in group:
+                team.append({'name': v['PlayerName'], 'skill': v['MEAN'], 'cc': v['Country']})
+            teams.append(team)
+
+        return teams
 
     id_changed = pyqtSignal(int)
 
@@ -134,16 +151,27 @@ class GameViewModel(QObject):
         self._slots = value
         self.slots_changed.emit(value)
 
-    players_changed = pyqtSignal(int)
+    player_count_changed = pyqtSignal(int)
 
-    @pyqtProperty(int, notify=players_changed)
-    def players(self):
-        return self._players
+    @pyqtProperty(int, notify=player_count_changed)
+    def player_count(self):
+        return self._player_count
 
-    @players.setter
-    def players(self, value):
-        self._players = value
-        self.players_changed.emit(value)
+    @player_count.setter
+    def player_count(self, value):
+        self._player_count = value
+        self.player_count_changed.emit(value)
+
+    teams_arrangement_changed = pyqtSignal(QVariant)
+
+    @pyqtProperty(QVariant, notify=teams_arrangement_changed)
+    def teams_arrangement(self):
+        return self._teams_arrangement
+
+    @teams_arrangement.setter
+    def teams_arrangement(self, value):
+        self._teams_arrangement = value
+        self.teams_arrangement_changed.emit(value)
 
     balance_changed = pyqtSignal(int)
 

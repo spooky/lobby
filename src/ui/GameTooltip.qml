@@ -90,7 +90,7 @@ Rectangle {
                     spacing: padding
 
                     property int first: index == 0
-                    property int last: index == playerSetup.count-1
+                    property int last: index == playerSetup.count-1 && playerSetup.count > 1
 
                     Column {
                         Repeater {
@@ -113,7 +113,7 @@ Rectangle {
                                 }
                                 Text {
                                     id: playerName
-                                    text: modelData.name
+                                    text: modelData.name + " (" + modelData.skill + ")"
                                     color: textColor
                                     font.pixelSize: textSize
                                     horizontalAlignment: team.first ? Text.AlignLeft : team.last ? Text.AlignRight : Text.AlignHCenter

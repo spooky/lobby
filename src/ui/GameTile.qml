@@ -10,6 +10,7 @@ Rectangle {
     property int slotsTaken
     property int slotsTotal
     property int gameBalance
+    property var teams: []
 
     property var container
     property int padding: 5
@@ -42,7 +43,7 @@ Rectangle {
     }
 
     GameTooltip {
-        parent: container // HACK to force qml z indexing for tooltips to work as expected 
+        parent: container // HACK to force qml z indexing for custom tooltips to work as expected 
         x: getX(wrapper.x, wrapper.width, width, container.width, padding)
         y: getY(wrapper.y, wrapper.height, height, centralWidget.height, padding)
         z: 100
@@ -57,9 +58,7 @@ Rectangle {
         slotsTaken: wrapper.slotsTaken
         slotsTotal: wrapper.slotsTotal
         gameBalance: wrapper.gameBalance
-        teams: [[{name:"cruchy (1100)", cc: "PL"}], [{name:"creamy (0)", cc:"pl"}]]
-        // teams: [[{name:"cruchy (1100)", cc:"pl"}, {name:"cookie (-200)", cc:"pl"}], [{name:"candy (0)", cc:"pl"}, {name:"cupcake (2600)", cc:"pl"}]]
-        // teams: [[{name:"cruchy (1100)", cc:"pl"}, {name:"cookie (-200)", cc:"pl"}], [{name:"candy (0)", cc:"pl"}, {name:"cupcake (2600)", cc:"pl"}], [{name:"creamy (0)", cc:"pl"}]]
+        teams: wrapper.teams
     }
 
     Item {

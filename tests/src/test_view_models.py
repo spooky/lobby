@@ -13,6 +13,15 @@ def test_GameViewModel_get_player_count():
     assert GameViewModel.get_player_count(data) == 1
 
 
+def test_GameViewModel_get_teams_arrangement():
+    from view_models.games import GameViewModel
+
+    teams = GameViewModel.get_teams_arrangement(data)
+    expected = [[{'name': 'spooky', 'skill': 1000, 'cc': 'world'}]]
+
+    assert teams == expected
+
+
 def test_test_GameViewModel_data():
     from view_models.games import GameViewModel
 
@@ -25,7 +34,7 @@ def test_test_GameViewModel_data():
     # assert g.featured_mod == 'FAF'
     # assert g.mods == []
     assert g.slots == 8
-    assert g.players == 1
+    assert g.player_count == 1
     assert g.balance == 0
 
 
