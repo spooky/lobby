@@ -9,7 +9,7 @@ Window {
     title: "FA Forever"
     width: 1024
     height: 768
-    minimumWidth: 400
+    minimumWidth: 460
     minimumHeight: 300
     flags: Qt.Window | Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint
     color: backgroundColor
