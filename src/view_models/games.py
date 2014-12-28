@@ -2,8 +2,9 @@ import logging
 from itertools import groupby
 from PyQt5.QtCore import QObject, QVariant, QCoreApplication, pyqtProperty, pyqtSignal, pyqtSlot
 
-from session.GameSession import GameSession
 from models import Map
+from session.GameSession import GameSession
+from widgets import Application
 from .adapters import ListModelFor
 
 
@@ -221,13 +222,15 @@ class GamesViewModel(QObject):
 
     @pyqtSlot()
     def on_hostGame(self):
-        # TODO: report activity in status bar
+        self.log.debug('hosting')
+        Application.instance().report_indefinite(QCoreApplication.translate('GamesViewModel', 'hosting game'))
         session = QCoreApplication.instance().session
         if not session:
             # TODO: display 'not logged' error
             return None
         game = GameSession(QCoreApplication.instance())
         game.setFAFConnection(self.server_context)
+        game.finished.connect(lambda: Application.instance().end_report())
 
         game.addArg('showlog')
         game.addArg('mean', 1000)
@@ -244,6 +247,7 @@ class GamesViewModel(QObject):
     @pyqtSlot(GameViewModel)
     def on_joinGame(self, id):
         self.log.debug('joining: {}'.format(id))
+        Application.instance().report_indefinite(QCoreApplication.translate('GamesViewModel', 'joining game'))
 
     @pyqtSlot(list, dict)
     def on_eventReceived(self, event_id, args):
