@@ -6,10 +6,11 @@ from PyQt5.QtGui import QGuiApplication, QIcon
 from PyQt5.QtQuick import QQuickItem
 
 import settings
+import factories
 from utils.async import async_slot
+from utils.collections import LocalContainer, RemoteContainer, Storage
 from view_models.chrome import MainWindowViewModel, LoginViewModel
 from session.Client import Client
-
 
 LOG_BUFFER_SIZE = 1000
 
@@ -19,13 +20,20 @@ class Application(QGuiApplication):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         try:
             self.setWindowIcon(QIcon('ui/icons/faf.ico'))
         except AttributeError:
             pass
+
         self.session = None
+        self.map_storage = None
 
     def start(self):
+        maps_local_container = LocalContainer(settings.get_map_dirs(), factories.create_local_map)
+        maps_remote_container = RemoteContainer()  # TODO
+        self.map_storage = Storage([maps_local_container, maps_remote_container])
+
         self.mainWindow = MainWindow(self)
         self.mainWindow.show()
 
@@ -44,10 +52,13 @@ class MainWindow(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        app = Application.instance()
+
         self.log = logging.getLogger(__name__)
         self._read_settings()
 
-        self.client = Client(app=Application.instance(), parent=self)
+        self.client = Client(app, parent=self)
 
         if self.remember:
             self._autologin()
@@ -71,7 +82,7 @@ class MainWindow(QObject):
         parent.log_changed.connect(self._log)
 
         # set content view
-        self.view_manager.load_view('games', self.client.server_context)
+        self.view_manager.load_view('games', self.client.server_context, app.map_storage)
 
     def show(self):
         self.window.show()

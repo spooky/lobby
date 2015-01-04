@@ -59,7 +59,7 @@ If there is default value for a search entry, error will not be generated. Defau
 import re
 import os
 
-class luaParser:
+class Parser:
 	
 	def __init__(self, luaPath):
 		self.iszip = False

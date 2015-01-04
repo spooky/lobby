@@ -62,3 +62,15 @@ def test_Storage_find_valid_item_in_second_container():
     s = Storage(containers=[lc1, lc2])
 
     assert s['src'] == 'src'
+
+
+def test_Storage_does_not_throw_when_factory_returns_None():
+    from utils.collections import Storage, LocalContainer
+
+    search_paths = [os.path.dirname(os.path.dirname(__file__))]
+    factory = lambda k, p: None
+    lc = LocalContainer(paths=search_paths, factory=factory)
+
+    s = Storage(containers=[lc])
+
+    assert s['src'] is None

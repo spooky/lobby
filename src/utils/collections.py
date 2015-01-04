@@ -31,14 +31,10 @@ class Storage():
         self._containers = containers
 
     def __getitem__(self, k):
-        item = None
         for c in self._containers:
             try:
-                item = c[k]
+                return c[k]
             except KeyError:
                 continue
 
-        if item is not None:
-            return item
-        else:
-            raise KeyError(k)
+        raise KeyError(k)

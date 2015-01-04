@@ -24,7 +24,8 @@ def test_ViewManager_get_view_on_games_view():
     from view_models.games import GamesViewModel
 
     vm = ViewManager(None, None)
-    path, view_model = vm.get_view('games', ServerContextStub())
+    maps_storage_stub = {}
+    path, view_model = vm.get_view('games', ServerContextStub(), maps_storage_stub)
 
     assert path == 'Games.qml'
     assert type(view_model) is GamesViewModel

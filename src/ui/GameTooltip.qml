@@ -3,7 +3,7 @@ import QtQuick.Layouts 1.1
 
 Rectangle {
     // data
-    property string map
+    property var mapPreview
     property string gameTitle
     property string gameHost
     property string mapName
@@ -50,7 +50,7 @@ Rectangle {
 
             Image {
                 fillMode: Image.PreserveAspectCrop
-                source: map || "icons/unknown_map.svg"
+                source: mapPreview != Qt.resolvedUrl("") ? mapPreview : Qt.resolvedUrl("icons/unknown_map.svg")
                 sourceSize: Qt.size(thumbSize, thumbSize)
                 smooth: true
             }

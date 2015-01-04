@@ -7,13 +7,32 @@ if os.name == 'nt':
 else:
     APPDATA_DIR = os.path.join(os.environ['HOME'], '.FAForever')
 
+# This should be 'My Documents' for most users. However,
+# users with accents in their names can't even use these folders in Supcom
+# so we are nice and create a new home for them in the APPDATA_DIR
+try:
+    bytes(os.environ['USERNAME'], 'ascii')  # Try to see if the user has a wacky username
+
+    import ctypes
+    from ctypes.wintypes import MAX_PATH
+
+    dll = ctypes.windll.shell32
+    buf = ctypes.create_unicode_buffer(MAX_PATH + 1)
+    if dll.SHGetSpecialFolderPathW(None, buf, 0x0005, False):
+        PERSONAL_DIR = (buf.value)
+    else:
+        raise Exception()
+except UnicodeDecodeError:
+    PERSONAL_DIR = os.path.join(APPDATA_DIR, 'user')
+
 LOBBY_HOST = 'faforever.tk'
 LOBBY_PORT = 8080
+GAME_PORT_DEFAULT = 6112
 BIN_DIR = os.path.join(APPDATA_DIR, 'bin')
 LOG_DIR = os.path.join(APPDATA_DIR, 'logs')
+FA_DIR = ''
 LOG_FILE_GAME = os.path.join(LOG_DIR, 'game.log')
 LOG_FILE_REPLAY = os.path.join(LOG_DIR, 'replay.log')
-GAME_PORT_DEFAULT = 6112
 
 ORGANIZATION_NAME = 'Forged Alliance Forever'
 APPLICATION_NAME = 'lobby'
@@ -54,6 +73,16 @@ def init(app):
     app.setOrganizationDomain(LOBBY_HOST)
     app.setApplicationName(APPLICATION_NAME)
 
+    global FA_DIR
+    FA_DIR = get().value('fa_path') or ''
+
 
 def get():
     return QSettings(ORGANIZATION_NAME, APPLICATION_NAME)
+
+
+def get_map_dirs():
+    stock = os.path.join(FA_DIR, 'maps')
+    downloaded = os.path.join(PERSONAL_DIR, 'My Games', 'Gas Powered Games', 'Supreme Commander Forged Alliance', 'Maps')
+
+    return [stock, downloaded]

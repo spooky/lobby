@@ -1,6 +1,6 @@
 import logging
 from itertools import groupby
-from PyQt5.QtCore import QObject, QVariant, QCoreApplication, pyqtProperty, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QObject, QVariant, QUrl, QCoreApplication, pyqtProperty, pyqtSignal, pyqtSlot
 
 from models import Map
 from session.GameSession import GameSession
@@ -18,7 +18,8 @@ class GameViewModel(QObject):
 
         self._id = source.get('id')
         game_map = self.get_map(source)
-        self._map = game_map.preview_url()[0]
+        self._map_preview_small = QUrl(game_map.preview_small)
+        self._map_preview_big = QUrl(game_map.preview_big)
         self._map_name = game_map.name
         self._title = source.get('Title')
         self._host = source['host'].get('username') if 'host' in source.keys() else None
@@ -71,16 +72,27 @@ class GameViewModel(QObject):
         self._id = value
         self.id_changed.emit(value)
 
-    map_changed = pyqtSignal(str)
+    map_preview_small_changed = pyqtSignal(QUrl)
 
-    @pyqtProperty(str, notify=map_changed)
-    def map(self):
-        return self._map
+    @pyqtProperty(QUrl, notify=map_preview_small_changed)
+    def map_preview_small(self):
+        return self._map_preview_small
 
-    @map.setter
-    def map(self, value):
-        self._map = value
-        self.map_changed.emit(value)
+    @map_preview_small.setter
+    def map_preview_small(self, value):
+        self._map_preview_small = value
+        self.map_preview_small_changed.emit(value)
+
+    map_preview_big_changed = pyqtSignal(QUrl)
+
+    @pyqtProperty(QUrl, notify=map_preview_big_changed)
+    def map_preview_big(self):
+        return self._map_preview_big
+
+    @map_preview_big.setter
+    def map_preview_big(self, value):
+        self._map_preview_big = value
+        self.map_preview_big_changed.emit(value)
 
     map_name_changed = pyqtSignal(str)
 
@@ -193,7 +205,7 @@ class GamesViewModel(QObject):
     hostGame = pyqtSignal()
     joinGame = pyqtSignal(int)
 
-    def __init__(self, server_context, parent=None):
+    def __init__(self, server_context, map_storage, parent=None):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
 
@@ -202,6 +214,8 @@ class GamesViewModel(QObject):
 
         self.server_context = server_context
         self.server_context.eventReceived.connect(self.on_eventReceived)
+
+        self.map_storage = map_storage
 
         self._games = GameListModel()
 
@@ -235,12 +249,12 @@ class GamesViewModel(QObject):
         game.addArg('init', 'init_test.lua')
 
         game.setTitle('test')
-        game.setMap('scmp_009')
+        game.setMap('3v3 Sand Box v2a')
         game.setLocalPlayer(session.user, session.user_id)
 
         game.start()
 
-    @pyqtSlot(GameViewModel)
+    @pyqtSlot(int)
     def on_joinGame(self, id):
         self.log.debug('joining: {}'.format(id))
         Application.instance().report_indefinite(QCoreApplication.translate('GamesViewModel', 'joining game'))
@@ -254,16 +268,16 @@ class GamesViewModel(QObject):
         getattr(self, 'on_'+cmd)(args)
 
     def on_opened(self, args):
-        g = GameViewModel(args)
+        g = GameViewModel(args, self.map_storage)
         self.games.append(g)
         self.log.debug('added game id: {}'.format(g.id))
 
     def on_updated(self, args):
-        g = GameViewModel(args)
+        g = GameViewModel(args, self.map_storage)
         self.games.update(g)
         self.log.debug('updated game id: {}'.format(g.id))
 
     def on_closed(self, args):
-        g = GameViewModel(args)
+        g = GameViewModel(args, self.map_storage)
         self.games.remove(g)
         self.log.debug('closed game id: {}'.format(g.id))

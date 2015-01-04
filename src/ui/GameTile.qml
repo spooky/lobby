@@ -1,7 +1,8 @@
 import QtQuick 2.0
 
 Rectangle {
-    property string map
+    property var mapPreviewSmall
+    property var mapPreviewBig
     property string mapName
     property string gameTitle
     property string gameHost
@@ -49,7 +50,7 @@ Rectangle {
         z: 100
         visible: mouseArea.containsMouse ? true : false
 
-        map: wrapper.map
+        mapPreview: wrapper.mapPreviewBig != Qt.resolvedUrl("") ? wrapper.mapPreviewBig : wrapper.mapPreviewSmall
         gameTitle: wrapper.gameTitle
         gameHost: wrapper.gameHost
         mapName: wrapper.mapName
@@ -68,7 +69,7 @@ Rectangle {
         Image {
             id: mapThumb
             fillMode: Image.PreserveAspectCrop
-            source: map || "icons/unknown_map.svg"
+            source: mapPreviewSmall != Qt.resolvedUrl("") ? mapPreviewSmall : Qt.resolvedUrl("icons/unknown_map.svg")
             sourceSize: Qt.size(parent.height, parent.height)
             anchors.top: parent.top
             anchors.bottom: parent.bottom

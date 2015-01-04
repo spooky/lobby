@@ -23,6 +23,8 @@ Flow {
             id: item
             gameTitle: title
             gameHost: host
+            mapPreviewSmall: map_preview_small
+            mapPreviewBig: map_preview_big
             mapName: map_name
             featuredModName: featured_mod
             modNames: mods
