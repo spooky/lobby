@@ -20,6 +20,9 @@ def ListModelFor(klass):
         def columnCount(self, parent=QModelIndex()):
             return 1
 
+        def parent(self, index):
+            return QModelIndex()
+
         def roleNames(self):
             return self._roleNames
 
