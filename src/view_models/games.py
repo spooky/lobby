@@ -10,8 +10,9 @@ from .adapters import ListModelFor
 
 class GameViewModel(QObject):
 
-    def __init__(self, source=None, parent=None):
+    def __init__(self, source=None, map_storage={}, parent=None):
         super().__init__(parent)
+        self._map_storage = map_storage
         if not source:
             return
 
@@ -23,7 +24,7 @@ class GameViewModel(QObject):
         self._host = source['host'].get('username') if 'host' in source.keys() else None
         self._featured_mod, self._mods = self.get_mods(source.get('GameMods'))
         self._slots = source['GameOption'].get('Slots', 0) if 'GameOption' in source.keys() else 0
-        self._player_count = self.get_player_count(source)
+        self._player_count = len(source.get('PlayerOption') or [])
         self._teams_arrangement = self.get_teams_arrangement(source)
         self._balance = 0
 
@@ -33,21 +34,16 @@ class GameViewModel(QObject):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    @staticmethod
-    def get_map(source):
+    def get_map(self, source):
         try:
             scenario = source['GameOption']['ScenarioFile']
-            return Map(scenario.split('/')[2])
+            return self._map_storage[scenario.split('/')[2]]
         except KeyError:
             return Map()
 
     @staticmethod
     def get_mods(mods):
         return ('featured (todo)', ['to', 'doX'])  # (featured, other)
-
-    @staticmethod
-    def get_player_count(source):
-        return len(source['PlayerOption']) if 'PlayerOption' in source.keys() else 0
 
     @staticmethod
     def get_teams_arrangement(source):

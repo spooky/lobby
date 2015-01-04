@@ -17,9 +17,11 @@ class Session(QObject):
 
 class Map(QObject):
 
-    def __init__(self, code=None):
+    def __init__(self, code=None, name=None, slots=0, description=None):
         self.code = code
-        self.name = code
+        self.name = name or code
+        self.slots = slots
+        self.description = description
 
     def preview_url(self):
-        return (None, None)
+        return (None, None)  # (small, big or small)
