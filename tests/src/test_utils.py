@@ -74,3 +74,12 @@ def test_Storage_does_not_throw_when_factory_returns_None():
     s = Storage(containers=[lc])
 
     assert s['src'] is None
+
+
+def test_Storage_with_dict_as_container():
+    from utils.collections import Storage
+
+    d = {'a': 'first', 'b': 'second'}
+    s = Storage(containers=[d])
+
+    assert s['a'] == 'first'

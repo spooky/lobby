@@ -86,3 +86,10 @@ def get_map_dirs():
     downloaded = os.path.join(PERSONAL_DIR, 'My Games', 'Gas Powered Games', 'Supreme Commander Forged Alliance', 'Maps')
 
     return [stock, downloaded]
+
+
+def get_mod_dirs():
+    stock = os.path.join(FA_DIR, 'mods')
+    downloaded = os.path.join(PERSONAL_DIR, 'My Games', 'Gas Powered Games', 'Supreme Commander Forged Alliance', 'Mods')
+
+    return [stock, downloaded]

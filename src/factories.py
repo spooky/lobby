@@ -42,7 +42,6 @@ def create_local_map(code, path):
     map_info['slots'] = len(map_info['slots'])
     map_info['preview_small'] = small
     map_info['preview_big'] = big
-    log.debug('Map info: {}'.format(map_info))
 
     return Map(code, **map_info)
 
@@ -62,10 +61,9 @@ def create_local_mod(name, path):
               'version': 'version', 'icon': 'icon', 'ui_only': 'ui_only', 'conflicts': 'conflicts'}
     defaults = {'uid': None, 'name': None, 'description': None, 'author': None, 'version': None, 'icon': None, 'ui_only': False, 'conflicts': {}}
 
-    mod_info = lua_parser.parse(search, defaults)
+    mod_info = lua_parser.parse(search, defaults)  # TODO: support for async
     mod_info['conflicts'] = list(mod_info['conflicts'].values())
-    mod_info['icon'] = icon(mod_info['icon'].split('/').pop(), path)
+    mod_info['icon'] = icon(mod_info['icon'].split('/').pop(), path) if mod_info['icon'] is not None else None
     mod_info['ui_only'] = mod_info['ui_only'] == 'true'
-    log.debug('Mon info: {}'.format(mod_info))
 
     return Mod(**mod_info)

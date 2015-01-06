@@ -32,6 +32,7 @@ class Map(QObject):
 
 
 class Mod(QObject):
+    FEATURED = []
 
     def __init__(self, uid=None, name=None, description=None, author=None, version=None, icon=None, ui_only=False, conflicts=[]):
         self.uid = uid
@@ -45,3 +46,6 @@ class Mod(QObject):
 
     def __str__(self):
         return {'uid': self.uid, 'name': self.name, 'version': self.version}.__str__()
+
+    def conflicts_with(self, other):
+        return len(set(self.conflicts).intersection(other)) > 0

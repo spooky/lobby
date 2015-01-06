@@ -10,9 +10,11 @@ from .adapters import ListModelFor
 
 class GameViewModel(QObject):
 
-    def __init__(self, source=None, map_storage={}, parent=None):
+    def __init__(self, source=None, map_storage={}, mod_storage={}, parent=None):
         super().__init__(parent)
         self._map_storage = map_storage
+        self._mod_storage = mod_storage
+
         if not source:
             return
 
@@ -23,7 +25,7 @@ class GameViewModel(QObject):
         self._map_name = game_map.name
         self._title = source.get('Title')
         self._host = source['host'].get('username') if 'host' in source.keys() else None
-        self._featured_mod, self._mods = self.get_mods(source.get('GameMods'))
+        self._featured_mod, self._mods = self.get_mods(source.get('GameMods') or [])
         self._slots = source['GameOption'].get('Slots', 0) if 'GameOption' in source.keys() else 0
         self._player_count = len(source.get('PlayerOption') or [])
         self._teams_arrangement = self.get_teams_arrangement(source)
@@ -42,9 +44,15 @@ class GameViewModel(QObject):
         except KeyError:
             return Map()
 
-    @staticmethod
-    def get_mods(mods):
-        return ('featured (todo)', ['to', 'doX'])  # (featured, other)
+    def get_mods(self, mods):
+        names = []
+        for m in mods:
+            try:
+                names.append(self._mod_storage[m].name)
+            except KeyError:
+                names.append(QCoreApplication.translate('GamesViewModel', 'unknown'))
+
+        return ('featured (todo)', sorted(names))  # (featured, other)
 
     @staticmethod
     def get_teams_arrangement(source):
@@ -56,7 +64,7 @@ class GameViewModel(QObject):
         for gkey, group in groupby(sorted(players.items(), key=lambda x: str(x[1]['Team']) + x[0]), key=lambda x: x[1]['Team']):
             team = []
             for k, v in group:
-                team.append({'name': v['PlayerName'], 'skill': v['MEAN'], 'cc': v['Country']})
+                team.append({'name': v['PlayerName'], 'skill': v.get('MEAN'), 'cc': v['Country']})
             teams.append(team)
 
         return teams
@@ -205,7 +213,7 @@ class GamesViewModel(QObject):
     hostGame = pyqtSignal()
     joinGame = pyqtSignal(int)
 
-    def __init__(self, server_context, map_storage, parent=None):
+    def __init__(self, server_context, map_storage, mod_storage, parent=None):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
 
@@ -216,6 +224,7 @@ class GamesViewModel(QObject):
         self.server_context.eventReceived.connect(self.on_eventReceived)
 
         self.map_storage = map_storage
+        self.mod_storage = mod_storage
 
         self._games = GameListModel()
 

@@ -64,7 +64,6 @@ Rectangle {
                 Row {
                     spacing: padding
 
-                    Text { text: qsTr("mod"); font.pixelSize: textSize; color: textColor }
                     Text { text: featuredModName; font.pixelSize: textSize; color: headingColor; font.weight: Font.DemiBold }
                     Text { text: qsTr("with"); font.pixelSize: textSize; color: textColor; visible: modNames.length > 0 }
                 }
@@ -113,7 +112,7 @@ Rectangle {
                                 }
                                 Text {
                                     id: playerName
-                                    text: modelData.name + " (" + modelData.skill + ")"
+                                    text: modelData.name + " (" + (modelData.skill || '?') + ")"
                                     color: textColor
                                     font.pixelSize: textSize
                                     horizontalAlignment: team.first ? Text.AlignLeft : team.last ? Text.AlignRight : Text.AlignHCenter

@@ -1,4 +1,6 @@
 import logging
+import itertools
+import os
 import re
 from PyQt5.QtCore import QObject, QUrl, pyqtSignal, pyqtSlot
 from PyQt5.QtQml import QQmlApplicationEngine
@@ -28,11 +30,22 @@ class Application(QGuiApplication):
 
         self.session = None
         self.map_storage = None
+        self.mod_storage = None
 
-    def start(self):
+    def __init_map_storage(self):
         maps_local_container = LocalContainer(settings.get_map_dirs(), factories.create_local_map)
         maps_remote_container = RemoteContainer()  # TODO
         self.map_storage = Storage([maps_local_container, maps_remote_container])
+
+    def __init_mod_storage(self):
+        mod_dirs = [(n, os.path.join(p, n)) for p in settings.get_mod_dirs() for n in os.listdir(p)]
+        mods = [factories.create_local_mod(n, p) for n, p in mod_dirs]
+        mod_lookup = {m.uid: m for m in mods}
+        self.mod_storage = Storage([mod_lookup])
+
+    def start(self):
+        self.__init_map_storage()
+        self.__init_mod_storage()
 
         self.mainWindow = MainWindow(self)
         self.mainWindow.show()
@@ -82,7 +95,7 @@ class MainWindow(QObject):
         parent.log_changed.connect(self._log)
 
         # set content view
-        self.view_manager.load_view('games', self.client.server_context, app.map_storage)
+        self.view_manager.load_view('games', self.client.server_context, app.map_storage, app.mod_storage)
 
     def show(self):
         self.window.show()
