@@ -1,0 +1,16 @@
+name = "sample_mod"
+uid = "78613f40-3428-44be-8fca-e4f6967c1bb3"
+version = 33
+description = "sample mod for tests"
+author = "spooky"
+url = ""
+icon = "/mods/sample_mod/mod_icon.png"
+selectable = true
+enabled = true
+exclusive = false
+ui_only = true
+requires = {}
+requiresNames = {}
+conflicts = {"8f3031ed-41fc-46e8-b409-d2820ae4b0b5"}
+before = {}
+after = {}

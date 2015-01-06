@@ -26,3 +26,22 @@ class Map(QObject):
         self.size = size
         self.preview_small = preview_small
         self.preview_big = preview_big
+
+    def __str__(self):
+        return {'code': self.code, 'version': self.version}.__str__()
+
+
+class Mod(QObject):
+
+    def __init__(self, uid=None, name=None, description=None, author=None, version=None, icon=None, ui_only=False, conflicts=[]):
+        self.uid = uid
+        self.name = name
+        self.description = description
+        self.author = author
+        self.version = version
+        self.icon = icon
+        self.ui_only = ui_only
+        self.conflicts = conflicts
+
+    def __str__(self):
+        return {'uid': self.uid, 'name': self.name, 'version': self.version}.__str__()
