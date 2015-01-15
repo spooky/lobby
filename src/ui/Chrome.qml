@@ -1,7 +1,7 @@
-import QtQuick 2.2
-import QtQuick.Controls 1.1
+import QtQuick 2.3
+import QtQuick.Controls 1.2
+import QtQuick.Controls.Styles 1.2
 import QtQuick.Window 2.1
-import QtQuick.Controls.Styles 1.1
 import Qt.labs.settings 1.0
 
 Window {
@@ -14,16 +14,17 @@ Window {
     flags: Qt.Window | Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint
     color: backgroundColor
 
-    property string backgroundColor: "#111111"
-    property string highlightColor: "#2f2f2f"
-    property string altHighlightColor: "#454545"
-    property string textColor: "#969696"
-    property string textHighlightColor: "#cccccc"
+    property color backgroundColor: "#111111"
+    property color highlightColor: "#2f2f2f"
+    property color altHighlightColor: "#454545"
+    property color paleTextColor: "#707070"
+    property color textColor: "#969696"
+    property color textHighlightColor: "#cccccc"
 
-    property string uefBlue: "#2d78b2"
-    property string cybRed: "#df2d0e"
-    property string aeonGreen: "#0a9d2f"
-    property string seraGold: "#f1c240"
+    property color uefBlue: "#2d78b2"
+    property color cybRed: "#df2d0e"
+    property color aeonGreen: "#0a9d2f"
+    property color seraGold: "#f1c240"
 
     // remember window geometry
     Settings {
@@ -302,34 +303,12 @@ Window {
         ]
         transitions: Transition { NumberAnimation { target: sideMenuOffset; property: "x"; duration: 200 } }
 
-        Column {
-            spacing: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.topMargin: 10
-            anchors.bottomMargin: 10
-
-            ActionIcon {
-                source: "icons/rss.svg"
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-
-            ActionIcon {
-                source: "icons/lightbulb.svg"
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-
-            ActionIcon {
-                source: "icons/point.svg"
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-
-            ActionIcon {
-                source: "icons/world.svg"
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-        }
+        Loader {
+            id: sideMenuContentLoader
+            source: windowModel.currentView + 'SideMenu.qml'
+            asynchronous: false // HACK: want this to be true, but this causes the app to crash. More details here: https://bugreports.qt.io/browse/QTBUG-35989
+            anchors.fill: parent
+        }        
     }
 
     Item {
@@ -408,7 +387,8 @@ Window {
 
                 Loader {
                     id: contentViewLoader
-                    source: windowModel.currentView
+                    source: windowModel.currentView + '.qml'
+                    asynchronous: true
                 }
             }
         }

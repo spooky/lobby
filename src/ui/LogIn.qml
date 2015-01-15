@@ -1,7 +1,4 @@
-import QtQuick 2.2
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
-
+import QtQuick 2.3
 
 Rectangle {
     property string background
@@ -57,12 +54,7 @@ Rectangle {
                 checked: loginModel.remember
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                style: CheckBoxStyle {
-                    label: Text {
-                        text: qsTr("Remember")
-                        color: textColor
-                    }
-                }
+                text: qsTr("Remember")
             }
 
             Button {

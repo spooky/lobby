@@ -245,7 +245,7 @@ class GamesViewModel(QObject):
         Application.instance().report_indefinite(QCoreApplication.translate('GamesViewModel', 'hosting game'))
         session = QCoreApplication.instance().session
         if not session:
-            # TODO: display 'not logged' error
+            # TODO: display 'not logged in' error
             return None
         game = GameSession(QCoreApplication.instance())
         game.setFAFConnection(self.server_context)

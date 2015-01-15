@@ -1,5 +1,4 @@
 import logging
-import itertools
 import os
 import re
 from PyQt5.QtCore import QObject, QUrl, pyqtSignal, pyqtSlot
@@ -25,7 +24,7 @@ class Application(QGuiApplication):
 
         try:
             self.setWindowIcon(QIcon('ui/icons/faf.ico'))
-        except AttributeError:
+        except AttributeError:  # setWindowIcon is available on windows only
             pass
 
         self.session = None
@@ -149,7 +148,7 @@ class ViewManager(QObject):
             vm_name = '{}ViewModel'.format(n)
             # equivalent of from view_models import <part>
             vm = __import__('view_models.'+name, globals(), locals(), [vm_name], 0)
-            self._cache[name] = ('{}.qml'.format(n), (getattr(vm, vm_name))(*args, parent=self, **kwargs))
+            self._cache[name] = (n, (getattr(vm, vm_name))(*args, parent=self, **kwargs))
 
         return self._cache[name]
 

@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.3
 
 Item {
     property string textColor: root.textColor
@@ -48,12 +48,33 @@ Item {
             smooth: true
         }
 
+        ActionIcon {
+            source: "icons/settings.svg"
+            size: 24
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.margins: 5
+            z: 20
+
+            onClicked: {
+                sideMenu.state = "open"
+                var panels = sideMenuContentLoader.item.children;
+                for (var i=0; i<panels.length; i++) {
+                    if (panels[i].objectName == "hostOptionsPanel") {
+                        panels[i].state = "open"
+                        return
+                    }
+                }
+            }
+        }
+
         MouseArea {
             id: mouseArea
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onDoubleClicked: wrapper.doubleClicked()
+            z: 10
         }
     }
 }
