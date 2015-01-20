@@ -32,5 +32,6 @@ if __name__ == '__main__':
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
 
-    app.start()
-    sys.exit(loop.run_forever())
+    with loop:
+        app.start()
+        sys.exit(loop.run_forever())

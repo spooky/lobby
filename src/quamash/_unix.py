@@ -1,6 +1,9 @@
 # © 2014 Mark Harviston <mark.harviston@gmail.com>
 # © 2014 Arve Knudsen <arve.knudsen@gmail.com>
 # BSD License
+
+""" UNIX specific Quamash functionality. """
+
 import asyncio
 from asyncio import selectors
 import collections
@@ -37,7 +40,9 @@ def _fileobj_to_fd(fileobj):
 
 
 class _SelectorMapping(collections.Mapping):
+
 	"""Mapping of file objects to selector keys."""
+
 	def __init__(self, selector):
 		self._selector = selector
 
@@ -68,7 +73,7 @@ class _Selector(selectors.BaseSelector):
 
 	def select(self, *args, **kwargs):
 		"""Implement abstract method even though we don't need it."""
-		raise NotImplemented
+		raise NotImplementedError
 
 	def _fileobj_lookup(self, fileobj):
 		"""Return a file descriptor from a file object.
@@ -187,10 +192,6 @@ class _SelectorEventLoop(asyncio.SelectorEventLoop):
 		selector = _Selector(self)
 		asyncio.SelectorEventLoop.__init__(self, selector)
 
-		socket_notifier = self.__socket_notifier = QtCore.QSocketNotifier(
-			self._ssock.fileno(), QtCore.QSocketNotifier.Read)
-		socket_notifier.activated.connect(self.__wake_on_socket)
-
 	def _before_run_forever(self):
 		pass
 
@@ -213,22 +214,5 @@ class _SelectorEventLoop(asyncio.SelectorEventLoop):
 			else:
 				self._logger.debug('Invoking writer callback: {}'.format(writer))
 				writer._run()
-
-	def _add_callback_signalsafe(self, handle):
-		"""Add callback in signal safe manner."""
-		self._signal_safe_callbacks.append(handle)
-		self._write_to_self()
-
-	def __wake_on_socket(self):
-		self._logger.debug('Waking on socket notification, {} signal callback(s) waiting'.format(
-			len(self._signal_safe_callbacks)
-		))
-		# Acknowledge command
-		self._ssock.recv(1)
-		for handle in self._signal_safe_callbacks[:]:
-			self._logger.debug('Scheduling signal callback {}'.format(handle))
-			self._signal_safe_callbacks.remove(handle)
-			self._add_callback(handle)
-
 
 baseclass = _SelectorEventLoop

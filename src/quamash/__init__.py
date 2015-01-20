@@ -1,11 +1,11 @@
 # © 2014 Mark Harviston <mark.harviston@gmail.com>
 # © 2014 Arve Knudsen <arve.knudsen@gmail.com>
 # BSD License
-"""
-Implementation of the PEP 3156 Event-Loop with Qt
-"""
+""" Implementation of the PEP 3156 Event-Loop with Qt. """
+
 __author__ = 'Mark Harviston <mark.harviston@gmail.com>, Arve Knudsen <arve.knudsen@gmail.com>'
-__version__ = '0.3'
+__version__ = '0.5.1'
+__url__ = 'https://github.com/harvimt/quamash'
 __license__ = 'BSD'
 
 import sys
@@ -13,26 +13,40 @@ import os
 import asyncio
 import time
 from functools import wraps
+import itertools
 from queue import Queue
 from concurrent.futures import Future
-
-for QtModuleName in ('PyQt5', 'PyQt4', 'PySide'):
-	try:
-		QtModule = __import__(QtModuleName)
-	except ImportError:
-		continue
-	else:
-		break
-else:
-	raise ImportError('No Qt implementations found')
-
-QtCore = __import__(QtModuleName + '.QtCore', fromlist=(QtModuleName,))
+import logging
+logger = logging.getLogger('quamash')
 
 try:
-	QtGui = __import__(QtModuleName + '.QtWidgets', fromlist=(QtModuleName,))
-except ImportError:
-	QtGui = __import__(QtModuleName + '.QtGui', fromlist=(QtModuleName,))
+	QtModuleName = os.environ['QUAMASH_QTIMPL']
+except KeyError:
+	QtModule = None
+else:
+	logger.info('Forcing use of {} as Qt Implementation'.format(QtModuleName))
+	QtModule = __import__(QtModuleName)
 
+if not QtModule:
+	for QtModuleName in ('PyQt5', 'PyQt4', 'PySide'):
+		try:
+			QtModule = __import__(QtModuleName)
+		except ImportError:
+			continue
+		else:
+			break
+	else:
+		raise ImportError('No Qt implementations found')
+
+logger.info('Using Qt Implementation: {}'.format(QtModuleName))
+
+QtCore = __import__(QtModuleName + '.QtCore', fromlist=(QtModuleName,))
+QtGui = __import__(QtModuleName + '.QtGui', fromlist=(QtModuleName,))
+if QtModuleName == 'PyQt5':
+	from PyQt5 import QtWidgets
+	QApplication = QtWidgets.QApplication
+else:
+	QApplication = QtGui.QApplication
 
 if not hasattr(QtCore, 'Signal'):
 	QtCore.Signal = QtCore.pyqtSignal
@@ -43,11 +57,13 @@ from ._common import with_logger
 
 @with_logger
 class _QThreadWorker(QtCore.QThread):
+
 	"""
 	Read from the queue.
 
 	For use by the QThreadExecutor
 	"""
+
 	def __init__(self, queue, num):
 		self.__queue = queue
 		self.__stop = False
@@ -78,7 +94,7 @@ class _QThreadWorker(QtCore.QThread):
 					self._logger.debug('Setting Future result: {}'.format(r))
 					future.set_result(r)
 			else:
-				self._logger.debug('Future was cancelled')
+				self._logger.debug('Future was canceled')
 
 		self._logger.debug('Thread #{} stopped'.format(self.__num))
 
@@ -89,8 +105,10 @@ class _QThreadWorker(QtCore.QThread):
 
 @with_logger
 class QThreadExecutor(QtCore.QObject):
+
 	"""
-	ThreadExecutor that produces QThreads
+	ThreadExecutor that produces QThreads.
+
 	Same API as `concurrent.futures.Executor`
 
 	>>> from quamash import QThreadExecutor
@@ -99,6 +117,7 @@ class QThreadExecutor(QtCore.QObject):
 	...     r = f.result()
 	...     assert r == 4
 	"""
+
 	def __init__(self, max_workers=10, parent=None):
 		super().__init__(parent)
 		self.__max_workers = max_workers
@@ -123,7 +142,7 @@ class QThreadExecutor(QtCore.QObject):
 	def map(self, func, *iterables, timeout=None):
 		raise NotImplementedError("use as_completed on the event loop")
 
-	def shutdown(self):
+	def shutdown(self, wait=True):
 		if self.__been_shutdown:
 			raise RuntimeError("QThreadExecutor has been shutdown")
 
@@ -133,8 +152,9 @@ class QThreadExecutor(QtCore.QObject):
 		for i in range(len(self.__workers)):
 			# Signal workers to stop
 			self.__queue.put(None)
-		for w in self.__workers:
-			w.wait()
+		if wait:
+			for w in self.__workers:
+				w.wait()
 
 	def __enter__(self, *args):
 		if self.__been_shutdown:
@@ -147,20 +167,20 @@ class QThreadExecutor(QtCore.QObject):
 
 def _easycallback(fn):
 	"""
-	Decorator that wraps a callback in a signal, and packs & unpacks arguments,
-	Makes the wrapped function effectively threadsafe. If you call the function
-	from one thread, it will be executed in the thread the QObject has affinity
-	with.
+	Decorator that wraps a callback in a signal.
+
+	It also packs & unpacks arguments, and makes the wrapped function effectively
+	threadsafe. If you call the function from one thread, it will be executed in
+	the thread the QObject has affinity with.
 
 	Remember: only objects that inherit from QObject can support signals/slots
 
 	>>> import asyncio
 	>>>
 	>>> import quamash
-	>>> from quamash import QEventLoop, QtCore, QtGui
 	>>> QThread, QObject = quamash.QtCore.QThread, quamash.QtCore.QObject
 	>>>
-	>>> app = QtCore.QCoreApplication.instance() or QtGui.QApplication([])
+	>>> app = getfixture('application')
 	>>>
 	>>> global_thread = QThread.currentThread()
 	>>> class MyObject(QObject):
@@ -181,6 +201,7 @@ def _easycallback(fn):
 	...     myobject.mycallback()
 	>>>
 	>>> loop = QEventLoop(app)
+	>>> asyncio.set_event_loop(loop)
 	>>> with loop:
 	...     loop.run_until_complete(mycoroutine())
 	"""
@@ -206,12 +227,13 @@ else:
 
 @with_logger
 class QEventLoop(_baseclass):
-	"""
-	Implementation of asyncio event loop that uses the Qt Event loop
 
-	>>> import quamash, asyncio
-	>>> from quamash import QtCore, QtGui
-	>>> app = QtCore.QCoreApplication.instance() or QtGui.QApplication([])
+	"""
+	Implementation of asyncio event loop that uses the Qt Event loop.
+
+	>>> import asyncio
+	>>>
+	>>> app = getfixture('application')
 	>>>
 	>>> @asyncio.coroutine
 	... def xplusy(x, y):
@@ -219,16 +241,22 @@ class QEventLoop(_baseclass):
 	...     assert x + y == 4
 	...     yield from asyncio.sleep(.1)
 	>>>
-	>>> with QEventLoop(app) as loop:
+	>>> loop = QEventLoop(app)
+	>>> asyncio.set_event_loop(loop)
+	>>> with loop:
 	...     loop.run_until_complete(xplusy(2, 2))
 	"""
+
 	def __init__(self, app=None):
 		self.__timers = []
-		self.__app = app or QtCore.QCoreApplication.instance()
+		self.__app = app or QApplication.instance()
+		assert self.__app is not None, 'No QApplication has been instantiated'
 		self.__is_running = False
 		self.__debug_enabled = False
 		self.__default_executor = None
 		self.__exception_handler = None
+		self._read_notifiers = {}
+		self._write_notifiers = {}
 
 		assert self.__app is not None
 
@@ -257,6 +285,7 @@ class QEventLoop(_baseclass):
 			self.run_forever()
 		finally:
 			future.remove_done_callback(stop)
+		self.__app.processEvents()  # run loop one last time to process all the events
 		if not future.done():
 			raise RuntimeError('Event loop stopped before Future completed.')
 
@@ -274,16 +303,34 @@ class QEventLoop(_baseclass):
 		self._logger.debug('Stopped event loop')
 
 	def is_running(self):
-		"""Is event loop running?"""
+		"""Return True if the event loop is running, False otherwise."""
 		return self.__is_running
 
 	def close(self):
-		"""Close event loop."""
-		self.__timers = []
-		self.__app = None
+		"""
+		Release all resources used by the event loop.
+
+		The loop cannot be restarted after it has been closed.
+		"""
+		self._logger.debug('Closing event loop...')
 		if self.__default_executor is not None:
 			self.__default_executor.shutdown()
+
 		super().close()
+
+		for timer in self.__timers:
+			if timer.isActive():
+				timer.stop()
+			del timer
+		self.__timers = None
+
+		self.__app = None
+
+		for notifier in itertools.chain(self._read_notifiers.values(), self._write_notifiers.values()):
+			notifier.setEnabled(False)
+
+		self._read_notifiers = None
+		self._write_notifiers = None
 
 	def call_later(self, delay, callback, *args):
 		"""Register callback to be invoked after a certain delay."""
@@ -299,6 +346,7 @@ class QEventLoop(_baseclass):
 
 	def _add_callback(self, handle, delay=0):
 		def upon_timeout():
+			assert timer in self.__timers, 'Timer {} not among {}'.format(timer, self.__timers)
 			self.__timers.remove(timer)
 			self._logger.debug('Callback timer fired, calling {}'.format(handle))
 			handle._run()
@@ -313,6 +361,7 @@ class QEventLoop(_baseclass):
 		return _Cancellable(timer, self)
 
 	def call_soon(self, callback, *args):
+		"""Register a callback to be run on the next iteration of the event loop."""
 		return self.call_later(0, callback, *args)
 
 	def call_at(self, when, callback, *args):
@@ -322,6 +371,104 @@ class QEventLoop(_baseclass):
 	def time(self):
 		"""Get time according to event loop's clock."""
 		return time.monotonic()
+
+	def add_reader(self, fd, callback, *args):
+		"""Register a callback for when a file descriptor is ready for reading."""
+		try:
+			existing = self._read_notifiers[fd]
+		except KeyError:
+			pass
+		else:
+			# this is necessary to avoid race condition-like issues
+			existing.setEnabled(False)
+			existing.activated.disconnect()
+			# will get overwritten by the assignment below anyways
+
+		notifier = QtCore.QSocketNotifier(fd, QtCore.QSocketNotifier.Read)
+		notifier.setEnabled(True)
+		self._logger.debug('Adding reader callback for file descriptor {}'.format(fd))
+		notifier.activated.connect(
+			lambda: self.__on_notifier_ready(
+				self._read_notifiers, notifier, fd, callback, args)
+		)
+		self._read_notifiers[fd] = notifier
+
+	def remove_reader(self, fd):
+		"""Remove reader callback."""
+		self._logger.debug('Removing reader callback for file descriptor {}'.format(fd))
+		try:
+			notifier = self._read_notifiers.pop(fd)
+		except KeyError:
+			return False
+		else:
+			notifier.setEnabled(False)
+			return True
+
+	def add_writer(self, fd, callback, *args):
+		"""Register a callback for when a file descriptor is ready for writing."""
+		try:
+			existing = self._write_notifiers[fd]
+		except KeyError:
+			pass
+		else:
+			# this is necessary to avoid race condition-like issues
+			existing.setEnabled(False)
+			existing.activated.disconnect()
+			# will get overwritten by the assignment below anyways
+
+		notifier = QtCore.QSocketNotifier(fd, QtCore.QSocketNotifier.Write)
+		notifier.setEnabled(True)
+		self._logger.debug('Adding writer callback for file descriptor {}'.format(fd))
+		notifier.activated.connect(
+			lambda: self.__on_notifier_ready(
+				self._write_notifiers, notifier, fd, callback, args)
+		)
+		self._write_notifiers[fd] = notifier
+
+	def remove_writer(self, fd):
+		"""Remove writer callback."""
+		self._logger.debug('Removing writer callback for file descriptor {}'.format(fd))
+		try:
+			notifier = self._write_notifiers.pop(fd)
+		except KeyError:
+			return False
+		else:
+			notifier.setEnabled(False)
+			return True
+
+	def __notifier_cb_wrapper(self, notifiers, notifier, fd, callback, args):
+		# This wrapper gets called with a certain delay. We cannot know
+		# for sure that the notifier is still the current notifier for
+		# the fd.
+		if notifiers.get(fd, None) is not notifier:
+			return
+		try:
+			callback(*args)
+		finally:
+			# The notifier might have been overriden by the
+			# callback. We must not re-enable it in that case.
+			if notifiers.get(fd, None) is notifier:
+				notifier.setEnabled(True)
+			else:
+				notifier.activated.disconnect()
+
+	def __on_notifier_ready(self, notifiers, notifier, fd, callback, args):
+		if fd not in notifiers:
+			self._logger.warning(
+				'Socket notifier for fd {} is ready, even though it should be disabled, not calling {} and disabling'
+				.format(fd, callback)
+			)
+			notifier.setEnabled(False)
+			return
+
+		# It can be necessary to disable QSocketNotifier when e.g. checking
+		# ZeroMQ sockets for events
+		assert notifier.isEnabled()
+		self._logger.debug('Socket notifier for fd {} is ready'.format(fd))
+		notifier.setEnabled(False)
+		self.call_soon(
+			self.__notifier_cb_wrapper,
+			notifiers, notifier, fd, callback, args)
 
 	# Methods for interacting with threads.
 
@@ -430,15 +577,11 @@ class QEventLoop(_baseclass):
 		self.__debug_enabled = enabled
 
 	def __enter__(self):
-		asyncio.set_event_loop(self)
 		return self
 
 	def __exit__(self, *args):
-		try:
-			self.stop()
-			self.close()
-		finally:
-			asyncio.set_event_loop(None)
+		self.stop()
+		self.close()
 
 	@classmethod
 	def __log_error(cls, *args, **kwds):
