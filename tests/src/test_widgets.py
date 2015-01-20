@@ -27,5 +27,5 @@ def test_ViewManager_get_view_on_games_view():
     storage_stub = {}
     path, view_model = vm.get_view('games', ServerContextStub(), storage_stub, storage_stub)
 
-    assert path == 'Games.qml'
+    assert path == 'Games'
     assert type(view_model) is GamesViewModel
