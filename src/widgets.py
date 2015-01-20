@@ -23,7 +23,7 @@ class Application(QGuiApplication):
         super().__init__(*args, **kwargs)
 
         try:
-            self.setWindowIcon(QIcon('ui/icons/faf.ico'))
+            self.setWindowIcon(QIcon(os.path.join(os.path.dirname(__file__), 'ui/icons/faf.ico')))
         except AttributeError:  # setWindowIcon is available on windows only
             pass
 
@@ -84,7 +84,7 @@ class MainWindow(QObject):
         self.engine.rootContext().setContextProperty('windowModel', self.windowModel)
         self.engine.rootContext().setContextProperty('loginModel', self.loginModel)
         self.engine.quit.connect(parent.quit)
-        self.engine.load(QUrl.fromLocalFile('ui/Chrome.qml'))
+        self.engine.load(QUrl.fromLocalFile(os.path.join(os.path.dirname(__file__), 'ui/Chrome.qml')))
 
         self.view_manager = ViewManager(self.engine.rootContext(), self.windowModel, parent=self)
         self.window = self.engine.rootObjects()[0]
