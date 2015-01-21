@@ -1,4 +1,5 @@
 import QtQuick 2.3
+import QtQuick.Layouts 1.1
 
 Item {
     anchors.horizontalCenter: parent.horizontalCenter
@@ -52,10 +53,19 @@ Item {
                 anchors.right: parent.right
                 editable: true
             }
-            TextField {
+            RowLayout {
+                spacing: parent.spacing
                 anchors.left: parent.left
                 anchors.right: parent.right
-                placeholderText: qsTr("game title")
+
+                TextField {
+                    placeholderText: qsTr("game title")
+                    Layout.fillWidth: true
+                }
+                LockButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    implicitWidth: 18
+                }
             }
             ComboBox {
                 anchors.left: parent.left
