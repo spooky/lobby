@@ -70,9 +70,11 @@ Item {
 
             CheckBox {
                 text: "mod 1"
+                checked: true
             }
             CheckBox {
                 text: "mod 2"
+                checked: true
             }
             CheckBox {
                 text: "mod 3"
