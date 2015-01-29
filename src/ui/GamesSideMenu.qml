@@ -51,7 +51,7 @@ Item {
             ComboBox {
                 anchors.left: parent.left
                 anchors.right: parent.right
-                editable: true
+                editable: false
             }
             RowLayout {
                 spacing: parent.spacing
@@ -75,7 +75,7 @@ Item {
             ComboBox {
                 anchors.left: parent.left
                 anchors.right: parent.right
-                editable: true
+                editable: false
             }
 
             CheckBox {
