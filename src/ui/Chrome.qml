@@ -305,7 +305,7 @@ Window {
 
         Loader {
             id: sideMenuContentLoader
-            source: windowModel.currentView + 'SideMenu.qml'
+            source: windowModel.currentView ? windowModel.currentView + 'SideMenu.qml' : ""
             asynchronous: false // HACK: want this to be true, but this causes the app to crash. More details here: https://bugreports.qt.io/browse/QTBUG-35989
             anchors.fill: parent
         }        
