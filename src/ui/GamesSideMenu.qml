@@ -39,78 +39,96 @@ Item {
             }
         ]
 
-        Column {
+        GridLayout {
             anchors.margins: 10
-            anchors.fill: parent
-            spacing: 5
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.right: parent.right
+            columns: 2
 
             Button {
-                anchors.right: parent.right
-                anchors.rightMargin: 23
+                Layout.row: 1
+                Layout.column: 1
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+
                 text: qsTr("Host")
             }
-            RowLayout {
-                spacing: parent.spacing
-                anchors.left: parent.left
-                anchors.right: parent.right
 
-                ComboBox {
-                    editable: false
-                    Layout.fillWidth: true
-                    model: ["default", "final rush", "training"]
-
-                }
-                ActionIcon {
-                    anchors.verticalCenter: parent.verticalCenter
-                    implicitWidth: 18
-                    size: 26
-                    source: "icons/save.svg"
-                    transform: Translate { x: 1 } // align to the right edge
-                    onClicked: {
-                        console.log('TODO: save preset action')
-                    }
-                }
-            }
-            RowLayout {
-                spacing: parent.spacing
-                anchors.left: parent.left
-                anchors.right: parent.right
-
-                TextField {
-                    placeholderText: qsTr("game title")
-                    Layout.fillWidth: true
-                }
-                LockButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    implicitWidth: 18
-                    transform: Translate { x: 4 } // align to the right edge
-                }
-            }
             ComboBox {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.rightMargin: 23
+                Layout.row: 2
+                Layout.column: 1
+                Layout.fillWidth: true
+
+                editable: false
+                model: ["default", "final rush", "training"]
+
+            }
+
+            ActionIcon {
+                Layout.row: 2
+                Layout.column: 2
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+
+                implicitWidth: 18
+                size: 26
+                source: "icons/save.svg"
+                transform: Translate { x: 1 } // align to the right edge
+                onClicked: {
+                    console.log('TODO: save preset action')
+                }
+            }
+
+            TextField {
+                Layout.row: 3
+                Layout.column: 1
+                Layout.fillWidth: true
+
+                placeholderText: qsTr("game title")
+            }
+
+            LockButton {
+                Layout.row: 3
+                Layout.column: 2
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+
+                implicitWidth: 18
+                transform: Translate { x: 4 } // align to the right edge
+            }
+
+            ComboBox {
+                Layout.row: 4
+                Layout.column: 1
+                Layout.fillWidth: true
+
                 editable: false
                 model: ["Forged Alliance Forever", "Phantom X", "Vanilla", "The Nomads"]
             }
+
             ComboBox {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.rightMargin: 23
+                Layout.row: 5
+                Layout.column: 1
+                Layout.fillWidth: true
+
                 editable: true
                 model: ["Seton's", "Sandbox", "Regor"]
             }
 
-            CheckBox {
-                text: "rks_explosions"
-                checked: true
-            }
-            CheckBox {
-                text: "Final Rush Pro"
-                checked: true
-            }
-            CheckBox {
-                text: "eco info"
+            ColumnLayout {
+                Layout.row: 6
+                Layout.column: 1
+                Layout.fillWidth: true
+
+                CheckBox {
+                    text: "rks_explosions"
+                    checked: true
+                }
+                CheckBox {
+                    text: "Final Rush Pro"
+                    checked: true
+                }
+                CheckBox {
+                    text: "eco info"
+                }
             }
         }
     }
