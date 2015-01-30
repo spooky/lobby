@@ -1,6 +1,7 @@
 import os
 from PyQt5.QtCore import QSettings
 
+
 # These directories are in Appdata (e.g. C:\ProgramData on some Win7 versions)
 if os.name == 'nt':
     APPDATA_DIR = os.path.join(os.environ['ALLUSERSPROFILE'], 'FAForever')
@@ -41,6 +42,8 @@ APPLICATION_NAME = 'lobby'
 AUTH_SERVICE_URL = 'http://{}:44343/auth'.format(LOBBY_HOST)
 FAF_SERVICE_URL = 'http://{}:8080'.format(LOBBY_HOST)
 
+
+EXECUTOR_THREADS = 10
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,

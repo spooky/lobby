@@ -1,7 +1,8 @@
 import logging
 import os
 import re
-from PyQt5.QtCore import QObject, QUrl, pyqtSignal, pyqtSlot
+import asyncio
+from PyQt5.QtCore import QObject, QCoreApplication, QUrl, pyqtSignal, pyqtSlot
 from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtGui import QGuiApplication, QIcon
 from PyQt5.QtQuick import QQuickItem
@@ -9,7 +10,7 @@ from PyQt5.QtQuick import QQuickItem
 import settings
 import factories
 from utils.async import async_slot
-from utils.collections import LocalContainer, RemoteContainer, Storage
+from utils.collections import Storage
 from view_models.chrome import MainWindowViewModel, LoginViewModel
 from session.Client import Client
 
@@ -31,23 +32,26 @@ class Application(QGuiApplication):
         self.map_storage = None
         self.mod_storage = None
 
+    @asyncio.coroutine
     def __init_map_storage(self):
-        maps_local_container = LocalContainer(settings.get_map_dirs(), factories.create_local_map)
-        maps_remote_container = RemoteContainer()  # TODO
-        self.map_storage = Storage([maps_local_container, maps_remote_container])
+        map_lookup = yield from factories.local_map_lookup(settings.get_map_dirs())
+        self.map_storage = Storage([map_lookup])
 
+    @asyncio.coroutine
     def __init_mod_storage(self):
-        mod_dirs = [(n, os.path.join(p, n)) for p in settings.get_mod_dirs() for n in os.listdir(p)]
-        mods = [factories.create_local_mod(n, p) for n, p in mod_dirs]
-        mod_lookup = {m.uid: m for m in mods}
+        mod_lookup = yield from factories.local_mod_lookup(settings.get_mod_dirs())
         self.mod_storage = Storage([mod_lookup])
 
+    @async_slot
     def start(self):
-        self.__init_map_storage()
-        self.__init_mod_storage()
-
         self.mainWindow = MainWindow(self)
         self.mainWindow.show()
+
+        self.report_indefinite(QCoreApplication.translate('Application', 'loading maps'))
+        yield from self.__init_map_storage()
+        self.report_indefinite(QCoreApplication.translate('Application', 'loading mods'))
+        yield from self.__init_mod_storage()
+        self.end_report()
 
     def log(self, msg):
         self.log_changed.emit(msg)
@@ -98,6 +102,7 @@ class MainWindow(QObject):
 
     def show(self):
         self.window.show()
+        self.log.debug('Client up')
 
     def _read_settings(self):
         stored = settings.get()

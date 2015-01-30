@@ -4,7 +4,7 @@ import logging.config
 import asyncio
 import settings
 from widgets import Application
-from quamash import QEventLoop
+from quamash import QEventLoop, QThreadExecutor
 
 try:
     import signal
@@ -31,6 +31,9 @@ if __name__ == '__main__':
 
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
+
+    executor = QThreadExecutor(settings.EXECUTOR_THREADS)
+    loop.set_default_executor(executor)
 
     with loop:
         app.start()

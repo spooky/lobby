@@ -1,14 +1,27 @@
 import os.path
+import asyncio
+import pytest
 
 from PyQt5.QtCore import QUrl
 
 
-def test_create_local_map():
+@pytest.fixture(scope='module')
+def loop(request):
+    loop = asyncio.get_event_loop()
+
+    def close_loop():
+        loop.close()
+    request.addfinalizer(close_loop)
+
+    return loop
+
+
+def test_create_local_map(loop):
     from factories import create_local_map
 
     code = 'sample_map'
     path = os.path.join(os.path.dirname(__file__), code)
-    m = create_local_map(code, path)
+    m = loop.run_until_complete(create_local_map(code, path))
 
     assert m.code == 'sample_map'
     assert m.name == '2V2 Sand Box'
@@ -20,12 +33,12 @@ def test_create_local_map():
     assert m.preview_big is None
 
 
-def test_create_local_map_with_screwed_up_versioning():
+def test_create_local_map_with_screwed_up_versioning(loop):
     from factories import create_local_map
 
     code = 'sample_map.v002'
     path = os.path.join(os.path.dirname(__file__), code)
-    m = create_local_map(code, path)
+    m = loop.run_until_complete(create_local_map(code, path))
 
     assert m.code == 'sample_map.v002'
     assert m.name == '2V2 Sand Box'
@@ -37,12 +50,12 @@ def test_create_local_map_with_screwed_up_versioning():
     assert m.preview_big is None
 
 
-def test_create_local_mod():
+def test_create_local_mod(loop):
     from factories import create_local_mod
 
     name = 'sample_mod'
     path = os.path.join(os.path.dirname(__file__), name)
-    m = create_local_mod(name, path)
+    m = loop.run_until_complete(create_local_mod(name, path))
 
     assert m.uid == '78613f40-3428-44be-8fca-e4f6967c1bb3'
     assert m.name == 'sample_mod'
