@@ -88,7 +88,7 @@ Window {
 
         ActionIcon {
             id: actionIcon
-            source: "icons/faf.png"
+            source: "icons/faf.svg"
             overlayColor: "#44f1c240"
             glowColor: "white"
             glowRadius: 3
