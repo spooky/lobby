@@ -29,7 +29,7 @@ Controls.CheckBox {
             }
 
             ColorOverlay {
-                visible: control.activeFocus
+                visible: control.activeFocus || control.hovered
                 cached: true
                 color: colorActive
                 source: icon

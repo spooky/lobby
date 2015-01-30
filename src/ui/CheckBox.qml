@@ -19,7 +19,7 @@ Controls.CheckBox {
             color: "transparent"
             implicitWidth: control.implicitWidth
             implicitHeight: control.implicitHeight
-            border.color: control.activeFocus ? activeBorderColor : borderColor
+            border.color: control.activeFocus || control.hovered ? activeBorderColor : borderColor
             border.width: 1
 
             Image {

@@ -24,8 +24,8 @@ Controls.Button {
         background: Rectangle {
             implicitWidth: control.implicitWidth
             implicitHeight: control.implicitHeight
-            border.width: control.activeFocus ? 2 : 1
-            border.color: control.activeFocus & !control.pressed ? pressedBackgroundColor : borderColor
+            border.width: control.activeFocus || control.hovered ? 2 : 1
+            border.color: (control.activeFocus || control.hovered) & !control.pressed ? pressedBackgroundColor : borderColor
             color: control.pressed ? pressedBackgroundColor : backgroundColor
         }
     }

@@ -48,10 +48,25 @@ Item {
                 anchors.right: parent.right
                 text: qsTr("Host")
             }
-            ComboBox {
+            RowLayout {
+                spacing: parent.spacing
                 anchors.left: parent.left
                 anchors.right: parent.right
-                editable: false
+
+                ComboBox {
+                    editable: false
+                    Layout.fillWidth: true
+                }
+                ActionIcon {
+                    anchors.verticalCenter: parent.verticalCenter
+                    implicitWidth: 18
+                    size: 26
+                    source: "icons/save.svg"
+                    transform: Translate { x: 1 } // align to the right edge
+                    onClicked: {
+                        console.log('TODO: save preset action')
+                    }
+                }
             }
             RowLayout {
                 spacing: parent.spacing
@@ -65,6 +80,7 @@ Item {
                 LockButton {
                     anchors.verticalCenter: parent.verticalCenter
                     implicitWidth: 18
+                    transform: Translate { x: 4 } // align to the right edge
                 }
             }
             ComboBox {

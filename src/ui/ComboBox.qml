@@ -2,6 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2 as Controls
 import QtQuick.Controls.Styles 1.2
 import QtQuick.Controls.Private 1.0
+import QtGraphicalEffects 1.0
 
 Controls.ComboBox {
     property color textColor: root.textHighlightColor
@@ -17,8 +18,6 @@ Controls.ComboBox {
     property color selectedTextColor: root.backgroundColor
     property int implicitWidth: 100
     property int implicitHeight: 24
-
-    model: ["lorem", "ipsum", "dolor"]
 
     style: ComboBoxStyle {
         id: styleRoot
@@ -52,11 +51,18 @@ Controls.ComboBox {
                     sourceSize: Qt.size(parent.height/2, parent.height/2)
                     smooth: true
                     anchors.centerIn: parent
-                    transform: [
-                        Rotation { origin.x: glyphIcon.width/2; origin.y: glyphIcon.height/2; angle: 180 },
-                        Translate { y: 2 }
-                    ]
+                    rotation: 180
+                    transform: Translate { y: 2 }
                 }
+            }
+
+            ColorOverlay {
+                visible: styleRoot.control.hovered
+                cached: true
+                color: borderColorActive
+                source: glyph
+                anchors.fill: glyph
+                rotation: glyph.state == "inverted" ? 180 : 0 // ugh...
             }
         }
 
