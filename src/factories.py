@@ -31,7 +31,11 @@ def create_local_map(code, path):
     small = run_chain([preview_small, preview], code, path)
     big = run_chain([preview_large], code, path)
 
-    scenario = os.path.join(path, '{}_scenario.lua'.format(code))
+    # strips the screwed up .vXYZ suffix that are sometimes used in map dir names
+    dot_index = code.find('.')
+    stripped_code = code if dot_index < 0 else code[:dot_index]
+
+    scenario = os.path.join(path, '{}_scenario.lua'.format(stripped_code))
     log.debug('Parsing map file: {}'.format(scenario))
     lua_parser = Parser(scenario)
     search = {'scenarioinfo>name': 'name', 'description': 'description', 'map_version': 'version', 'armies': 'slots', 'size': 'size'}

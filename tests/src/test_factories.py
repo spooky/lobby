@@ -20,6 +20,23 @@ def test_create_local_map():
     assert m.preview_big is None
 
 
+def test_create_local_map_with_screwed_up_versioning():
+    from factories import create_local_map
+
+    code = 'sample_map.v002'
+    path = os.path.join(os.path.dirname(__file__), code)
+    m = create_local_map(code, path)
+
+    assert m.code == 'sample_map.v002'
+    assert m.name == '2V2 Sand Box'
+    assert m.description == 'lorem ipsum'
+    assert m.version == '66'
+    assert m.slots == 4
+    assert m.size == ['512', '510']
+    assert m.preview_small == QUrl.fromLocalFile(os.path.join(path, 'sample_map.v002.png'))
+    assert m.preview_big is None
+
+
 def test_create_local_mod():
     from factories import create_local_mod
 
