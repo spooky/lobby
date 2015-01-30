@@ -46,6 +46,7 @@ Item {
 
             Button {
                 anchors.right: parent.right
+                anchors.rightMargin: 23
                 text: qsTr("Host")
             }
             RowLayout {
@@ -56,6 +57,8 @@ Item {
                 ComboBox {
                     editable: false
                     Layout.fillWidth: true
+                    model: ["default", "final rush", "training"]
+
                 }
                 ActionIcon {
                     anchors.verticalCenter: parent.verticalCenter
@@ -86,24 +89,28 @@ Item {
             ComboBox {
                 anchors.left: parent.left
                 anchors.right: parent.right
-                editable: true
+                anchors.rightMargin: 23
+                editable: false
+                model: ["Forged Alliance Forever", "Phantom X", "Vanilla", "The Nomads"]
             }
             ComboBox {
                 anchors.left: parent.left
                 anchors.right: parent.right
-                editable: false
+                anchors.rightMargin: 23
+                editable: true
+                model: ["Seton's", "Sandbox", "Regor"]
             }
 
             CheckBox {
-                text: "mod 1"
+                text: "rks_explosions"
                 checked: true
             }
             CheckBox {
-                text: "mod 2"
+                text: "Final Rush Pro"
                 checked: true
             }
             CheckBox {
-                text: "mod 3"
+                text: "eco info"
             }
         }
     }
