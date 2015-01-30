@@ -1,5 +1,3 @@
-__all__ = ['Client']
-
 import logging
 import json
 import asyncio
@@ -10,6 +8,8 @@ import settings
 from models import Session
 from session.LobbyServerContext import LobbyServerContext
 from utils import rest
+
+__all__ = ['Client']
 
 
 class Client(QObject):
@@ -42,10 +42,11 @@ class Client(QObject):
 
     @asyncio.coroutine
     def logout(self):
-        url = '{}/logout'.format(settings.AUTH_SERVICE_URL)
+        # NOTE: logout url disabled for some reason... waiting for more info
+        # url = '{}/logout'.format(settings.AUTH_SERVICE_URL)
 
-        body = yield from rest.post(url)
-        self.log.debug(body)
+        # body = yield from rest.post(url)
+        # self.log.debug(body)
 
         # NOTE: move?
         self.app.session = None
