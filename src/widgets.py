@@ -10,7 +10,6 @@ from PyQt5.QtQuick import QQuickItem
 import settings
 import factories
 from utils.async import async_slot
-from utils.collections import Storage
 from view_models.chrome import MainWindowViewModel, LoginViewModel
 from session.Client import Client
 
@@ -29,18 +28,16 @@ class Application(QGuiApplication):
             pass
 
         self.session = None
-        self.map_storage = None
-        self.mod_storage = None
+        self.map_lookup = None
+        self.mod_lookup = None
 
     @asyncio.coroutine
-    def __init_map_storage(self):
-        map_lookup = yield from factories.local_map_lookup(settings.get_map_dirs())
-        self.map_storage = Storage([map_lookup])
+    def __init_map_lookup(self):
+        self.map_lookup = yield from factories.local_map_lookup(settings.get_map_dirs())
 
     @asyncio.coroutine
-    def __init_mod_storage(self):
-        mod_lookup = yield from factories.local_mod_lookup(settings.get_mod_dirs())
-        self.mod_storage = Storage([mod_lookup])
+    def __init_mod_lookup(self):
+        self.mod_lookup = yield from factories.local_mod_lookup(settings.get_mod_dirs())
 
     @async_slot
     def start(self):
@@ -48,9 +45,9 @@ class Application(QGuiApplication):
         self.mainWindow.show()
 
         self.report_indefinite(QCoreApplication.translate('Application', 'loading maps'))
-        yield from self.__init_map_storage()
+        yield from self.__init_map_lookup()
         self.report_indefinite(QCoreApplication.translate('Application', 'loading mods'))
-        yield from self.__init_mod_storage()
+        yield from self.__init_mod_lookup()
         self.end_report()
 
     def log(self, msg):
@@ -98,7 +95,7 @@ class MainWindow(QObject):
         parent.log_changed.connect(self._log)
 
         # set content view
-        self.view_manager.load_view('games', self.client.server_context, app.map_storage, app.mod_storage)
+        self.view_manager.load_view('games', self.client.server_context, app.map_lookup, app.mod_lookup)
 
     def show(self):
         self.window.show()

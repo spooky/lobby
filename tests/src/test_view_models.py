@@ -16,8 +16,8 @@ def test_test_GameViewModel_data():
     from models import Map
     from view_models.games import GameViewModel
 
-    map_storage = {'scmp_009': Map(code='scmp_009', name="Seton's")}
-    g = GameViewModel(data, map_storage=map_storage)
+    map_lookup = {'scmp_009': Map(code='scmp_009', name="Seton's")}
+    g = GameViewModel(data, map_lookup=map_lookup)
     assert g.id == 93
     assert g.map_name == "Seton's"
     # assert g.map == 'url_to_preview'

@@ -10,10 +10,10 @@ from .adapters import ListModelFor
 
 class GameViewModel(QObject):
 
-    def __init__(self, source=None, map_storage={}, mod_storage={}, parent=None):
+    def __init__(self, source=None, map_lookup={}, mod_lookup={}, parent=None):
         super().__init__(parent)
-        self._map_storage = map_storage
-        self._mod_storage = mod_storage
+        self._map_lookup = map_lookup
+        self._mod_lookup = mod_lookup
 
         if not source:
             return
@@ -40,7 +40,7 @@ class GameViewModel(QObject):
     def get_map(self, source):
         try:
             scenario = source['GameOption']['ScenarioFile']
-            return self._map_storage[scenario.split('/')[2]]
+            return self._map_lookup[scenario.split('/')[2]]
         except KeyError:
             return Map()
 
@@ -48,7 +48,7 @@ class GameViewModel(QObject):
         names = []
         for m in mods:
             try:
-                names.append(self._mod_storage[m].name)
+                names.append(self._mod_lookup[m].name)
             except KeyError:
                 names.append(QCoreApplication.translate('GamesViewModel', 'unknown'))
 
@@ -213,7 +213,7 @@ class GamesViewModel(QObject):
     hostGame = pyqtSignal()
     joinGame = pyqtSignal(int)
 
-    def __init__(self, server_context, map_storage, mod_storage, parent=None):
+    def __init__(self, server_context, map_lookup, mod_lookup, parent=None):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
 
@@ -223,10 +223,15 @@ class GamesViewModel(QObject):
         self.server_context = server_context
         self.server_context.eventReceived.connect(self.on_eventReceived)
 
-        self.map_storage = map_storage
-        self.mod_storage = mod_storage
+        self.map_lookup = map_lookup
+        self.mod_lookup = mod_lookup
 
         self._games = GameListModel()
+        self._title = None
+        self._private = False
+        self._featured = None
+        self._map_code = None
+        self._mods = []
 
     games_changed = pyqtSignal(GameListModel)
 
@@ -277,16 +282,16 @@ class GamesViewModel(QObject):
         getattr(self, 'on_'+cmd)(args)
 
     def on_opened(self, args):
-        g = GameViewModel(args, self.map_storage)
+        g = GameViewModel(args, self.map_lookup, self.mod_lookup)
         self.games.append(g)
         self.log.debug('added game id: {}'.format(g.id))
 
     def on_updated(self, args):
-        g = GameViewModel(args, self.map_storage)
+        g = GameViewModel(args, self.map_lookup, self.mod_lookup)
         self.games.update(g)
         self.log.debug('updated game id: {}'.format(g.id))
 
     def on_closed(self, args):
-        g = GameViewModel(args, self.map_storage)
+        g = GameViewModel(args, self.map_lookup, self.mod_lookup)
         self.games.remove(g)
         self.log.debug('closed game id: {}'.format(g.id))
