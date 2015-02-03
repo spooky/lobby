@@ -244,9 +244,64 @@ class GamesViewModel(QObject):
         self._games = value
         self.games_changed.emit(value)
 
+    title_changed = pyqtSignal(str)
+
+    @pyqtProperty(str, notify=title_changed)
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, value):
+        self._title = value
+        self.title_changed.emit(value)
+
+    private_changed = pyqtSignal(bool)
+
+    @pyqtProperty(bool, notify=private_changed)
+    def private(self):
+        return self._private
+
+    @private.setter
+    def private(self, value):
+        self._private = value
+        self.private_changed.emit(value)
+
+    featured_changed = pyqtSignal(str)
+
+    @pyqtProperty(str, notify=featured_changed)
+    def featured(self):
+        return self._featured
+
+    @featured.setter
+    def featured(self, value):
+        self._featured = value
+        self.featured_changed.emit(value)
+
+    map_code_changed = pyqtSignal(str)
+
+    @pyqtProperty(str, notify=map_code_changed)
+    def map_code(self):
+        return self._map_code
+
+    @map_code.setter
+    def map_code(self, value):
+        self._map_code = value
+        self.map_code_changed.emit(value)
+
+    mods_changed = pyqtSignal(QVariant)
+
+    @pyqtProperty(QVariant, notify=mods_changed)
+    def mods(self):
+        return self._mods
+
+    @mods.setter
+    def mods(self, value):
+        self._mods = value
+        self.mods_changed.emit(value)
+
     @pyqtSlot()
     def on_hostGame(self):
-        self.log.debug('hosting')
+        self.log.debug('hosting with options: {}, {}, {}, {}, {}'.format(self.title, 'locked' if self.private else 'open', self.featured, self.map_code, self.mods))
         Application.instance().report_indefinite(QCoreApplication.translate('GamesViewModel', 'hosting game'))
         session = QCoreApplication.instance().session
         if not session:
@@ -262,11 +317,11 @@ class GamesViewModel(QObject):
         game.addArg('windowed', 1024, 768)
         game.addArg('init', 'init_test.lua')
 
-        game.setTitle('test')
-        game.setMap('3v3 Sand Box v2a')
+        game.setTitle(self.title)
+        game.setMap(self.map_code)
         game.setLocalPlayer(session.user, session.user_id)
 
-        game.start()
+        # game.start()
 
     @pyqtSlot(int)
     def on_joinGame(self, id):

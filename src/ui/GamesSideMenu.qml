@@ -6,6 +6,19 @@ Item {
     anchors.top: parent.top
     anchors.bottom: parent.bottom
 
+    function storeOptions() {
+        contentModel.title = title.text
+        contentModel.private = locked.checked
+        contentModel.featured = featured.currentText
+        contentModel.map_code = map_code.currentText
+
+        for (var i=0; i<mods.model.count; i++) {
+            console.log(mods.model.get(i).selected)
+        }
+
+        contentModel.mods = mods.model
+    }
+
     Column {
         id: icons
         spacing: 10
@@ -52,6 +65,10 @@ Item {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
 
                 text: qsTr("Host")
+                onClicked: {
+                    storeOptions()
+                    contentModel.hostGame()
+                }
             }
 
             ComboBox {
@@ -83,7 +100,9 @@ Item {
                 Layout.column: 1
                 Layout.fillWidth: true
 
+                id: title
                 placeholderText: qsTr("game title")
+                text: contentModel.title
             }
 
             LockButton {
@@ -91,6 +110,8 @@ Item {
                 Layout.column: 2
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
 
+                id: locked
+                checked: contentModel.private
                 implicitWidth: 18
                 transform: Translate { x: 4 } // align to the right edge
             }
@@ -100,6 +121,7 @@ Item {
                 Layout.column: 1
                 Layout.fillWidth: true
 
+                id: featured
                 editable: false
                 model: ["Forged Alliance Forever", "Phantom X", "Vanilla", "The Nomads"]
             }
@@ -109,6 +131,7 @@ Item {
                 Layout.column: 1
                 Layout.fillWidth: true
 
+                id: map_code
                 editable: true
                 model: ["Seton's", "Sandbox", "Regor"]
             }
@@ -118,16 +141,29 @@ Item {
                 Layout.column: 1
                 Layout.fillWidth: true
 
-                CheckBox {
-                    text: "rks_explosions"
-                    checked: true
-                }
-                CheckBox {
-                    text: "Final Rush Pro"
-                    checked: true
-                }
-                CheckBox {
-                    text: "eco info"
+                Repeater {
+                    id: mods
+                    model: ListModel {
+                        ListElement {
+                            name: "rks_explosions"
+                            selected: true
+                        }
+                        ListElement {
+                            name: "Final Rush Pro"
+                            selected: false
+                        }
+                        ListElement {
+                            name: "eco info"
+                            selected: true
+                        }
+                    }
+
+                    delegate: CheckBox {
+                        id: checkbox
+                        checked: selected
+                        text: name
+                        onClicked: mods.model.set(index, { "selected": checkbox.checked })
+                    }
                 }
             }
         }
