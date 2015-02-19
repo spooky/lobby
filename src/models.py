@@ -17,7 +17,9 @@ class Session(QObject):
 
 class Map(QObject):
 
-    def __init__(self, code=None, name=None, description=None, version=None, slots=0, size=[0, 0], preview_small=None, preview_big=None):
+    def __init__(self, code=None, name=None, description=None, version=None, slots=0, size=[0, 0], preview_small=None, preview_big=None, parent=None):
+        super().__init__(parent)
+
         self.code = code
         self.name = name or code
         self.description = description
@@ -34,7 +36,9 @@ class Map(QObject):
 class Mod(QObject):
     FEATURED = []
 
-    def __init__(self, uid=None, name=None, description=None, author=None, version=None, icon=None, ui_only=False, conflicts=[]):
+    def __init__(self, uid=None, name=None, description=None, author=None, version=None, icon=None, ui_only=False, conflicts=[], parent=None):
+        super().__init__(parent)
+
         self.uid = uid
         self.name = name
         self.description = description
