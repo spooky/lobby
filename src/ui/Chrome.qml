@@ -387,7 +387,8 @@ Window {
 
                 Loader {
                     id: contentViewLoader
-                    source: windowModel.currentView + '.qml'
+                    source: windowModel.currentView ? windowModel.currentView + '.qml' : ""
+
                     asynchronous: true
                 }
             }

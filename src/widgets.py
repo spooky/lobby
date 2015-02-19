@@ -41,14 +41,19 @@ class Application(QGuiApplication):
 
     @async_slot
     def start(self):
-        self.mainWindow = MainWindow(self)
-        self.mainWindow.show()
-
-        self.report_indefinite(QCoreApplication.translate('Application', 'loading maps'))
-        yield from self.__init_map_lookup()
-        self.report_indefinite(QCoreApplication.translate('Application', 'loading mods'))
-        yield from self.__init_mod_lookup()
-        self.end_report()
+        try:
+            self.mainWindow = MainWindow(self)
+            self.mainWindow.show()
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.critical('Error during init: {}'.format(e))
+            self.quit()
+        else:
+            self.report_indefinite(QCoreApplication.translate('Application', 'loading maps'))
+            yield from self.__init_map_lookup()
+            self.report_indefinite(QCoreApplication.translate('Application', 'loading mods'))
+            yield from self.__init_mod_lookup()
+            self.end_report()
 
     def log(self, msg):
         self.log_changed.emit(msg)
@@ -98,6 +103,9 @@ class MainWindow(QObject):
         self.view_manager.load_view('games', self.client.server_context, app.map_lookup, app.mod_lookup)
 
     def show(self):
+        if not self.windowModel.currentView:
+            raise Exception('currentView not set')
+
         self.window.show()
         self.log.debug('Client up')
 
