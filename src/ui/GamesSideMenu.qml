@@ -6,19 +6,6 @@ Item {
     anchors.top: parent.top
     anchors.bottom: parent.bottom
 
-    function storeOptions() {
-        contentModel.title = title.text
-        contentModel.private = locked.checked
-        contentModel.featured = featured.currentText
-        contentModel.map_code = map_code.currentText
-
-        for (var i=0; i<mods.model.count; i++) {
-            console.log(mods.model.get(i).selected)
-        }
-
-        contentModel.mods = mods.model
-    }
-
     Column {
         id: icons
         spacing: 10
@@ -65,10 +52,7 @@ Item {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
 
                 text: qsTr("Host")
-                onClicked: {
-                    storeOptions()
-                    contentModel.hostGame()
-                }
+                onClicked: contentModel.hostGame()
             }
 
             ComboBox {
@@ -90,9 +74,7 @@ Item {
                 size: 26
                 source: "icons/save.svg"
                 transform: Translate { x: 1 } // align to the right edge
-                onClicked: {
-                    console.log('TODO: save preset action')
-                }
+                onClicked: contentModel.savePreset()
             }
 
             TextField {
@@ -103,6 +85,7 @@ Item {
                 id: title
                 placeholderText: qsTr("game title")
                 text: contentModel.title
+                onTextChanged: contentModel.title = text
             }
 
             LockButton {
@@ -114,6 +97,7 @@ Item {
                 checked: contentModel.private
                 implicitWidth: 18
                 transform: Translate { x: 4 } // align to the right edge
+                onCheckedChanged: contentModel.private = checked
             }
 
             ComboBox {
@@ -143,26 +127,12 @@ Item {
 
                 Repeater {
                     id: mods
-                    model: ListModel {
-                        ListElement {
-                            name: "rks_explosions"
-                            selected: true
-                        }
-                        ListElement {
-                            name: "Final Rush Pro"
-                            selected: false
-                        }
-                        ListElement {
-                            name: "eco info"
-                            selected: true
-                        }
-                    }
+                    model: contentModel.mods
 
                     delegate: CheckBox {
-                        id: checkbox
                         checked: selected
                         text: name
-                        onClicked: mods.model.set(index, { "selected": checkbox.checked })
+                        onClicked: mods.model.setProperty(index, "selected", checked)
                     }
                 }
             }

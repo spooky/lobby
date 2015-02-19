@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QAbstractItemModel, QModelIndex
+from PyQt5.QtCore import QAbstractItemModel, QModelIndex, pyqtSlot
 
 
 def ListModelFor(klass):
@@ -48,5 +48,10 @@ def ListModelFor(klass):
             self.beginRemoveRows(QModelIndex(), index, index)
             self._items.remove(item)
             self.endRemoveRows()
+
+        @pyqtSlot(int, str, str)
+        def setProperty(self, index, prop, value):
+            item = self._items[index]
+            item.setProperty(prop, value)
 
     return ListModel

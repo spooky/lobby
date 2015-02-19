@@ -209,7 +209,56 @@ class GameListModel(ListModelFor(GameViewModel)):
         super().update(index, item)
 
 
+class ModSelectionViewModel(QObject):
+
+    def __init__(self, name='', uid='', selected=False, parent=None):
+        super().__init__(parent)
+        self._name = name
+        self._uid = uid
+        self._selected = selected
+
+    name_changed = pyqtSignal(str)
+
+    @pyqtProperty(str, notify=name_changed)
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+        self.name_changed.emit(value)
+
+    uid_changed = pyqtSignal(str)
+
+    @pyqtProperty(str, notify=uid_changed)
+    def uid(self):
+        return self._uid
+
+    @uid.setter
+    def uid(self, value):
+        self._uid = value
+        self.uid_changed.emit(value)
+
+    selected_changed = pyqtSignal(bool)
+
+    @pyqtProperty(bool, notify=selected_changed)
+    def selected(self):
+        return self._selected
+
+    @selected.setter
+    def selected(self, value):
+        self._selected = value
+        self.selected_changed.emit(value)
+
+
+class ModSelectionListModel(ListModelFor(ModSelectionViewModel)):
+
+    def get_selected_ids(self):
+        return [item.uid for item in self._items if item.selected]
+
+
 class GamesViewModel(QObject):
+    savePreset = pyqtSignal()
     hostGame = pyqtSignal()
     joinGame = pyqtSignal(int)
 
@@ -217,6 +266,7 @@ class GamesViewModel(QObject):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
 
+        self.savePreset.connect(self.on_savePreset)
         self.hostGame.connect(self.on_hostGame)
         self.joinGame.connect(self.on_joinGame)
 
@@ -231,7 +281,11 @@ class GamesViewModel(QObject):
         self._private = False
         self._featured = None
         self._map_code = None
-        self._mods = []
+        self._mods = ModSelectionListModel()
+
+        self._mods.append(ModSelectionViewModel('mod 1', '1', True))
+        self._mods.append(ModSelectionViewModel('mod 2', '2', False))
+        self._mods.append(ModSelectionViewModel('mod 3', '3', False))
 
     games_changed = pyqtSignal(GameListModel)
 
@@ -288,9 +342,9 @@ class GamesViewModel(QObject):
         self._map_code = value
         self.map_code_changed.emit(value)
 
-    mods_changed = pyqtSignal(QVariant)
+    mods_changed = pyqtSignal(ModSelectionListModel)
 
-    @pyqtProperty(QVariant, notify=mods_changed)
+    @pyqtProperty(ModSelectionListModel, notify=mods_changed)
     def mods(self):
         return self._mods
 
@@ -300,8 +354,12 @@ class GamesViewModel(QObject):
         self.mods_changed.emit(value)
 
     @pyqtSlot()
+    def on_savePreset(self):
+        self.log.debug('TODO: save preset')
+
+    @pyqtSlot()
     def on_hostGame(self):
-        self.log.debug('hosting with options: {}, {}, {}, {}, {}'.format(self.title, 'locked' if self.private else 'open', self.featured, self.map_code, self.mods))
+        self.log.debug('hosting with options: {}, {}, {}, {}, mods: {}'.format(self.title, 'locked' if self.private else 'open', self.featured, self.map_code, self.mods.get_selected_ids()))
         Application.instance().report_indefinite(QCoreApplication.translate('GamesViewModel', 'hosting game'))
         session = QCoreApplication.instance().session
         if not session:
