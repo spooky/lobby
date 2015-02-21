@@ -23,7 +23,7 @@ def test_notifyableProperty():
 
     assert t.name == 'first'
     assert t.code == 'second'
-    assert hasattr(t, 'name_changed')   
+    assert hasattr(t, 'name_changed')
     assert hasattr(t, 'kung_foo')
 
     t.name = 'changed'

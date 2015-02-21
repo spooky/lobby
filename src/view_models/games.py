@@ -1,14 +1,26 @@
 import logging
 from itertools import groupby
-from PyQt5.QtCore import QObject, QVariant, QUrl, QCoreApplication, pyqtProperty, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import QVariant, QUrl, QCoreApplication, pyqtSignal, pyqtSlot
 
 from models import Map
 from session.GameSession import GameSession
 from widgets import Application
-from .adapters import ListModelFor
+from .adapters import ListModelFor, NotifyablePropertyObject, notifyableProperty
 
 
-class GameViewModel(QObject):
+class GameViewModel(NotifyablePropertyObject):
+    id = notifyableProperty(int)
+    map_preview_small = notifyableProperty(QUrl)
+    map_preview_big = notifyableProperty(QUrl)
+    map_name = notifyableProperty(str)
+    title = notifyableProperty(str)
+    host = notifyableProperty(str)
+    featured_mod = notifyableProperty(str)
+    mods = notifyableProperty(QVariant)
+    slots = notifyableProperty(int)
+    player_count = notifyableProperty(int)
+    teams_arrangement = notifyableProperty(QVariant)
+    balance = notifyableProperty(int)
 
     def __init__(self, source=None, map_lookup={}, mod_lookup={}, parent=None):
         super().__init__(parent)
@@ -18,18 +30,18 @@ class GameViewModel(QObject):
         if not source:
             return
 
-        self._id = source.get('id')
+        self.id = source.get('id')
         game_map = self.get_map(source)
-        self._map_preview_small = QUrl(game_map.preview_small)
-        self._map_preview_big = QUrl(game_map.preview_big)
-        self._map_name = game_map.name
-        self._title = source.get('Title')
-        self._host = source['host'].get('username') if 'host' in source.keys() else None
-        self._featured_mod, self._mods = self.get_mods(source.get('GameMods') or [])
-        self._slots = source['GameOption'].get('Slots', 0) if 'GameOption' in source.keys() else 0
-        self._player_count = len(source.get('PlayerOption') or [])
-        self._teams_arrangement = self.get_teams_arrangement(source)
-        self._balance = 0
+        self.map_preview_small = QUrl(game_map.preview_small)
+        self.map_preview_big = QUrl(game_map.preview_big)
+        self.map_name = game_map.name
+        self.title = source.get('Title')
+        self.host = source['host'].get('username') if 'host' in source.keys() else None
+        self.featured_mod, self._mods = self.get_mods(source.get('GameMods') or [])
+        self.slots = source['GameOption'].get('Slots', 0) if 'GameOption' in source.keys() else 0
+        self.player_count = len(source.get('PlayerOption') or [])
+        self.teams_arrangement = self.get_teams_arrangement(source)
+        self.balance = 0
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and other.id == self.id
@@ -69,138 +81,6 @@ class GameViewModel(QObject):
 
         return teams
 
-    id_changed = pyqtSignal(int)
-
-    @pyqtProperty(int, notify=id_changed)
-    def id(self):
-        return self._id
-
-    @id.setter
-    def id(self, value):
-        self._id = value
-        self.id_changed.emit(value)
-
-    map_preview_small_changed = pyqtSignal(QUrl)
-
-    @pyqtProperty(QUrl, notify=map_preview_small_changed)
-    def map_preview_small(self):
-        return self._map_preview_small
-
-    @map_preview_small.setter
-    def map_preview_small(self, value):
-        self._map_preview_small = value
-        self.map_preview_small_changed.emit(value)
-
-    map_preview_big_changed = pyqtSignal(QUrl)
-
-    @pyqtProperty(QUrl, notify=map_preview_big_changed)
-    def map_preview_big(self):
-        return self._map_preview_big
-
-    @map_preview_big.setter
-    def map_preview_big(self, value):
-        self._map_preview_big = value
-        self.map_preview_big_changed.emit(value)
-
-    map_name_changed = pyqtSignal(str)
-
-    @pyqtProperty(str, notify=map_name_changed)
-    def map_name(self):
-        return self._map_name
-
-    @map_name.setter
-    def map_name(self, value):
-        self._map_name = value
-        self.map_name_changed.emit(value)
-
-    title_changed = pyqtSignal(str)
-
-    @pyqtProperty(str, notify=title_changed)
-    def title(self):
-        return self._title
-
-    @title.setter
-    def title(self, value):
-        self._title = value
-        self.title_changed.emit(value)
-
-    host_changed = pyqtSignal(str)
-
-    @pyqtProperty(str, notify=host_changed)
-    def host(self):
-        return self._host
-
-    @host.setter
-    def host(self, value):
-        self._host = value
-        self.host_changed.emit(value)
-
-    featured_mod_changed = pyqtSignal(str)
-
-    @pyqtProperty(str, notify=featured_mod_changed)
-    def featured_mod(self):
-        return self._featured_mod
-
-    @featured_mod.setter
-    def featured_mod(self, value):
-        self._featured_mod = value
-        self.featured_mod_changed.emit(value)
-
-    mods_changed = pyqtSignal(QVariant)
-
-    @pyqtProperty(QVariant, notify=mods_changed)
-    def mods(self):
-        return self._mods
-
-    @mods.setter
-    def mods(self, value):
-        self._mods = value
-        self.mods_changed.emit(value)
-
-    slots_changed = pyqtSignal(int)
-
-    @pyqtProperty(int, notify=slots_changed)
-    def slots(self):
-        return self._slots
-
-    @slots.setter
-    def slots(self, value):
-        self._slots = value
-        self.slots_changed.emit(value)
-
-    player_count_changed = pyqtSignal(int)
-
-    @pyqtProperty(int, notify=player_count_changed)
-    def player_count(self):
-        return self._player_count
-
-    @player_count.setter
-    def player_count(self, value):
-        self._player_count = value
-        self.player_count_changed.emit(value)
-
-    teams_arrangement_changed = pyqtSignal(QVariant)
-
-    @pyqtProperty(QVariant, notify=teams_arrangement_changed)
-    def teams_arrangement(self):
-        return self._teams_arrangement
-
-    @teams_arrangement.setter
-    def teams_arrangement(self, value):
-        self._teams_arrangement = value
-        self.teams_arrangement_changed.emit(value)
-
-    balance_changed = pyqtSignal(int)
-
-    @pyqtProperty(int, notify=balance_changed)
-    def balance(self):
-        return self._balance
-
-    @balance.setter
-    def balance(self, value):
-        self._balance = value
-        self.balance_changed.emit(value)
-
 
 class GameListModel(ListModelFor(GameViewModel)):
 
@@ -209,46 +89,16 @@ class GameListModel(ListModelFor(GameViewModel)):
         super().update(index, item)
 
 
-class ModSelectionViewModel(QObject):
+class ModSelectionViewModel(NotifyablePropertyObject):
+    name = notifyableProperty(str)
+    uid = notifyableProperty(str)
+    selected = notifyableProperty(bool)
 
     def __init__(self, name='', uid='', selected=False, parent=None):
         super().__init__(parent)
-        self._name = name
-        self._uid = uid
-        self._selected = selected
-
-    name_changed = pyqtSignal(str)
-
-    @pyqtProperty(str, notify=name_changed)
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, value):
-        self._name = value
-        self.name_changed.emit(value)
-
-    uid_changed = pyqtSignal(str)
-
-    @pyqtProperty(str, notify=uid_changed)
-    def uid(self):
-        return self._uid
-
-    @uid.setter
-    def uid(self, value):
-        self._uid = value
-        self.uid_changed.emit(value)
-
-    selected_changed = pyqtSignal(bool)
-
-    @pyqtProperty(bool, notify=selected_changed)
-    def selected(self):
-        return self._selected
-
-    @selected.setter
-    def selected(self, value):
-        self._selected = value
-        self.selected_changed.emit(value)
+        self.name = name
+        self.uid = uid
+        self.selected = selected
 
 
 class ModSelectionListModel(ListModelFor(ModSelectionViewModel)):
@@ -257,7 +107,14 @@ class ModSelectionListModel(ListModelFor(ModSelectionViewModel)):
         return [item.uid for item in self._items if item.selected]
 
 
-class GamesViewModel(QObject):
+class GamesViewModel(NotifyablePropertyObject):
+    games = notifyableProperty(GameListModel)
+    title = notifyableProperty(str)
+    private = notifyableProperty(bool)
+    featured = notifyableProperty(str)
+    map_code = notifyableProperty(str)
+    mods = notifyableProperty(ModSelectionListModel)
+
     savePreset = pyqtSignal()
     hostGame = pyqtSignal()
     joinGame = pyqtSignal(int)
@@ -276,82 +133,16 @@ class GamesViewModel(QObject):
         self.map_lookup = map_lookup
         self.mod_lookup = mod_lookup
 
-        self._games = GameListModel()
-        self._title = None
-        self._private = False
-        self._featured = None
-        self._map_code = None
-        self._mods = ModSelectionListModel()
+        self.games = GameListModel()
+        self.title = None
+        self.private = False
+        self.featured = None
+        self.map_code = None
+        self.mods = ModSelectionListModel()
 
-        self._mods.append(ModSelectionViewModel('mod 1', '1', True))
-        self._mods.append(ModSelectionViewModel('mod 2', '2', False))
-        self._mods.append(ModSelectionViewModel('mod 3', '3', False))
-
-    games_changed = pyqtSignal(GameListModel)
-
-    @pyqtProperty(GameListModel, notify=games_changed)
-    def games(self):
-        return self._games
-
-    @games.setter
-    def games(self, value):
-        self._games = value
-        self.games_changed.emit(value)
-
-    title_changed = pyqtSignal(str)
-
-    @pyqtProperty(str, notify=title_changed)
-    def title(self):
-        return self._title
-
-    @title.setter
-    def title(self, value):
-        self._title = value
-        self.title_changed.emit(value)
-
-    private_changed = pyqtSignal(bool)
-
-    @pyqtProperty(bool, notify=private_changed)
-    def private(self):
-        return self._private
-
-    @private.setter
-    def private(self, value):
-        self._private = value
-        self.private_changed.emit(value)
-
-    featured_changed = pyqtSignal(str)
-
-    @pyqtProperty(str, notify=featured_changed)
-    def featured(self):
-        return self._featured
-
-    @featured.setter
-    def featured(self, value):
-        self._featured = value
-        self.featured_changed.emit(value)
-
-    map_code_changed = pyqtSignal(str)
-
-    @pyqtProperty(str, notify=map_code_changed)
-    def map_code(self):
-        return self._map_code
-
-    @map_code.setter
-    def map_code(self, value):
-        self._map_code = value
-        self.map_code_changed.emit(value)
-
-    mods_changed = pyqtSignal(ModSelectionListModel)
-
-    @pyqtProperty(ModSelectionListModel, notify=mods_changed)
-    def mods(self):
-        return self._mods
-
-    @mods.setter
-    def mods(self, value):
-        self._mods = value
-        self.mods_changed.emit(value)
+        self.mods.append(ModSelectionViewModel('mod 1', '1', True))
+        self.mods.append(ModSelectionViewModel('mod 2', '2', False))
+        self.mods.append(ModSelectionViewModel('mod 3', '3', False))
 
     @pyqtSlot()
     def on_savePreset(self):

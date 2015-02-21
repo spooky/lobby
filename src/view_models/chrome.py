@@ -1,74 +1,29 @@
 import logging
-from PyQt5.QtCore import QObject, pyqtProperty, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
 from utils.async import async_slot
+from .adapters import NotifyablePropertyObject, notifyableProperty
 
 
-class MainWindowViewModel(QObject):  # TODO: use MetaClass(ish) model to handle notifyable properties?
+class MainWindowViewModel(NotifyablePropertyObject):
+    label = notifyableProperty(str)
+    taskRunning = notifyableProperty(bool)
+    taskStatusText = notifyableProperty(str)
+    taskStatusIsIndefinite = notifyableProperty(bool)
+    taskStatusProgress = notifyableProperty(float)
+    currentView = notifyableProperty(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self._label = 'FA Forever v.dev'
+        self.label = 'FA Forever v.dev'
 
-        self._taskRunning = False  # wether to show the task indicator
-        self._taskStatusText = None  # text to show while task is running
-        self._taskStatusIsIndefinite = True  # wether to hide the progress bar progress bar progress value - makes sense only if taskStatusIsIndefinite == True
-        self._taskStatusProgress = 0
+        self.taskRunning = False  # wether to show the task indicator
+        self.taskStatusText = None  # text to show while task is running
+        self.taskStatusIsIndefinite = True  # wether to hide the progress bar progress bar progress value - makes sense only if taskStatusIsIndefinite == True
+        self.taskStatusProgress = 0
 
         self._currentView = None
-
-    @pyqtProperty(str, constant=True)
-    def label(self):
-        return self._label
-
-    @label.setter
-    def label(self, text):
-        self._label = text
-
-    taskRunning_changed = pyqtSignal(bool)
-
-    @pyqtProperty(bool, notify=taskRunning_changed)
-    def taskRunning(self):
-        return self._taskRunning
-
-    @taskRunning.setter
-    def taskRunning(self, value):
-        self._taskRunning = value
-        self.taskRunning_changed.emit(value)
-
-    taskStatusText_changed = pyqtSignal(str)
-
-    @pyqtProperty(str, notify=taskStatusText_changed)
-    def taskStatusText(self):
-        return self._taskStatusText
-
-    @taskStatusText.setter
-    def taskStatusText(self, value):
-        self._taskStatusText = value
-        self.taskStatusText_changed.emit(value)
-
-    taskStatusIsIndefinite_changed = pyqtSignal(bool)
-
-    @pyqtProperty(bool, notify=taskStatusIsIndefinite_changed)
-    def taskStatusIsIndefinite(self):
-        return self._taskStatusIsIndefinite
-
-    @taskStatusIsIndefinite.setter
-    def taskStatusIsIndefinite(self, value):
-        self._taskStatusIsIndefinite = value
-        self.taskStatusIsIndefinite_changed.emit(value)
-
-    taskStatusProgress_changed = pyqtSignal(float)
-
-    @pyqtProperty(float, notify=taskStatusProgress_changed)
-    def taskStatusProgress(self):
-        return self._taskStatusProgress
-
-    @taskStatusProgress.setter
-    def taskStatusProgress(self, value):
-        self._taskStatusProgress = value
-        self.taskStatusProgress_changed.emit(value)
 
     def setTaskStatus(self, text, indefinite=True):
         self.taskStatusText = text
@@ -82,19 +37,14 @@ class MainWindowViewModel(QObject):  # TODO: use MetaClass(ish) model to handle 
         self.taskStatusText = None
         self.taskStatusProgress = 0.0
 
-    currentView_changed = pyqtSignal(str)
 
-    @pyqtProperty(str, notify=currentView_changed)
-    def currentView(self):
-        return self._currentView
+class LoginViewModel(NotifyablePropertyObject):
+    user = notifyableProperty(str)
+    password = notifyableProperty(str)
+    remember = notifyableProperty(bool)
+    logged_in = notifyableProperty(bool)
+    panel_visible = notifyableProperty(bool)
 
-    @currentView.setter
-    def currentView(self, value):
-        self._currentView = value
-        self.currentView_changed.emit(value)
-
-
-class LoginViewModel(QObject):
     login = pyqtSignal(str, str, bool)
     logout = pyqtSignal()
 
@@ -105,66 +55,11 @@ class LoginViewModel(QObject):
         self.login.connect(self.on_login)
         self.logout.connect(self.on_logout)
         self.client = client
-        self._user = user
-        self._password = password
-        self._remember = remember
-        self._logged_in = False
-        self._panel_visible = False
-
-    user_changed = pyqtSignal(str)
-
-    @pyqtProperty(str, notify=user_changed)
-    def user(self):
-        return self._user
-
-    @user.setter
-    def user(self, value):
-        self._user = value
-        self.user_changed.emit(value)
-
-    password_changed = pyqtSignal(str)
-
-    @pyqtProperty(str, notify=password_changed)
-    def password(self):
-        return self._password
-
-    @password.setter
-    def password(self, value):
-        self._password = value
-        self.password_changed.emit(value)
-
-    remember_changed = pyqtSignal(bool)
-
-    @pyqtProperty(bool, notify=remember_changed)
-    def remember(self):
-        return self._remember
-
-    @remember.setter
-    def remember(self, value):
-        self._remember = value
-        self.remember_changed.emit(value)
-
-    logged_in_changed = pyqtSignal(bool)
-
-    @pyqtProperty(bool, notify=logged_in_changed)
-    def logged_in(self):
-        return self._logged_in
-
-    @logged_in.setter
-    def logged_in(self, value):
-        self._logged_in = value
-        self.logged_in_changed.emit(value)
-
-    panel_visible_changed = pyqtSignal(bool)
-
-    @pyqtProperty(bool, notify=panel_visible_changed)
-    def panel_visible(self):
-        return self._panel_visible
-
-    @panel_visible.setter
-    def panel_visible(self, value):
-        self._panel_visible = value
-        self.panel_visible_changed.emit(value)
+        self.user = user
+        self.password = password
+        self.remember = remember
+        self.logged_in = False
+        self.panel_visible = False
 
     @async_slot
     @pyqtSlot(str, str, bool)
