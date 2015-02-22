@@ -9,6 +9,9 @@ from .adapters import ListModelFor, NotifyablePropertyObject, notifyableProperty
 
 
 class GameViewModel(NotifyablePropertyObject):
+
+    ''' View model for game tile '''
+
     id = notifyableProperty(int)
     map_preview_small = notifyableProperty(QUrl)
     map_preview_big = notifyableProperty(QUrl)
@@ -84,6 +87,8 @@ class GameViewModel(NotifyablePropertyObject):
 
 class GameListModel(ListModelFor(GameViewModel)):
 
+    ''' View model for a list of games '''
+
     def update(self, item):
         index = self._items.index(item)
         super().update(index, item)
@@ -108,6 +113,9 @@ class ModSelectionListModel(ListModelFor(ModSelectionViewModel)):
 
 
 class GamesViewModel(NotifyablePropertyObject):
+
+    ''' Main view model for games screen '''
+
     games = notifyableProperty(GameListModel)
     title = notifyableProperty(str)
     private = notifyableProperty(bool)
