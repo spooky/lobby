@@ -422,6 +422,13 @@ Window {
             width: childrenRect.width
             spacing: 5
 
+            BusyIndicator {
+                visible: windowModel.taskStatusIsIndefinite
+                running: windowModel.taskRunning
+                implicitHeight: parent.height
+                implicitWidth: implicitHeight
+            }
+
             Label {
                 id: actionLabel
                 text: windowModel.taskStatusText
