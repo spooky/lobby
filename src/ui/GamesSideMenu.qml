@@ -61,7 +61,7 @@ Item {
                 Layout.fillWidth: true
 
                 editable: false
-                model: ["default", "final rush", "training"]
+                model: contentModel.presets
 
             }
 
@@ -107,7 +107,9 @@ Item {
 
                 id: featured
                 editable: false
-                model: ["Forged Alliance Forever", "Phantom X", "Vanilla", "The Nomads"]
+                model: contentModel.featured
+                currentIndex: contentModel.featured.getSelectedIndex()
+                onCurrentIndexChanged: contentModel.featured.setSelected(currentIndex)
             }
 
             ComboBox {
@@ -117,7 +119,9 @@ Item {
 
                 id: map_code
                 editable: true
-                model: ["Seton's", "Sandbox", "Regor"]
+                model: contentModel.maps
+                currentIndex: contentModel.maps.getSelectedIndex()
+                onCurrentIndexChanged: contentModel.maps.setSelected(currentIndex)
             }
 
             ColumnLayout {
@@ -130,9 +134,9 @@ Item {
                     model: contentModel.mods
 
                     delegate: CheckBox {
-                        checked: selected
+                        checked: mods.model.isSelected(index)
                         text: name
-                        onClicked: mods.model.setProperty(index, "selected", checked)
+                        onClicked: mods.model.setSelected(index, checked)
                     }
                 }
             }

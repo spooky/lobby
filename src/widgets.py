@@ -18,6 +18,7 @@ LOG_BUFFER_SIZE = 1000
 
 class Application(QGuiApplication):
     log_changed = pyqtSignal(str)
+    init_complete = pyqtSignal()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,16 +29,18 @@ class Application(QGuiApplication):
             pass
 
         self.session = None
-        self.map_lookup = None
-        self.mod_lookup = None
+        self.map_lookup = {}
+        self.mod_lookup = {}
 
     @asyncio.coroutine
     def __init_map_lookup(self):
-        self.map_lookup = yield from factories.local_map_lookup(settings.get_map_dirs())
+        local = yield from factories.local_map_lookup(settings.get_map_dirs())
+        self.map_lookup.update(local)
 
     @asyncio.coroutine
     def __init_mod_lookup(self):
-        self.mod_lookup = yield from factories.local_mod_lookup(settings.get_mod_dirs())
+        local = yield from factories.local_mod_lookup(settings.get_mod_dirs())
+        self.mod_lookup.update(local)
 
     @async_slot
     def start(self):
@@ -54,6 +57,8 @@ class Application(QGuiApplication):
             self.report_indefinite(QCoreApplication.translate('Application', 'loading mods'))
             yield from self.__init_mod_lookup()
             self.end_report()
+        finally:
+            self.init_complete.emit()
 
     def log(self, msg):
         self.log_changed.emit(msg)

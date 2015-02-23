@@ -2,10 +2,10 @@ import logging
 from itertools import groupby
 from PyQt5.QtCore import QVariant, QUrl, QCoreApplication, pyqtSignal, pyqtSlot
 
-from models import Map
+from models import Map, Mod
 from session.GameSession import GameSession
 from widgets import Application
-from .adapters import ListModelFor, NotifyablePropertyObject, notifyableProperty
+from .adapters import ListModelFor, SelectionList, NotifyablePropertyObject, notifyableProperty
 
 
 class GameViewModel(NotifyablePropertyObject):
@@ -94,34 +94,17 @@ class GameListModel(ListModelFor(GameViewModel)):
         super().update(index, item)
 
 
-class ModSelectionViewModel(NotifyablePropertyObject):
-    name = notifyableProperty(str)
-    uid = notifyableProperty(str)
-    selected = notifyableProperty(bool)
-
-    def __init__(self, name='', uid='', selected=False, parent=None):
-        super().__init__(parent)
-        self.name = name
-        self.uid = uid
-        self.selected = selected
-
-
-class ModSelectionListModel(ListModelFor(ModSelectionViewModel)):
-
-    def get_selected_ids(self):
-        return [item.uid for item in self._items if item.selected]
-
-
 class GamesViewModel(NotifyablePropertyObject):
 
     ''' Main view model for games screen '''
 
     games = notifyableProperty(GameListModel)
+    presets = notifyableProperty(SelectionList)
     title = notifyableProperty(str)
     private = notifyableProperty(bool)
-    featured = notifyableProperty(str)
-    map_code = notifyableProperty(str)
-    mods = notifyableProperty(ModSelectionListModel)
+    featured = notifyableProperty(SelectionList)
+    maps = notifyableProperty(SelectionList)
+    mods = notifyableProperty(SelectionList)
 
     savePreset = pyqtSignal()
     hostGame = pyqtSignal()
@@ -142,15 +125,29 @@ class GamesViewModel(NotifyablePropertyObject):
         self.mod_lookup = mod_lookup
 
         self.games = GameListModel()
+
+        self.presets = SelectionList()  # TODO
         self.title = None
         self.private = False
-        self.featured = None
-        self.map_code = None
-        self.mods = ModSelectionListModel()
+        self.featured = SelectionList()
+        self.maps = SelectionList()
+        self.mods = SelectionList(multiple=True)
 
-        self.mods.append(ModSelectionViewModel('mod 1', '1', True))
-        self.mods.append(ModSelectionViewModel('mod 2', '2', False))
-        self.mods.append(ModSelectionViewModel('mod 3', '3', False))
+        Application.instance().init_complete.connect(self.on_app_init_complete)
+
+        # test data
+        self.featured.append(Mod('uid-faf', 'Forged Alliance Forever'), selected=True)
+        self.featured.append(Mod('uid-vanilla', 'Vanilla'))
+        self.featured.append(Mod('uid-phantom', 'Phantom X'))
+        self.featured.append(Mod('uid-nomads', 'The Nomads'))
+
+    def on_app_init_complete(self):
+        for m in sorted(self.map_lookup.values(), key=lambda m: m.name.lower()):
+            self.maps.append(m)
+
+        for m in sorted(self.mod_lookup.values(), key=lambda m: m.name.lower()):
+            if not m.ui_only:
+                self.mods.append(m)
 
     @pyqtSlot()
     def on_savePreset(self):
@@ -158,7 +155,13 @@ class GamesViewModel(NotifyablePropertyObject):
 
     @pyqtSlot()
     def on_hostGame(self):
-        self.log.debug('hosting with options: {}, {}, {}, {}, mods: {}'.format(self.title, 'locked' if self.private else 'open', self.featured, self.map_code, self.mods.get_selected_ids()))
+        self.log.debug('hosting with options: {}, {}, {}, {}, mods: {}'.format(
+            self.title,
+            'locked' if self.private else 'open',
+            self.featured.getSelected(),
+            self.maps.getSelected(),
+            [m.uid for m in self.mods.getSelected()]))
+
         Application.instance().report_indefinite(QCoreApplication.translate('GamesViewModel', 'hosting game'))
         session = QCoreApplication.instance().session
         if not session:
@@ -175,10 +178,10 @@ class GamesViewModel(NotifyablePropertyObject):
         game.addArg('init', 'init_test.lua')
 
         game.setTitle(self.title)
-        game.setMap(self.map_code)
+        game.setMap(self.maps.getSelected().code)
         game.setLocalPlayer(session.user, session.user_id)
 
-        # game.start()
+        game.start()
 
     @pyqtSlot(int)
     def on_joinGame(self, id):

@@ -32,6 +32,9 @@ class Map(QObject):
     def __str__(self):
         return {'code': self.code, 'version': self.version}.__str__()
 
+    def __lt__(self, other):
+        return self.name < other.name
+
 
 class Mod(QObject):
     FEATURED = []
@@ -50,6 +53,9 @@ class Mod(QObject):
 
     def __str__(self):
         return {'uid': self.uid, 'name': self.name, 'version': self.version}.__str__()
+
+    def __le__(self, other):
+        return self.name <= other.name
 
     def conflicts_with(self, other):
         return len(set(self.conflicts).intersection(other)) > 0
