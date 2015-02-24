@@ -39,7 +39,7 @@ class Map(QObject):
 class Mod(QObject):
     FEATURED = []
 
-    def __init__(self, uid=None, name=None, description=None, author=None, version=None, icon=None, ui_only=False, conflicts=[], parent=None):
+    def __init__(self, uid=None, name=None, description=None, author=None, version=None, icon=None, ui_only=False, conflicts=None, parent=None):
         super().__init__(parent)
 
         self.uid = uid
@@ -49,7 +49,7 @@ class Mod(QObject):
         self.version = version
         self.icon = icon
         self.ui_only = ui_only
-        self.conflicts = conflicts
+        self.conflicts = conflicts or []
 
     def __str__(self):
         return {'uid': self.uid, 'name': self.name, 'version': self.version}.__str__()

@@ -25,10 +25,10 @@ class GameViewModel(NotifyablePropertyObject):
     teams_arrangement = notifyableProperty(QVariant)
     balance = notifyableProperty(int)
 
-    def __init__(self, source=None, map_lookup={}, mod_lookup={}, parent=None):
+    def __init__(self, source=None, map_lookup=None, mod_lookup=None, parent=None):
         super().__init__(parent)
-        self._map_lookup = map_lookup
-        self._mod_lookup = mod_lookup
+        self._map_lookup = map_lookup or {}
+        self._mod_lookup = mod_lookup or {}
 
         if not source:
             return
