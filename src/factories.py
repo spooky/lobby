@@ -1,5 +1,6 @@
 import logging
 import asyncio
+import itertools
 import os
 from PyQt5.QtCore import QUrl
 
@@ -19,20 +20,16 @@ def __local_lookup(paths, factory_method):
     log = logging.getLogger(__name__)
     dirs = [(n, os.path.join(p, n)) for p in paths for n in os.listdir(p)]
 
-    def wrap(n, p):
-        try:
-            item = yield from factory_method(n, p)
-            return item
-        except Exception as e:
-            log.warn('Unable to load {}: {}'.format(p, e))
+    tasks = itertools.starmap(factory_method, dirs)
+    results = yield from asyncio.gather(*tasks, return_exceptions=True)
 
-    return (yield from asyncio.gather(*[wrap(n, p) for n, p in dirs]))
+    return filter(lambda x: not isinstance(x, Exception), results)
 
 
 @asyncio.coroutine
 def local_map_lookup(paths):
     maps = yield from __local_lookup(paths, create_local_map)
-    return {m.code: m for m in maps if m is not None}
+    return {m.code: m for m in maps}
 
 
 @asyncio.coroutine
@@ -81,7 +78,7 @@ def create_local_map(code, path):
 @asyncio.coroutine
 def local_mod_lookup(paths):
     mods = yield from __local_lookup(paths, create_local_mod)
-    return {m.uid: m for m in mods if m is not None}
+    return {m.uid: m for m in mods}
 
 
 @asyncio.coroutine
