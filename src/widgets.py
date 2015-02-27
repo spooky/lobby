@@ -44,11 +44,11 @@ class Application(QGuiApplication):
 
     @async_slot
     def start(self):
+        logger = logging.getLogger(__name__)
         try:
             self.mainWindow = MainWindow(self)
             self.mainWindow.show()
         except Exception as e:
-            logger = logging.getLogger(__name__)
             logger.critical('Error during init: {}'.format(e))
             self.quit()
         else:
@@ -56,9 +56,10 @@ class Application(QGuiApplication):
             yield from self.__init_map_lookup()
             self.report_indefinite(QCoreApplication.translate('Application', 'loading mods'))
             yield from self.__init_mod_lookup()
-            self.end_report()
         finally:
+            logger.debug('Init complete')
             self.init_complete.emit()
+            self.end_report()
 
     def log(self, msg):
         self.log_changed.emit(msg)
