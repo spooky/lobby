@@ -1,1 +1,3 @@
+aiohttp
+ws4py
 lupa
