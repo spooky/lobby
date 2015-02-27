@@ -65,8 +65,8 @@ class Application(QGuiApplication):
         self.log_changed.emit(msg)
 
     def report_indefinite(self, msg):
-        self.mainWindow.windowModel.taskStatusText = msg
         self.mainWindow.windowModel.taskRunning = True
+        self.mainWindow.windowModel.taskStatusText = msg
 
     def end_report(self):
         self.mainWindow.windowModel.taskRunning = False
