@@ -1,10 +1,10 @@
-# import logging
+import logging
 import asyncio
 import os
 from PyQt5.QtCore import QUrl
 
 from models import Map, Mod
-from utils.lua import Parser
+from utils.lua import get_lua_runtime
 
 
 def __run_chain(handlers, *args, **kwargs):
@@ -16,11 +16,15 @@ def __run_chain(handlers, *args, **kwargs):
 
 @asyncio.coroutine
 def __local_lookup(paths, factory_method):
+    log = logging.getLogger(__name__)
     dirs = [(n, os.path.join(p, n)) for p in paths for n in os.listdir(p)]
     result = []
     for n, p in dirs:
-        item = yield from factory_method(n, p)
-        result.append(item)
+        try:
+            item = yield from factory_method(n, p)
+            result.append(item)
+        except Exception as e:
+            log.warn('Unable to load {}: {}'.format(p, e))
 
     return result
 
@@ -28,12 +32,11 @@ def __local_lookup(paths, factory_method):
 @asyncio.coroutine
 def local_map_lookup(paths):
     maps = yield from __local_lookup(paths, create_local_map)
-    return {m.code: m for m in maps}
+    return {m.code: m for m in maps if m is not None}
 
 
 @asyncio.coroutine
 def create_local_map(code, path):
-    # log = logging.getLogger(__name__)
 
     def preview(code, path, suffix=''):
         file_name = '{}{}.png'.format(code, suffix)
@@ -55,22 +58,20 @@ def create_local_map(code, path):
     stripped_code = code if dot_index < 0 else code[:dot_index]
 
     scenario = os.path.join(path, '{}_scenario.lua'.format(stripped_code))
-    # log.debug('Parsing map file: {}'.format(scenario))
 
     @asyncio.coroutine
     def parse(scenario):
-        try:
-            lua_parser = Parser(scenario)
-            search = {'scenarioinfo>name': 'name', 'description': 'description', 'map_version': 'version', 'armies': 'slots', 'size': 'size'}
-            defaults = {'name': None, 'description': None, 'version': None, 'slots': 0, 'size': {'0': '0', '1': '0'}}
-            return (yield from asyncio.get_event_loop().run_in_executor(None, lua_parser.parse, search, defaults))  # None means run in default executor
-        except Exception as e:
-            # log.error(e)
-            return None
+
+        def convert(lua_string):
+            lua = get_lua_runtime()
+            lua.execute(lua_string)
+            si = lua.globals().ScenarioInfo
+            return {'name': si.name, 'description': si.description, 'version': str(si.map_version), 'size': [si.size[1], si.size[2]], 'slots': len(si.Configurations.standard.teams[1].armies)}
+
+        with open(scenario) as f:
+            return (yield from asyncio.get_event_loop().run_in_executor(None, convert, f.read()))  # None means run in default executor
 
     map_info = yield from parse(scenario)
-    map_info['size'] = [map_info['size']['0'], map_info['size']['1']]
-    map_info['slots'] = len(map_info['slots'])
     map_info['preview_small'] = small
     map_info['preview_big'] = big
 
@@ -80,35 +81,33 @@ def create_local_map(code, path):
 @asyncio.coroutine
 def local_mod_lookup(paths):
     mods = yield from __local_lookup(paths, create_local_mod)
-    return {m.uid: m for m in mods}
+    return {m.uid: m for m in mods if m is not None}
 
 
 @asyncio.coroutine
 def create_local_mod(name, path):
-    # log = logging.getLogger(__name__)
 
     def icon(file_name, path):
         if os.path.exists(os.path.join(path, file_name)):
             return QUrl.fromLocalFile(os.path.join(path, file_name))
 
     info = os.path.join(path, 'mod_info.lua')
-    # log.debug('Parsing mod file: {}'.format(info))
 
     @asyncio.coroutine
     def parse(info):
-        try:
-            lua_parser = Parser(info)
-            search = {'uid': 'uid', 'name': 'name', 'description': 'description', 'author': 'author',
-                      'version': 'version', 'icon': 'icon', 'ui_only': 'ui_only', 'conflicts': 'conflicts'}
-            defaults = {'uid': None, 'name': None, 'description': None, 'author': None, 'version': None, 'icon': None, 'ui_only': False, 'conflicts':{}}
-            return (yield from asyncio.get_event_loop().run_in_executor(None, lua_parser.parse, search, defaults))  # None means run in default executor
-        except Exception as e:
-            # log.error(e)
-            return None
+
+        def convert(lua_string):
+            lua = get_lua_runtime()
+            lua.execute(lua_string)
+            g = lua.globals()
+            return {p: g[p] for p in ['uid', 'name', 'description', 'author', 'version', 'icon', 'ui_only', 'conflicts']}
+
+        with open(info) as f:
+            return (yield from asyncio.get_event_loop().run_in_executor(None, convert, f.read()))  # None means run in default executor
 
     mod_info = yield from parse(info)
-    mod_info['conflicts'] = list(mod_info['conflicts'].values())
+    mod_info['version'] = str(mod_info['version'])
+    mod_info['conflicts'] = list(mod_info['conflicts'].values()) if mod_info['conflicts'] is not None else None
     mod_info['icon'] = icon(mod_info['icon'].split('/').pop(), path) if mod_info['icon'] is not None else None
-    mod_info['ui_only'] = mod_info['ui_only'] == 'true'
 
     return Mod(**mod_info)
