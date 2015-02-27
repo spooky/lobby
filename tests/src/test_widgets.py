@@ -1,3 +1,4 @@
+import sys
 from PyQt5.QtCore import QObject, pyqtSignal
 
 
@@ -20,9 +21,11 @@ def test_ViewManager_convert_name():
 
 
 def test_ViewManager_get_view_on_games_view():
-    from widgets import ViewManager
+    from widgets import Application, ViewManager
     from view_models.games import GamesViewModel
 
+    app = Application(sys.argv)  # could be done better, but this is 'just' a test
+    app.start()
     vm = ViewManager(None, None)
     storage_stub = {}
     path, view_model = vm.get_view('games', ServerContextStub(), storage_stub, storage_stub)
