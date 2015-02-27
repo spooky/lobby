@@ -63,6 +63,7 @@ class SelectionList(QAbstractListModel):
         super().__init__(parent)
         self.multiple = multiple
         self._items = []
+        # TODO: use proxy model to help with selection problems
         self._selected = set()
         self._roleNames = {1: 'name'}  # TODO: do the thing...
 
@@ -93,6 +94,7 @@ class SelectionList(QAbstractListModel):
     @pyqtSlot(int)
     @pyqtSlot(int, bool)
     def setSelected(self, index, selected=True):
+        # TODO: notify about changed selection
         if selected:
             if not self.multiple:
                 self._selected.clear()
