@@ -1,5 +1,6 @@
 import logging
 import asyncio
+import itertools
 import os
 from PyQt5.QtCore import QUrl
 
@@ -19,20 +20,23 @@ def __local_lookup(paths, factory_method):
     log = logging.getLogger(__name__)
     dirs = [(n, os.path.join(p, n)) for p in paths for n in os.listdir(p)]
 
-    def wrap(n, p):
-        try:
-            item = yield from factory_method(n, p)
-            return item
-        except Exception as e:
-            log.warn('Unable to load {}: {}'.format(p, e))
+    tasks = itertools.starmap(factory_method, dirs)
+    results = yield from asyncio.gather(*tasks, return_exceptions=True)
 
-    return (yield from asyncio.gather(*[wrap(n, p) for n, p in dirs]))
+    return filter(lambda x: not isinstance(x, Exception), results)
+
+
+def __execute_lua(scenario):
+    with open(scenario) as f:
+        lua = get_lua_runtime()
+        lua.execute(f.read())
+        return lua.globals()
 
 
 @asyncio.coroutine
 def local_map_lookup(paths):
     maps = yield from __local_lookup(paths, create_local_map)
-    return {m.code: m for m in maps if m is not None}
+    return {m.code: m for m in maps}
 
 
 @asyncio.coroutine
@@ -59,19 +63,17 @@ def create_local_map(code, path):
 
     scenario = os.path.join(path, '{}_scenario.lua'.format(stripped_code))
 
-    @asyncio.coroutine
-    def read(scenario):
+    def read():
+        si = __execute_lua(scenario).ScenarioInfo
+        return dict(
+            name=si.name,
+            description=si.description,
+            version=si.map_version,
+            size=(si.size[1], si.size[2]),
+            slots=len(si.Configurations.standard.teams[1].armies)
+        )
 
-        def parse():
-            with open(scenario) as f:
-                lua = get_lua_runtime()
-                lua.execute(f.read())
-                si = lua.globals().ScenarioInfo
-                return {'name': si.name, 'description': si.description, 'version': str(si.map_version), 'size': [si.size[1], si.size[2]], 'slots': len(si.Configurations.standard.teams[1].armies)}
-
-        return asyncio.get_event_loop().run_in_executor(None, parse)  # None means run in default executor
-
-    map_info = yield from read(scenario)
+    map_info = yield from asyncio.get_event_loop().run_in_executor(None, read)
     map_info['preview_small'] = small
     map_info['preview_big'] = big
 
@@ -81,7 +83,7 @@ def create_local_map(code, path):
 @asyncio.coroutine
 def local_mod_lookup(paths):
     mods = yield from __local_lookup(paths, create_local_mod)
-    return {m.uid: m for m in mods if m is not None}
+    return {m.uid: m for m in mods}
 
 
 @asyncio.coroutine
@@ -93,19 +95,11 @@ def create_local_mod(name, path):
 
     info = os.path.join(path, 'mod_info.lua')
 
-    @asyncio.coroutine
-    def read(info):
+    def read():
+        g = __execute_lua(info)
+        return {p: g[p] for p in ['uid', 'name', 'description', 'author', 'version', 'icon', 'ui_only', 'conflicts']}
 
-        def parse():
-            with open(info) as f:
-                lua = get_lua_runtime()
-                lua.execute(f.read())
-                g = lua.globals()
-                return {p: g[p] for p in ['uid', 'name', 'description', 'author', 'version', 'icon', 'ui_only', 'conflicts']}
-
-        return asyncio.get_event_loop().run_in_executor(None, parse)  # None means run in default executor
-
-    mod_info = yield from read(info)
+    mod_info = yield from asyncio.get_event_loop().run_in_executor(None, read)  # None means run in default executor
     mod_info['version'] = str(mod_info['version'])
     mod_info['conflicts'] = list(mod_info['conflicts'].values()) if mod_info['conflicts'] is not None else None
     mod_info['icon'] = icon(mod_info['icon'].split('/').pop(), path) if mod_info['icon'] is not None else None
