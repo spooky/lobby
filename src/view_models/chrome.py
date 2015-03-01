@@ -63,6 +63,15 @@ class LoginViewModel(NotifyablePropertyObject):
         self.panel_visible = False
 
     @async_slot
+    def autologin(self):
+        try:
+            self.log.info('logging in (auto)...')
+            self.logged_in = yield from self.client.login(self.user, self.password)
+            self.log.debug('autologin result: {}'.format(self.logged_in))
+        except Exception as e:
+            self.log.error('autologin failed. {}'.format(e))
+
+    @async_slot
     @pyqtSlot(str, str, bool)
     def on_login(self, user, password, remember):
         try:

@@ -87,7 +87,7 @@ class MainWindow(QObject):
         self.loginModel.read_credentials()
         self.loginModel.panel_visible = not self.loginModel.remember
         if self.loginModel.remember:
-            self._autologin()
+            self.loginModel.autologin()
 
         self.engine = QQmlApplicationEngine(self)
         self.engine.rootContext().setContextProperty('windowModel', self.windowModel)
@@ -111,15 +111,6 @@ class MainWindow(QObject):
 
         self.window.show()
         self.log.debug('Client up')
-
-    @async_slot
-    def _autologin(self):
-        try:
-            self.log.info('logging in (auto)...')
-            self.loginModel.logged_in = yield from self.client.login(self.loginModel.user, self.loginModel.password)
-            self.log.debug('autologin result: {}'.format(self.loginModel.logged_in))
-        except Exception as e:
-            self.log.error('autologin failed. {}'.format(e))
 
     @pyqtSlot(str)
     def _log(self, msg):
