@@ -72,7 +72,7 @@ def create_local_map(code, path):
         return dict(
             name=si.name,
             description=si.description,
-            version=si.map_version,
+            version=str(si.map_version),
             size=(si.size[1], si.size[2]),
             slots=len(si.Configurations.standard.teams[1].armies)
         )

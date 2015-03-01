@@ -28,7 +28,7 @@ def test_create_local_map(loop):
     assert m.description == 'lorem ipsum'
     assert m.version == '66'
     assert m.slots == 4
-    assert m.size == [512, 510]
+    assert m.size == (512, 510)
     assert m.preview_small == QUrl.fromLocalFile(os.path.join(path, 'sample_map.png'))
     assert m.preview_big is None
 
@@ -45,7 +45,7 @@ def test_create_local_map_with_screwed_up_versioning(loop):
     assert m.description == 'lorem ipsum'
     assert m.version == '66'
     assert m.slots == 4
-    assert m.size == [512, 510]
+    assert m.size == (512, 510)
     assert m.preview_small == QUrl.fromLocalFile(os.path.join(path, 'sample_map.v002.png'))
     assert m.preview_big is None
 
