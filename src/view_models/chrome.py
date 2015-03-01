@@ -1,6 +1,7 @@
 import logging
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
+import settings
 from utils.async import async_slot
 from .adapters import NotifyablePropertyObject, notifyableProperty
 
@@ -48,7 +49,7 @@ class LoginViewModel(NotifyablePropertyObject):
     login = pyqtSignal(str, str, bool)
     logout = pyqtSignal()
 
-    def __init__(self, client, user, password, remember, parent=None):
+    def __init__(self, client, user=None, password=None, remember=None, parent=None):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class LoginViewModel(NotifyablePropertyObject):
         self.client = client
         self.user = user
         self.password = password
-        self.remember = remember
+        self.remember = remember or False
         self.logged_in = False
         self.panel_visible = False
 
@@ -72,7 +73,7 @@ class LoginViewModel(NotifyablePropertyObject):
             self.logged_in = yield from self.client.login(user, pass_hash)
             self.panel_visible = not self.logged_in
 
-            self._store_credentials(user, pass_hash, remember)
+            self.store_credentials(user, pass_hash, remember)
 
             self.log.debug('login successful? {}'.format(self.logged_in))
 
@@ -91,9 +92,7 @@ class LoginViewModel(NotifyablePropertyObject):
         except Exception as ex:
             self.log.warn('logout failed: {}'.format(ex))
 
-    def _store_credentials(self, user, password, remember):
-        # TODO: DRY (widgets.MainWindow._read_settings)
-        import settings
+    def store_credentials(self, user, password, remember):
         s = settings.get()
         s.beginGroup('login')
 
@@ -102,3 +101,13 @@ class LoginViewModel(NotifyablePropertyObject):
         s.setValue('remember', remember)
 
         s.endGroup()
+
+    def read_credentials(self):
+        stored = settings.get()
+        stored.beginGroup('login')
+
+        self.user = stored.value('user')
+        self.password = stored.value('password')
+        self.remember = stored.value('remember') == 'true'
+
+        stored.endGroup()

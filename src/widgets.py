@@ -76,21 +76,18 @@ class MainWindow(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.log = logging.getLogger(__name__)
 
         app = Application.instance()
-
-        self.log = logging.getLogger(__name__)
-        self._read_settings()
-
         self.client = Client(app, parent=self)
-
-        if self.remember:
-            self._autologin()
 
         self.windowModel = MainWindowViewModel(parent=self)
 
-        self.loginModel = LoginViewModel(self.client, self.user, self.password, self.remember, parent=self)
-        self.loginModel.panel_visible = not self.remember
+        self.loginModel = LoginViewModel(self.client, parent=self)
+        self.loginModel.read_credentials()
+        self.loginModel.panel_visible = not self.loginModel.remember
+        if self.loginModel.remember:
+            self._autologin()
 
         self.engine = QQmlApplicationEngine(self)
         self.engine.rootContext().setContextProperty('windowModel', self.windowModel)
@@ -115,21 +112,11 @@ class MainWindow(QObject):
         self.window.show()
         self.log.debug('Client up')
 
-    def _read_settings(self):
-        stored = settings.get()
-        stored.beginGroup('login')
-
-        self.user = stored.value('user')
-        self.password = stored.value('password')
-        self.remember = stored.value('remember') == 'true'
-
-        stored.endGroup()
-
     @async_slot
     def _autologin(self):
         try:
             self.log.info('logging in (auto)...')
-            self.loginModel.logged_in = yield from self.client.login(self.user, self.password)
+            self.loginModel.logged_in = yield from self.client.login(self.loginModel.user, self.loginModel.password)
             self.log.debug('autologin result: {}'.format(self.loginModel.logged_in))
         except Exception as e:
             self.log.error('autologin failed. {}'.format(e))
