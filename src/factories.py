@@ -17,7 +17,6 @@ def __run_chain(handlers, *args, **kwargs):
 
 @asyncio.coroutine
 def __local_lookup(paths, factory_method):
-    log = logging.getLogger(__name__)
     dirs = [(n, os.path.join(p, n)) for p in paths for n in os.listdir(p)]
 
     tasks = itertools.starmap(factory_method, dirs)
@@ -26,11 +25,16 @@ def __local_lookup(paths, factory_method):
     return filter(lambda x: not isinstance(x, Exception), results)
 
 
-def __execute_lua(scenario):
-    with open(scenario) as f:
-        lua = get_lua_runtime()
-        lua.execute(f.read())
-        return lua.globals()
+def __execute_lua(path):
+    log = logging.getLogger(__name__)
+
+    with open(path) as f:
+        try:
+            lua = get_lua_runtime()
+            lua.execute(f.read())
+            return lua.globals()
+        except Exception as e:
+            log.warning('Error while trying to parse {}. {}'.format(path, e))
 
 
 @asyncio.coroutine
