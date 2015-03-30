@@ -108,8 +108,9 @@ Item {
                 id: featured
                 editable: false
                 model: contentModel.featured
-                currentIndex: contentModel.featured.getSelectedIndex()
-                onCurrentIndexChanged: contentModel.featured.setSelected(currentIndex)
+                textRole: 'name'
+                currentIndex: model.currentIndex
+                onActivated: model.setSelected(index)
             }
 
             ComboBox {
@@ -120,8 +121,9 @@ Item {
                 id: map_code
                 editable: true
                 model: contentModel.maps
-                currentIndex: contentModel.maps.getSelectedIndex()
-                onCurrentIndexChanged: contentModel.maps.setSelected(currentIndex)
+                textRole: 'name'
+                currentIndex: model.currentIndex
+                onActivated: model.setSelected(index)
             }
 
             ColumnLayout {
@@ -134,9 +136,9 @@ Item {
                     model: contentModel.mods
 
                     delegate: CheckBox {
-                        checked: mods.model.isSelected(index)
-                        text: name
-                        onClicked: mods.model.setSelected(index, checked)
+                        checked: model.item.selected
+                        text: model.item.name
+                        onClicked: model.item.toggle_selected()
                     }
                 }
             }

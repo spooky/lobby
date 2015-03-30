@@ -57,73 +57,6 @@ def ListModelFor(klass):
     return ListModel
 
 
-class SelectionList(QAbstractListModel):
-
-    def __init__(self, multiple=False, parent=None):
-        super().__init__(parent)
-        self.multiple = multiple
-        self._items = []
-        # TODO: use proxy model to help with selection problems
-        self._selected = set()
-        self._roleNames = {1: 'name'}  # TODO: do the thing...
-
-    def roleNames(self):
-        return self._roleNames
-
-    def rowCount(self, parent=QModelIndex()):
-        return len(self._items)
-
-    def data(self, index, role):
-        item = self._items[index.row()]
-        return getattr(item, self._roleNames[role])
-
-    def append(self, item, selected=False):
-        index = len(self._items)
-        self.beginInsertRows(QModelIndex(), index, index)
-        self._items.append(item)
-        if selected:
-            self._selected.add(index)
-        self.endInsertRows()
-
-    def remove(self, item):
-        index = self._items.index(item)
-        self.beginRemoveRows(QModelIndex(), index, index)
-        self._items.remove(item)
-        self.endRemoveRows()
-
-    @pyqtSlot(int)
-    @pyqtSlot(int, bool)
-    def setSelected(self, index, selected=True):
-        # TODO: notify about changed selection
-        if selected:
-            if not self.multiple:
-                self._selected.clear()
-
-            self._selected.add(index)
-        else:
-            self._selected.discard(index)
-
-    @pyqtSlot(int, result=bool)
-    def isSelected(self, index):
-        return index in self._selected
-
-    @pyqtSlot(result=QVariant)
-    def getSelected(self):
-        s = [self._items[i] for i in self._selected]
-        return s if self.multiple else s[0]
-
-    @pyqtSlot(result=QVariant)
-    def getSelectedIndex(self):
-        s = list(self._selected)
-        return s if self.multiple else s[0] if len(s) > 0 else None
-
-    @pyqtSlot()
-    def clearSelection(self):
-        self.beginRemoveRows(QModelIndex(), 0, 0)
-        self._selected.clear()
-        self.endRemoveRows()
-
-
 class notifyableProperty:
 
     """
@@ -191,3 +124,93 @@ class NotifyablePropertyObject(QObject, metaclass=notifyablePropertyWrapperType)
     ''' Base class for model objects. This class uses PropertyChangeSignalMeta to generate signals for each pyqtProperty found in a class '''
 
     pass
+
+
+class Selectable(NotifyablePropertyObject):
+
+    name = notifyableProperty(str)
+    selected = notifyableProperty(bool)
+
+    def __init__(self, item, name_extractor=None):
+        super().__init__()
+        self._item = item
+        self.selected = False
+        self.name = (name_extractor or (lambda x: str(x)))(item)
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.name == other.name
+
+    @pyqtSlot()
+    def toggle_selected(self):
+        self.selected = not self.selected
+
+
+class SelectionList(QAbstractListModel, NotifyablePropertyObject):
+
+    currentIndex = notifyableProperty(int)
+
+    def __init__(self, items=None, multiple=False, item_name_extractor=None, parent=None):
+        super().__init__()
+        self.currentIndex = -1
+        self.multiple = multiple
+        self._items = [Selectable(i, self._name_extractor) for i in (items or [])]
+        self._name_extractor = item_name_extractor
+
+    def roleNames(self):
+        return {0: 'item', 1: 'name'}
+
+    def rowCount(self, parent=QModelIndex()):
+        return len(self._items)
+
+    def data(self, index, role):
+        if index.isValid():
+            if role == 0:
+                return self._items[index.row()]
+            if role == 1:
+                return self._items[index.row()].name
+
+    def append(self, item, selected=False):
+        index = len(self._items)
+        self.beginInsertRows(QModelIndex(), index, index)
+
+        e = Selectable(item, self._name_extractor)
+        e.selected = selected
+        self._items.append(e)
+
+        self.endInsertRows()
+
+    def remove(self, item):
+        e = Selectable(item, self._name_extractor)
+
+        index = self._items.index(e)
+        self.beginRemoveRows(QModelIndex(), index, index)
+
+        self._items.remove(e)
+
+        self.endRemoveRows()
+
+    @pyqtSlot(result=QVariant)
+    def getSelectedIndex(self):
+        s = self._selections()
+        if self.multiple:
+            [self._items.index(i) for i in s]
+        elif len(s) > 0:
+            return self._items.index(s[0])
+
+    def _selections(self):
+        return [x for x in self._items if x.selected]
+
+    def selected(self):
+        s = [x._item for x in self._items if x.selected]
+        return s if self.multiple else s[0] if len(s) > 0 else None
+
+    @pyqtSlot(int)
+    @pyqtSlot(int, bool)
+    def setSelected(self, index, selected=True):
+        if not self.multiple:
+            for s in self._selections()[:]:
+                s.selected = False
+
+        if len(self._items) > index:
+            self._items[index].selected = selected
+            self.currentIndex = index

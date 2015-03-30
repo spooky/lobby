@@ -129,9 +129,13 @@ class GamesViewModel(NotifyablePropertyObject):
         self.presets = SelectionList()  # TODO
         self.title = None
         self.private = False
-        self.featured = SelectionList()
-        self.maps = SelectionList()
-        self.mods = SelectionList(multiple=True)
+
+        def get_name(x):
+            return x.name
+
+        self.featured = SelectionList(item_name_extractor=get_name)
+        self.maps = SelectionList(item_name_extractor=get_name)
+        self.mods = SelectionList(multiple=True, item_name_extractor=get_name)
 
         Application.instance().init_complete.connect(self.on_app_init_complete)
 
@@ -144,6 +148,7 @@ class GamesViewModel(NotifyablePropertyObject):
     def on_app_init_complete(self):
         for m in sorted(self.map_lookup.values(), key=lambda m: m.name.lower()):
             self.maps.append(m)
+        self.maps.setSelected(0)
 
         for m in sorted(self.mod_lookup.values(), key=lambda m: m.name.lower()):
             if not m.ui_only:
@@ -152,15 +157,23 @@ class GamesViewModel(NotifyablePropertyObject):
     @pyqtSlot()
     def on_savePreset(self):
         self.log.debug('TODO: save preset')
+        try:
+            self.featured.setSelected(1)
+            self.maps.setSelected(7)
+            self.mods.setSelected(4)
+            self.mods.setSelected(8)
+            self.log.debug('changed settings')
+        except Exception as e:
+            self.log.error(e)
 
     @pyqtSlot()
     def on_hostGame(self):
         self.log.debug('hosting with options: {}, {}, {}, {}, mods: {}'.format(
             self.title,
             'locked' if self.private else 'open',
-            self.featured.getSelected(),
-            self.maps.getSelected(),
-            [m.uid for m in self.mods.getSelected()]))
+            self.featured.selected(),
+            self.maps.selected(),
+            [m.uid for m in self.mods.selected()]))
 
         Application.instance().report_indefinite(QCoreApplication.translate('GamesViewModel', 'hosting game'))
         session = QCoreApplication.instance().session
@@ -178,7 +191,7 @@ class GamesViewModel(NotifyablePropertyObject):
         game.addArg('init', 'init_test.lua')
 
         game.setTitle(self.title)
-        game.setMap(self.maps.getSelected().code)
+        game.setMap(self.maps.selected().code)
         game.setLocalPlayer(session.user, session.user_id)
 
         game.start()
