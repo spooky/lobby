@@ -3,7 +3,6 @@ from itertools import groupby
 from PyQt5.QtCore import QVariant, QUrl, QCoreApplication, pyqtSignal, pyqtSlot
 
 from models import Map, Mod
-from session.GameSession import GameSession
 from widgets import Application
 from .adapters import ListModelFor, SelectionList, NotifyablePropertyObject, notifyableProperty
 
@@ -126,6 +125,12 @@ class GamesViewModel(NotifyablePropertyObject):
 
         self.games = GameListModel()
 
+        import json
+        data = json.loads('{"id":93,"host":{"ip":"89.64.254.67","port":6112,"username":"spooky"},"GameOption":{"Timeouts":"3","NavalExpansionsAllowed":"4","Score":"no","LandExpansionsAllowed":"5","Victory":"demoralization","TeamLock":"locked","AutoTeams":"pvsi","CheatMult":"2.2","AllowObservers":0,"RankedGame":"Off","PrebuiltUnits":"Off","ScenarioFile":"/maps/3v3 Sand Box v2a/3v3 Sand Box v2a_scenario.lua","OmniCheat":"on","ShareUnitCap":"allies","RandomMap":"Off","FogOfWar":"explored","UnitCap":"1000","CivilianAlliance":"enemy","Slots":6,"TeamSpawn":"random","CheatsEnabled":"false","BuildMult":"2.0","Share":"yes","TMLRandom":"0","NoRushOption":"Off","GameSpeed":"adjustable"},"GameState":"Lobby","PlayerOption":{"1":{"PlayerName":"crunchy","RC":"ffffffff","DEV":0,"OwnerID":"3","Country":"world","Team":0,"MEAN":1000,"NG":0,"Ready":0,"Civilian":0,"ArmyColor":3,"COUNTRY":"world","Faction":3,"Human":1,"AIPersonality":"","PlayerColor":3,"StartSpot":1,"PL":1000},"2":{"PlayerName":"creamy","RC":"ffffffff","DEV":0,"OwnerID":"3","Country":"world","Team":0,"MEAN":100,"NG":0,"Ready":0,"Civilian":0,"ArmyColor":3,"COUNTRY":"world","Faction":3,"Human":1,"AIPersonality":"","PlayerColor":3,"StartSpot":1,"PL":1000},"3":{"PlayerName":"cookie","RC":"ffffffff","DEV":0,"OwnerID":"3","Country":"world","Team":1,"MEAN":1500,"NG":0,"Ready":0,"Civilian":0,"ArmyColor":3,"COUNTRY":"world","Faction":3,"Human":1,"AIPersonality":"","PlayerColor":3,"StartSpot":1,"PL":1000}},"Title":"test","GameMods":["921bdf63-c14a-1415-a758-42d1c231e4f4", "7749EEN4-DE86-5CC2-39AC-35692BDE76XF"]}')
+        for i in range(1):
+            g = GameViewModel(data, self.map_lookup, self.mod_lookup)
+            self.games.append(g)
+
         self.presets = SelectionList()  # TODO
         self.title = None
         self.private = False
@@ -180,21 +185,7 @@ class GamesViewModel(NotifyablePropertyObject):
         if not session:
             # TODO: display 'not logged in' error
             return None
-        game = GameSession(QCoreApplication.instance())
-        game.setFAFConnection(self.server_context)
-        game.finished.connect(lambda: Application.instance().end_report())
-
-        game.addArg('showlog')
-        game.addArg('mean', 1000)
-        game.addArg('deviation', 0)
-        game.addArg('windowed', 1024, 768)
-        game.addArg('init', 'init_test.lua')
-
-        game.setTitle(self.title)
-        game.setMap(self.maps.selected().code)
-        game.setLocalPlayer(session.user, session.user_id)
-
-        game.start()
+        # TODO: add game starting logic here
 
     @pyqtSlot(int)
     def on_joinGame(self, id):

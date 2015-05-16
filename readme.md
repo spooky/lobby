@@ -1,20 +1,12 @@
 FA Forever - Lobby
 ------------------
 
-This is the source code for the FA Forever Lobby.
+This is the source code for the refreshed FA Forever Lobby.
 
 Pre-requisites are :
 
-- Python 2.6/2.7 32 bits
-- PyQt4 with QT 4.7.2
-- Python Win32Api
-- Py2Exe
-- Numpy/Scipy
-- Python matplotlib
-- FreeImagePy
-- bsdiff
-- python-dateutil
-- six
+- Python 3
+- PyQt5 with QT 5
 
 If you want to contribute back to the project, please make a fork and create
 pull-requests of your changes.
