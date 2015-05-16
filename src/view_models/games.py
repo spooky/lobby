@@ -125,13 +125,7 @@ class GamesViewModel(NotifyablePropertyObject):
 
         self.games = GameListModel()
 
-        import json
-        data = json.loads('{"id":93,"host":{"ip":"89.64.254.67","port":6112,"username":"spooky"},"GameOption":{"Timeouts":"3","NavalExpansionsAllowed":"4","Score":"no","LandExpansionsAllowed":"5","Victory":"demoralization","TeamLock":"locked","AutoTeams":"pvsi","CheatMult":"2.2","AllowObservers":0,"RankedGame":"Off","PrebuiltUnits":"Off","ScenarioFile":"/maps/3v3 Sand Box v2a/3v3 Sand Box v2a_scenario.lua","OmniCheat":"on","ShareUnitCap":"allies","RandomMap":"Off","FogOfWar":"explored","UnitCap":"1000","CivilianAlliance":"enemy","Slots":6,"TeamSpawn":"random","CheatsEnabled":"false","BuildMult":"2.0","Share":"yes","TMLRandom":"0","NoRushOption":"Off","GameSpeed":"adjustable"},"GameState":"Lobby","PlayerOption":{"1":{"PlayerName":"crunchy","RC":"ffffffff","DEV":0,"OwnerID":"3","Country":"world","Team":0,"MEAN":1000,"NG":0,"Ready":0,"Civilian":0,"ArmyColor":3,"COUNTRY":"world","Faction":3,"Human":1,"AIPersonality":"","PlayerColor":3,"StartSpot":1,"PL":1000},"2":{"PlayerName":"creamy","RC":"ffffffff","DEV":0,"OwnerID":"3","Country":"world","Team":0,"MEAN":100,"NG":0,"Ready":0,"Civilian":0,"ArmyColor":3,"COUNTRY":"world","Faction":3,"Human":1,"AIPersonality":"","PlayerColor":3,"StartSpot":1,"PL":1000},"3":{"PlayerName":"cookie","RC":"ffffffff","DEV":0,"OwnerID":"3","Country":"world","Team":1,"MEAN":1500,"NG":0,"Ready":0,"Civilian":0,"ArmyColor":3,"COUNTRY":"world","Faction":3,"Human":1,"AIPersonality":"","PlayerColor":3,"StartSpot":1,"PL":1000}},"Title":"test","GameMods":["921bdf63-c14a-1415-a758-42d1c231e4f4", "7749EEN4-DE86-5CC2-39AC-35692BDE76XF"]}')
-        for i in range(1):
-            g = GameViewModel(data, self.map_lookup, self.mod_lookup)
-            self.games.append(g)
-
-        self.presets = SelectionList()  # TODO
+        self.presets = SelectionList()  # TODO: presets
         self.title = None
         self.private = False
 
@@ -144,7 +138,7 @@ class GamesViewModel(NotifyablePropertyObject):
 
         Application.instance().init_complete.connect(self.on_app_init_complete)
 
-        # test data
+        # TODO: remove test data
         self.featured.append(Mod('uid-faf', 'Forged Alliance Forever'), selected=True)
         self.featured.append(Mod('uid-vanilla', 'Vanilla'))
         self.featured.append(Mod('uid-phantom', 'Phantom X'))
@@ -158,6 +152,13 @@ class GamesViewModel(NotifyablePropertyObject):
         for m in sorted(self.mod_lookup.values(), key=lambda m: m.name.lower()):
             if not m.ui_only:
                 self.mods.append(m)
+
+        # TODO: remove test data
+        import json
+        data = json.loads('{"id":93,"host":{"ip":"89.64.254.67","port":6112,"username":"spooky"},"GameOption":{"Timeouts":"3","NavalExpansionsAllowed":"4","Score":"no","LandExpansionsAllowed":"5","Victory":"demoralization","TeamLock":"locked","AutoTeams":"pvsi","CheatMult":"2.2","AllowObservers":0,"RankedGame":"Off","PrebuiltUnits":"Off","ScenarioFile":"/maps/3v3 Sand Box v2a/3v3 Sand Box v2a_scenario.lua","OmniCheat":"on","ShareUnitCap":"allies","RandomMap":"Off","FogOfWar":"explored","UnitCap":"1000","CivilianAlliance":"enemy","Slots":6,"TeamSpawn":"random","CheatsEnabled":"false","BuildMult":"2.0","Share":"yes","TMLRandom":"0","NoRushOption":"Off","GameSpeed":"adjustable"},"GameState":"Lobby","PlayerOption":{"1":{"PlayerName":"crunchy","RC":"ffffffff","DEV":0,"OwnerID":"3","Country":"pl","Team":0,"MEAN":1000,"NG":0,"Ready":0,"Civilian":0,"ArmyColor":3,"COUNTRY":"pl","Faction":3,"Human":1,"AIPersonality":"","PlayerColor":3,"StartSpot":1,"PL":1000},"2":{"PlayerName":"creamy","RC":"ffffffff","DEV":0,"OwnerID":"3","Country":"dk","Team":0,"MEAN":100,"NG":0,"Ready":0,"Civilian":0,"ArmyColor":3,"COUNTRY":"dk","Faction":3,"Human":1,"AIPersonality":"","PlayerColor":3,"StartSpot":1,"PL":1000},"3":{"PlayerName":"cookie","RC":"ffffffff","DEV":0,"OwnerID":"3","Country":"fi","Team":1,"MEAN":1500,"NG":0,"Ready":0,"Civilian":0,"ArmyColor":3,"COUNTRY":"fi","Faction":3,"Human":1,"AIPersonality":"","PlayerColor":3,"StartSpot":1,"PL":1000}},"Title":"test","GameMods":["921bdf63-c14a-1415-a758-42d1c231e4f4", "EEFFA8C6-96D9-11E4-9DA1-460D1D5D46B0"]}')
+        for i in range(1):
+            g = GameViewModel(data, self.map_lookup, self.mod_lookup)
+            self.games.append(g)
 
     @pyqtSlot()
     def on_savePreset(self):
