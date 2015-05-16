@@ -39,7 +39,7 @@ class GameViewModel(NotifyablePropertyObject):
         self.map_name = game_map.name
         self.title = source.get('Title')
         self.host = source['host'].get('username') if 'host' in source.keys() else None
-        self.featured_mod, self._mods = self.get_mods(source.get('GameMods') or [])
+        self.featured_mod, self.mods = self.get_mods(source.get('GameMods') or [])
         self.slots = source['GameOption'].get('Slots', 0) if 'GameOption' in source.keys() else 0
         self.player_count = len(source.get('PlayerOption') or [])
         self.teams_arrangement = self.get_teams_arrangement(source)
