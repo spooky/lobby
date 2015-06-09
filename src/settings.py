@@ -26,7 +26,8 @@ try:
 except UnicodeDecodeError:
     PERSONAL_DIR = os.path.join(APPDATA_DIR, 'user')
 
-LOBBY_HOST = 'faforever.tk'
+# TODO: cleanup unused settings
+LOBBY_HOST = 'faforever.lh'
 LOBBY_PORT = 8080
 GAME_PORT_DEFAULT = 6112
 BIN_DIR = os.path.join(APPDATA_DIR, 'bin')
@@ -37,10 +38,6 @@ LOG_FILE_REPLAY = os.path.join(LOG_DIR, 'replay.log')
 
 ORGANIZATION_NAME = 'Forged Alliance Forever'
 APPLICATION_NAME = 'lobby'
-
-# Service URLs
-AUTH_SERVICE_URL = 'http://{}:44343/auth'.format(LOBBY_HOST)
-FAF_SERVICE_URL = 'http://{}:8080'.format(LOBBY_HOST)
 
 
 EXECUTOR_THREADS = 10

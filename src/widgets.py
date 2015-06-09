@@ -103,7 +103,7 @@ class MainWindow(QObject):
         parent.log_changed.connect(self._log)
 
         # set content view
-        self.view_manager.load_view('games', self.client.server_context, app.map_lookup, app.mod_lookup)
+        self.view_manager.load_view('games', app.map_lookup, app.mod_lookup)
 
     def show(self):
         if not self.windowModel.currentView:

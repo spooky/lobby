@@ -109,16 +109,13 @@ class GamesViewModel(NotifyablePropertyObject):
     hostGame = pyqtSignal()
     joinGame = pyqtSignal(int)
 
-    def __init__(self, server_context, map_lookup, mod_lookup, parent=None):
+    def __init__(self, map_lookup, mod_lookup, parent=None):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
 
         self.savePreset.connect(self.on_savePreset)
         self.hostGame.connect(self.on_hostGame)
         self.joinGame.connect(self.on_joinGame)
-
-        self.server_context = server_context
-        self.server_context.eventReceived.connect(self.on_eventReceived)
 
         self.map_lookup = map_lookup
         self.mod_lookup = mod_lookup
@@ -193,6 +190,7 @@ class GamesViewModel(NotifyablePropertyObject):
         self.log.debug('joining: {}'.format(id))
         Application.instance().report_indefinite(QCoreApplication.translate('GamesViewModel', 'joining game'))
 
+    # TODO: fix
     @pyqtSlot(list, dict)
     def on_eventReceived(self, event_id, args):
         subs, cmd = event_id
