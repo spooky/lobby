@@ -1,12 +1,4 @@
 import sys
-from PyQt5.QtCore import QObject, pyqtSignal
-
-
-class ServerContextStub(QObject):
-    eventReceived = pyqtSignal(list, object)
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
 
 
 def test_ViewManager_convert_name():
@@ -28,7 +20,7 @@ def test_ViewManager_get_view_on_games_view():
     app.start()
     vm = ViewManager(None, None)
     storage_stub = {}
-    path, view_model = vm.get_view('games', ServerContextStub(), storage_stub, storage_stub)
+    path, view_model = vm.get_view('games', storage_stub, storage_stub)
 
     assert path == 'Games'
     assert type(view_model) is GamesViewModel
