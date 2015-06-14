@@ -34,7 +34,7 @@ Rectangle {
 
     function getFlag(cc) {
         // TODO
-        return "../../res/countries/" + cc.toLowerCase() + ".png";
+        return "../../../res/countries/" + cc.toLowerCase() + ".png";
     }
  
     Column {

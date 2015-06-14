@@ -4,7 +4,7 @@ data = json.loads('{"id": 93, "host": {"ip": "89.64.254.67", "port": 6112, "user
 
 
 def test_GameViewModel_get_teams_arrangement():
-    from view_models.games import GameViewModel
+    from games.view_models import GameViewModel
 
     teams = GameViewModel.get_teams_arrangement(data)
     expected = [[{'name': 'spooky', 'skill': 1000, 'cc': 'world'}]]
@@ -14,7 +14,7 @@ def test_GameViewModel_get_teams_arrangement():
 
 def test_test_GameViewModel_data():
     from models import Map
-    from view_models.games import GameViewModel
+    from games.view_models import GameViewModel
 
     map_lookup = {'scmp_009': Map(code='scmp_009', name="Seton's")}
     g = GameViewModel(data, map_lookup=map_lookup)
@@ -31,7 +31,7 @@ def test_test_GameViewModel_data():
 
 
 def test_GameViewModel_equality():
-    from view_models.games import GameViewModel
+    from games.view_models import GameViewModel
 
     g1 = GameViewModel(dict(id=1, Title='title'))
     g2 = GameViewModel(dict(id=1, Title='other title'))
@@ -40,7 +40,7 @@ def test_GameViewModel_equality():
 
 
 def test_GameViewModel_inequality():
-    from view_models.games import GameViewModel
+    from games.view_models import GameViewModel
 
     g1 = GameViewModel(dict(id=1, Title='title'))
     g2 = GameViewModel(dict(id=2, Title='other title'))
@@ -49,7 +49,7 @@ def test_GameViewModel_inequality():
 
 
 def test_GameViewModel_list_check():
-    from view_models.games import GameViewModel
+    from games.view_models import GameViewModel
 
     g1 = GameViewModel(dict(id=1, Title='title'))
     g2 = GameViewModel(dict(id=1, Title='other title'))

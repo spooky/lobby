@@ -4,7 +4,7 @@ from PyQt5.QtCore import QVariant, QUrl, QCoreApplication, pyqtSignal, pyqtSlot
 
 from models import Map, Mod
 from widgets import Application
-from .adapters import ListModelFor, SelectionList, NotifyablePropertyObject, notifyableProperty
+from view_models.adapters import ListModelFor, SelectionList, NotifyablePropertyObject, notifyableProperty
 
 
 class GameViewModel(NotifyablePropertyObject):

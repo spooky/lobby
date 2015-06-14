@@ -8,6 +8,7 @@ if os.name == 'nt':
 else:
     APPDATA_DIR = os.path.join(os.environ['HOME'], '.FAForever')
 
+# Set up PERSONAL_DIR
 # This should be 'My Documents' for most users. However,
 # users with accents in their names can't even use these folders in Supcom
 # so we are nice and create a new home for them in the APPDATA_DIR
@@ -26,22 +27,25 @@ try:
 except UnicodeDecodeError:
     PERSONAL_DIR = os.path.join(APPDATA_DIR, 'user')
 
-# TODO: cleanup unused settings
-LOBBY_HOST = 'faforever.lh'
-LOBBY_PORT = 8080
-GAME_PORT_DEFAULT = 6112
-BIN_DIR = os.path.join(APPDATA_DIR, 'bin')
-LOG_DIR = os.path.join(APPDATA_DIR, 'logs')
-FA_DIR = ''
-LOG_FILE_GAME = os.path.join(LOG_DIR, 'game.log')
-LOG_FILE_REPLAY = os.path.join(LOG_DIR, 'replay.log')
-
 ORGANIZATION_NAME = 'Forged Alliance Forever'
+LOBBY_HOST = 'faforever.lh'
 APPLICATION_NAME = 'lobby'
 
+FA_DIR = ''
+BIN_DIR = os.path.join(APPDATA_DIR, 'bin')
+LOG_DIR = os.path.join(APPDATA_DIR, 'logs')
 LOG_BUFFER_SIZE = 1000
-
 EXECUTOR_THREADS = 10
+
+# Register modules
+#   Tuple consisting of module name and a list of requirements.
+#   If no requirements are needed, either provide an empty list or don't provide anything as the second argument
+#   The requirements are names of properties available on the Application object
+MODULES = (
+    ('games', ['map_lookup', 'mod_lookup']),
+    ('sample', ),
+)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,

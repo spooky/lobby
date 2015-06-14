@@ -1,6 +1,8 @@
 import QtQuick 2.3
 import QtQuick.Layouts 1.1
 
+import "../../ui" as Faf
+
 Item {
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.top: parent.top
@@ -10,7 +12,7 @@ Item {
         id: icons
         spacing: 10
 
-        ActionIcon {
+        Faf.ActionIcon {
             source: "icons/host.svg"
             anchors.horizontalCenter: parent.horizontalCenter
             onClicked: {
@@ -46,7 +48,7 @@ Item {
             anchors.right: parent.right
             columns: 2
 
-            Button {
+            Faf.Button {
                 Layout.row: 1
                 Layout.column: 1
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
@@ -55,7 +57,7 @@ Item {
                 onClicked: contentModel.hostGame()
             }
 
-            ComboBox {
+            Faf.ComboBox {
                 Layout.row: 2
                 Layout.column: 1
                 Layout.fillWidth: true
@@ -65,7 +67,7 @@ Item {
 
             }
 
-            ActionIcon {
+            Faf.ActionIcon {
                 Layout.row: 2
                 Layout.column: 2
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
@@ -77,7 +79,7 @@ Item {
                 onClicked: contentModel.savePreset()
             }
 
-            TextField {
+            Faf.TextField {
                 Layout.row: 3
                 Layout.column: 1
                 Layout.fillWidth: true
@@ -88,7 +90,7 @@ Item {
                 onTextChanged: contentModel.title = text
             }
 
-            LockButton {
+            Faf.LockButton {
                 Layout.row: 3
                 Layout.column: 2
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
@@ -100,7 +102,7 @@ Item {
                 onCheckedChanged: contentModel.private = checked
             }
 
-            ComboBox {
+            Faf.ComboBox {
                 Layout.row: 4
                 Layout.column: 1
                 Layout.fillWidth: true
@@ -113,7 +115,7 @@ Item {
                 onActivated: model.setSelected(index)
             }
 
-            ComboBox {
+            Faf.ComboBox {
                 Layout.row: 5
                 Layout.column: 1
                 Layout.fillWidth: true
@@ -135,7 +137,7 @@ Item {
                     id: mods
                     model: contentModel.mods
 
-                    delegate: CheckBox {
+                    delegate: Faf.CheckBox {
                         checked: model.item.selected
                         text: model.item.name
                         onClicked: model.item.toggle_selected()

@@ -1,5 +1,7 @@
 import QtQuick 2.3
 
+import "../../ui" as Faf
+
 Item {
     property string textColor: root.textColor
     property string altColor: root.altHighlightColor
@@ -48,7 +50,7 @@ Item {
             smooth: true
         }
 
-        ActionIcon {
+        Faf.ActionIcon {
             source: "icons/settings.svg"
             size: 24
             anchors.right: parent.right

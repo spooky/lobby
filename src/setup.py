@@ -5,6 +5,8 @@ import sys
 import os
 from cx_Freeze import setup, Executable
 
+import settings
+
 base = None
 include_files = []
 
@@ -20,7 +22,7 @@ if sys.platform == 'win32':
         (os.path.join(PYQT5_DIR, 'qml', 'QtGraphicalEffects'), 'QtGraphicalEffects'),
         (os.path.join(PYQT5_DIR, 'qml', 'Qt'), os.path.join('Qt')),
         (LUA_DIR, '.'),
-    ]
+    ].extend(map(lambda m: os.path.join(m, 'views'), settings.MODULES))
 # need linux stuff here
 
 options = {
@@ -31,7 +33,7 @@ options = {
             # 'PyQt5.QtCore', 'PyQt5.QtGui', 'PyQt5.QtWidgets',
             # 'PyQt5.QtNetwork', 'PyQt5.QtOpenGL', 'PyQt5.QtQml', 'PyQt5.QtQuick',
             'view_models.games'  # TODO: bad bad bad, want full packages here e.g: 'games'
-        ],
+        ].extend(settings.MODULES),
         'excludes': ['Tkinter'],
         'optimize': 2,
         'compressed': True,

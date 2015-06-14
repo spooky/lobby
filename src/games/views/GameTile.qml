@@ -115,7 +115,7 @@ Rectangle {
 
                 Image {
                     fillMode: Image.PreserveAspectCrop
-                    source: "icons/faf.svg" // TODO
+                    source: "../../ui/icons/faf.svg" // TODO
                     sourceSize: Qt.size(16, 16)
                     smooth: true
                 }

@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 import asyncio
 from PyQt5.QtCore import QObject, QCoreApplication, QUrl, pyqtSignal, pyqtSlot
@@ -96,14 +97,14 @@ class MainWindow(QObject):
         self.engine.load(QUrl.fromLocalFile('ui/Chrome.qml'))
 
         self.view_manager = ViewManager(self.engine.rootContext(), self.windowModel, parent=self)
+        first = self._register_views(settings.MODULES, app)
+        self.view_manager.load_view(first)
+
         self.window = self.engine.rootObjects()[0]
 
         # wire up logging console
         self.console = self.window.findChild(QQuickItem, 'console')
         parent.log_changed.connect(self._log)
-
-        # set content view
-        self.view_manager.load_view('games', app.map_lookup, app.mod_lookup)
 
     def show(self):
         if not self.windowModel.currentView:
@@ -111,6 +112,21 @@ class MainWindow(QObject):
 
         self.window.show()
         self.log.debug('Client up')
+
+    def _register_views(self, views, app):
+        first = None
+        for module in views:
+            try:
+                name, requirements = module
+                init_args = map(lambda r: getattr(app, r), requirements)  # extremely poor man's DI
+            except ValueError:  # no requirements
+                name = module[0]
+                init_args = []
+            finally:
+                first = first or name
+                self.view_manager.register_view(name, *init_args)
+
+        return first
 
     @pyqtSlot(str)
     def _log(self, msg):
@@ -131,28 +147,27 @@ class ViewManager(QObject):
         self._views = dict()
 
     def register_view(self, name, *args, **kwargs):
-        pass
-
-    def get_view(self, name, *args, **kwargs):
         '''
         Works on a convention. The view requires 2 thins:
         1) the ui file which should be the camel cased .qml file in the ui directory. Path should be relative to Chrome.qml
         2) the view model which should be a class in the view_models module
         '''
+        if self._views.get(name):
+            raise Exception('{} already registered'.format(name))
 
-        if name not in self._views:
-            n = self._convert_name(name)
-            vm_name = '{}ViewModel'.format(n)
-            # equivalent of from view_models import <part>
-            vm = __import__('view_models.'+name, globals(), locals(), [vm_name], 0)
-            self._views[name] = (n, (getattr(vm, vm_name))(*args, parent=self, **kwargs))
+        n = self._convert_name(name)
+        vm_name = '{}ViewModel'.format(n)
+        # equivalent of from <name>.view_models import <vm_name>
+        vm = __import__(name+'.view_models', globals(), locals(), [vm_name], 0)
+        self._views[name] = (n, (getattr(vm, vm_name))(*args, parent=self, **kwargs))
 
+    def get_view(self, name):
         return self._views[name]
 
-    def load_view(self, name, *args, **kwargs):
-        view_path, view_model = self.get_view(name, *args, **kwargs)
+    def load_view(self, name):
+        view_name, view_model = self.get_view(name)
         self._context.setContextProperty('contentModel', view_model)
-        self._window.currentView = view_path
+        self._window.currentView = os.path.join('..', name, 'views', view_name)
 
     def _convert_name(self, name):
         return re.sub('([_\s]?)([A-Z]?[a-z]+)', lambda m: m.group(2).title(), name)
