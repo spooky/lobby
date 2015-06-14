@@ -13,6 +13,10 @@ from utils.async import async_slot
 from view_models.chrome import MainWindowViewModel, LoginViewModel
 from session.Client import Client
 
+# TODO: clean up/utilize the relative imports in qml files
+# TODO: create top view switcher and pull registered icons
+# TODO: work on conventions
+
 
 class Application(QGuiApplication):
     log_changed = pyqtSignal(str)
