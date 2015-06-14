@@ -1,5 +1,4 @@
 import logging
-import os
 import re
 import asyncio
 from PyQt5.QtCore import QObject, QCoreApplication, QUrl, pyqtSignal, pyqtSlot
@@ -12,8 +11,6 @@ import factories
 from utils.async import async_slot
 from view_models.chrome import MainWindowViewModel, LoginViewModel
 from session.Client import Client
-
-LOG_BUFFER_SIZE = 1000
 
 
 class Application(QGuiApplication):
@@ -61,15 +58,18 @@ class Application(QGuiApplication):
             self.init_complete.emit()
             self.end_report()
 
+    # Required for QtHandler to propagate log messages to client 'console'
     def log(self, msg):
         self.log_changed.emit(msg)
 
+    def report(self, msg, progress=0.0):
+        self.mainWindow.windowModel.setTaskStatus(msg, progress, False)
+
     def report_indefinite(self, msg):
-        self.mainWindow.windowModel.taskRunning = True
-        self.mainWindow.windowModel.taskStatusText = msg
+        self.mainWindow.windowModel.setTaskStatus(msg, indefinite=True)
 
     def end_report(self):
-        self.mainWindow.windowModel.taskRunning = False
+        self.mainWindow.windowModel.clearTaskStatus()
 
 
 class MainWindow(QObject):
@@ -115,7 +115,7 @@ class MainWindow(QObject):
     @pyqtSlot(str)
     def _log(self, msg):
         # replace with collections.deque binding(ish)?
-        if self.console.property('lineCount') == LOG_BUFFER_SIZE:
+        if self.console.property('lineCount') == settings.LOG_BUFFER_SIZE:
             line_end = self.console.property('text').find('\n') + 1
             self.console.remove(0, line_end)
 
@@ -124,11 +124,14 @@ class MainWindow(QObject):
 
 class ViewManager(QObject):
 
-    def __init__(self, context, windowViewModeModel, parent=None):
+    def __init__(self, context, windowViewModel, parent=None):
         super().__init__(parent)
         self._context = context
-        self._window = windowViewModeModel
-        self._cache = dict()
+        self._window = windowViewModel
+        self._views = dict()
+
+    def register_view(self, name, *args, **kwargs):
+        pass
 
     def get_view(self, name, *args, **kwargs):
         '''
@@ -137,14 +140,14 @@ class ViewManager(QObject):
         2) the view model which should be a class in the view_models module
         '''
 
-        if name not in self._cache:
+        if name not in self._views:
             n = self._convert_name(name)
             vm_name = '{}ViewModel'.format(n)
             # equivalent of from view_models import <part>
             vm = __import__('view_models.'+name, globals(), locals(), [vm_name], 0)
-            self._cache[name] = (n, (getattr(vm, vm_name))(*args, parent=self, **kwargs))
+            self._views[name] = (n, (getattr(vm, vm_name))(*args, parent=self, **kwargs))
 
-        return self._cache[name]
+        return self._views[name]
 
     def load_view(self, name, *args, **kwargs):
         view_path, view_model = self.get_view(name, *args, **kwargs)

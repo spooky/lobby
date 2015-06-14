@@ -39,6 +39,7 @@ LOG_FILE_REPLAY = os.path.join(LOG_DIR, 'replay.log')
 ORGANIZATION_NAME = 'Forged Alliance Forever'
 APPLICATION_NAME = 'lobby'
 
+LOG_BUFFER_SIZE = 1000
 
 EXECUTOR_THREADS = 10
 LOGGING = {

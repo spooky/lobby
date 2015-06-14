@@ -26,9 +26,9 @@ class MainWindowViewModel(NotifyablePropertyObject):
 
         self._currentView = None
 
-    def setTaskStatus(self, text, indefinite=True):
+    def setTaskStatus(self, text, progress=0.0, indefinite=True):
         self.taskStatusText = text
-        self.taskStatusProgress = 0.0
+        self.taskStatusProgress = progress
         self.taskStatusIsIndefinite = indefinite
         self.taskRunning = True
 
