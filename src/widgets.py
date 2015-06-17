@@ -2,6 +2,7 @@ import logging
 import os
 import re
 import asyncio
+from collections import OrderedDict
 from PyQt5.QtCore import QObject, QCoreApplication, QUrl, pyqtSignal, pyqtSlot
 from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtGui import QGuiApplication, QIcon
@@ -87,6 +88,7 @@ class MainWindow(QObject):
         self.client = Client(app, parent=self)
 
         self.windowModel = MainWindowViewModel(parent=self)
+        self.windowModel.switchView.connect(self._on_switchView)
 
         self.loginModel = LoginViewModel(self.client, parent=self)
         self.loginModel.read_credentials()
@@ -108,7 +110,7 @@ class MainWindow(QObject):
 
         # wire up logging console
         self.console = self.window.findChild(QQuickItem, 'console')
-        parent.log_changed.connect(self._log)
+        parent.log_changed.connect(self._on_log_changed)
 
     def show(self):
         if not self.windowModel.currentView:
@@ -121,10 +123,17 @@ class MainWindow(QObject):
         for module in views:
             self.view_manager.register_view(module)
 
+        # TODO need nicer solution - would be nice if the list was notifyable
+        self.windowModel.registeredViews = list(self.view_manager.get_views())
+
         return views[0]
 
     @pyqtSlot(str)
-    def _log(self, msg):
+    def _on_switchView(self, name):
+        self.view_manager.load_view(name)
+
+    @pyqtSlot(str)
+    def _on_log_changed(self, msg):
         # replace with collections.deque binding(ish)?
         if self.console.property('lineCount') == settings.LOG_BUFFER_SIZE:
             line_end = self.console.property('text').find('\n') + 1
@@ -139,7 +148,7 @@ class ViewManager(QObject):
         super().__init__(parent)
         self._context = context
         self._window = windowViewModel
-        self._views = dict()
+        self._views = OrderedDict()
 
     def register_view(self, name, *args, **kwargs):
         '''
@@ -163,6 +172,9 @@ class ViewManager(QObject):
         view_name, view_model = self.get_view(name)
         self._context.setContextProperty('contentModel', view_model)
         self._window.currentView = os.path.join('..', name, 'views', view_name)
+
+    def get_views(self):
+        return self._views
 
     def _convert_name(self, name):
         return re.sub('([_\s]?)([A-Z]?[a-z]+)', lambda m: m.group(2).title(), name)

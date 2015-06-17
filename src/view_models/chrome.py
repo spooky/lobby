@@ -1,5 +1,5 @@
 import logging
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QVariant
 
 import settings
 from utils.async import async_slot
@@ -12,7 +12,10 @@ class MainWindowViewModel(NotifyablePropertyObject):
     taskStatusText = notifyableProperty(str)
     taskStatusIsIndefinite = notifyableProperty(bool)
     taskStatusProgress = notifyableProperty(float)
+    registeredViews = notifyableProperty(QVariant)
     currentView = notifyableProperty(str)
+
+    switchView = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -24,7 +27,8 @@ class MainWindowViewModel(NotifyablePropertyObject):
         self.taskStatusIsIndefinite = True  # wether to hide the progress bar progress bar progress value - makes sense only if taskStatusIsIndefinite == True
         self.taskStatusProgress = 0
 
-        self._currentView = None
+        self.registeredViews = list()
+        self.currentView = None
 
     def setTaskStatus(self, text, progress=0.0, indefinite=True):
         self.taskStatusText = text

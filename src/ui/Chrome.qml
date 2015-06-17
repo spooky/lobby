@@ -102,18 +102,25 @@ Window {
 
         Item { // to hold main menu, top action menu, user widget...
             anchors.top: parent.top
+            anchors.right: user.left
+            anchors.bottom: parent.bottom
             anchors.left: actionIcon.right
-            anchors.right: parent.right
-            anchors.margins: 5
-            height: childrenRect.height + 5
             z:400
 
             Row {
-                anchors.top: parent.top
-                anchors.left: parent.left
+                anchors.centerIn: parent
+                height: parent.height
 
-                width: 24
-                height: 24
+                Repeater {
+                    id: mainNavItems
+                    model: windowModel.registeredViews
+
+                    ActionIcon {
+                        size: parent.height
+                        source: "../" + modelData + "/views/icon.svg"
+                        onClicked: windowModel.switchView(modelData)
+                    }
+                }
             }
         }
 
@@ -305,10 +312,10 @@ Window {
 
         Loader {
             id: sideMenuContentLoader
-            source: windowModel.currentView ? windowModel.currentView + 'SideMenu.qml' : ''
+            source: !!windowModel.currentView ? windowModel.currentView + 'SideMenu.qml' : ''
             asynchronous: false // HACK: want this to be true, but this causes the app to crash. More details here: https://bugreports.qt.io/browse/QTBUG-35989
             anchors.fill: parent
-        }        
+        }
     }
 
     Item {

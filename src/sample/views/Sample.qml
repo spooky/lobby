@@ -9,7 +9,7 @@ Item {
     id: flow
     // the 'spacing fun' is here to provide content padding
     width: centralWidget.viewport.width - 2*spacing
-    height: childrenRect.height + 2*spacing
+    height: centralWidget.viewport.height - 2*spacing
     x: spacing
     y: spacing
 
