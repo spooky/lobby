@@ -42,8 +42,8 @@ EXECUTOR_THREADS = 10
 #   If no requirements are needed, either provide an empty list or don't provide anything as the second argument
 #   The requirements are names of properties available on the Application object
 MODULES = (
-    ('games', ['map_lookup', 'mod_lookup']),
-    ('sample', ),
+    'games',
+    'sample',
 )
 
 LOGGING = {

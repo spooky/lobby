@@ -19,8 +19,7 @@ def test_ViewManager_get_view_on_games_view():
     app = Application(sys.argv)  # could be done better, but this is 'just' a test
     app.start()
     vm = ViewManager(None, None)
-    storage_stub = {}
-    vm.register_view('games', storage_stub, storage_stub)
+    vm.register_view('games')
     path, view_model = vm.get_view('games')
 
     assert path == 'Games'

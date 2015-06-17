@@ -109,16 +109,18 @@ class GamesViewModel(NotifyablePropertyObject):
     hostGame = pyqtSignal()
     joinGame = pyqtSignal(int)
 
-    def __init__(self, map_lookup, mod_lookup, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
+
+        app = Application.instance()
 
         self.savePreset.connect(self.on_savePreset)
         self.hostGame.connect(self.on_hostGame)
         self.joinGame.connect(self.on_joinGame)
 
-        self.map_lookup = map_lookup
-        self.mod_lookup = mod_lookup
+        self.map_lookup = app.map_lookup
+        self.mod_lookup = app.mod_lookup
 
         self.games = GameListModel()
 
@@ -133,7 +135,7 @@ class GamesViewModel(NotifyablePropertyObject):
         self.maps = SelectionList(item_name_extractor=get_name)
         self.mods = SelectionList(multiple=True, item_name_extractor=get_name)
 
-        Application.instance().init_complete.connect(self.on_app_init_complete)
+        app.init_complete.connect(self.on_app_init_complete)
 
         # TODO: remove test data
         self.featured.append(Mod('uid-faf', 'Forged Alliance Forever'), selected=True)

@@ -118,19 +118,10 @@ class MainWindow(QObject):
         self.log.debug('Client up')
 
     def _register_views(self, views, app):
-        first = None
         for module in views:
-            try:
-                name, requirements = module
-                init_args = map(lambda r: getattr(app, r), requirements)  # extremely poor man's DI
-            except ValueError:  # no requirements
-                name = module[0]
-                init_args = []
-            finally:
-                first = first or name
-                self.view_manager.register_view(name, *init_args)
+            self.view_manager.register_view(module)
 
-        return first
+        return views[0]
 
     @pyqtSlot(str)
     def _log(self, msg):
