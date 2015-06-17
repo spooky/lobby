@@ -20,7 +20,7 @@ class MainWindowViewModel(NotifyablePropertyObject):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.label = 'FA Forever v.dev'
+        self.label = settings.VERSION
 
         self.taskRunning = False  # wether to show the task indicator
         self.taskStatusText = None  # text to show while task is running

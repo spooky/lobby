@@ -1,6 +1,7 @@
 import os
 from PyQt5.QtCore import QSettings
 
+VERSION = 'FA Forever v.dev'
 
 # These directories are in Appdata (e.g. C:\ProgramData on some Win7 versions)
 if os.name == 'nt':
