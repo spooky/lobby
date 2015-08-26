@@ -21,7 +21,7 @@ def configureLogging():
         logging.basicConfig(level=logging.WARNING, handlers=[QtHandler()])
 
 
-if __name__ == '__main__':
+def startApp():
     app = Application(sys.argv)
     settings.init(app)
 
@@ -38,3 +38,9 @@ if __name__ == '__main__':
     with loop:
         app.start()
         sys.exit(loop.run_forever())
+
+    return app
+
+
+if __name__ == '__main__':
+    startApp()

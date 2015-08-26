@@ -22,7 +22,7 @@ Controls.ComboBox {
     style: ComboBoxStyle {
         id: styleRoot
         dropDownButtonWidth: 17
-        
+
         property color __borderColor: control.enabled ? (control.activeFocus ? borderColorActive : borderColor) : borderColorDisabled
 
         background: Rectangle {
@@ -44,7 +44,7 @@ Controls.ComboBox {
                     when: __popup.__popupVisible
                     PropertyChanges { target: glyph; rotation: 180 }
                 }
-                    
+
                 Image {
                     id: glyphIcon
                     source: "icons/up.svg"
@@ -66,7 +66,7 @@ Controls.ComboBox {
             }
         }
 
-        label: Controls.Label {      
+        label: Controls.Label {
           verticalAlignment: Qt.AlignVCenter
           anchors.fill: parent
           text: control.currentText

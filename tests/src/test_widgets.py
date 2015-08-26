@@ -16,8 +16,8 @@ def test_ViewManager_get_view_on_games_view():
     from widgets import Application, ViewManager
     from games.view_models import GamesViewModel
 
-    app = Application(sys.argv)  # could be done better, but this is 'just' a test
-    app.start()
+    app = Application(sys.argv)
+
     vm = ViewManager(None, None)
     vm.register_view('games')
     path, view_model = vm.get_view('games')

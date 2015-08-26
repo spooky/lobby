@@ -159,10 +159,11 @@ class GamesViewModel(NotifyablePropertyObject):
             g = GameViewModel(data, self.map_lookup, self.mod_lookup)
             self.games.append(g)
 
+    # TODO: implement preset saving
     @pyqtSlot()
     def on_savePreset(self):
-        self.log.debug('TODO: save preset')
         try:
+            # TODO: remove test data
             self.featured.setSelected(1)
             self.maps.setSelected(7)
             self.mods.setSelected(4)
@@ -191,15 +192,6 @@ class GamesViewModel(NotifyablePropertyObject):
     def on_joinGame(self, id):
         self.log.debug('joining: {}'.format(id))
         Application.instance().report_indefinite(QCoreApplication.translate('GamesViewModel', 'joining game'))
-
-    # TODO: fix
-    @pyqtSlot(list, dict)
-    def on_eventReceived(self, event_id, args):
-        subs, cmd = event_id
-        if subs != 'games':
-            return
-
-        getattr(self, 'on_'+cmd)(args)
 
     def on_opened(self, args):
         g = GameViewModel(args, self.map_lookup, self.mod_lookup)

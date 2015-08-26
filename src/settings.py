@@ -38,10 +38,6 @@ LOG_DIR = os.path.join(APPDATA_DIR, 'logs')
 LOG_BUFFER_SIZE = 1000
 EXECUTOR_THREADS = 10
 
-# Register modules
-#   Tuple consisting of module name and a list of requirements.
-#   If no requirements are needed, either provide an empty list or don't provide anything as the second argument
-#   The requirements are names of properties available on the Application object
 MODULES = (
     'games',
     'sample',

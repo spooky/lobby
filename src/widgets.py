@@ -15,7 +15,6 @@ from view_models.chrome import MainWindowViewModel, LoginViewModel
 from session.Client import Client
 
 # TODO: clean up/utilize the relative imports in qml files
-# TODO: create top view switcher and pull registered icons
 # TODO: work on conventions
 
 
@@ -120,8 +119,8 @@ class MainWindow(QObject):
         self.log.debug('Client up')
 
     def _register_views(self, views, app):
-        for module in views:
-            self.view_manager.register_view(module)
+        for view in views:
+            self.view_manager.register_view(view)
 
         # TODO need nicer solution - would be nice if the list was notifyable
         self.windowModel.registeredViews = list(self.view_manager.get_views())

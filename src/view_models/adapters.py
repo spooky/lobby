@@ -12,7 +12,7 @@ def ListModelFor(klass):
 
             self._roleNames = {}
             for i in range(0, meta.propertyCount()):
-                self._roleNames[i] = meta.property(i).name()
+                self._roleNames[i] = meta.property(i).name().encode()
 
         def rowCount(self, parent=QModelIndex()):
             return len(self._items)
@@ -157,7 +157,7 @@ class SelectionList(QAbstractListModel, NotifyablePropertyObject):
         self._name_extractor = item_name_extractor
 
     def roleNames(self):
-        return {0: 'item', 1: 'name'}
+        return {0: b'item', 1: b'name'}
 
     def rowCount(self, parent=QModelIndex()):
         return len(self._items)
