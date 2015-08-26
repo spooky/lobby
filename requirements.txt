@@ -1,1 +1,4 @@
 lupa==1.1
+#PyQt5==5.5
+#quamash==0.5
+#pyqtdeploy==1.1
