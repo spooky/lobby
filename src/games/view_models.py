@@ -1,10 +1,13 @@
 import logging
+import json
 from itertools import groupby
 from PyQt5.QtCore import QVariant, QUrl, QCoreApplication, pyqtSignal, pyqtSlot
 
 from models import Map, Mod
 from widgets import Application
 from view_models.adapters import ListModelFor, SelectionList, NotifyablePropertyObject, notifyableProperty
+
+from .models import Preset
 
 
 class GameViewModel(NotifyablePropertyObject):
@@ -104,6 +107,7 @@ class GamesViewModel(NotifyablePropertyObject):
     featured = notifyableProperty(SelectionList)
     maps = notifyableProperty(SelectionList)
     mods = notifyableProperty(SelectionList)
+    presets = notifyableProperty(SelectionList)
 
     savePreset = pyqtSignal()
     hostGame = pyqtSignal()
@@ -124,7 +128,9 @@ class GamesViewModel(NotifyablePropertyObject):
 
         self.games = GameListModel()
 
-        self.presets = SelectionList()  # TODO: presets
+        self.presets = SelectionList(item_name_extractor=lambda p: p.title)
+        self._restore_presets()
+
         self.title = None
         self.private = False
 
@@ -142,6 +148,13 @@ class GamesViewModel(NotifyablePropertyObject):
         self.featured.append(Mod('uid-vanilla', 'Vanilla'))
         self.featured.append(Mod('uid-phantom', 'Phantom X'))
         self.featured.append(Mod('uid-nomads', 'The Nomads'))
+
+    # TODO: async
+    def _restore_presets(self):
+        # TODO: path... should either have a fixed dir or search up until a point
+        presets = json.load(open('../presets.json'))
+        for preset in presets:
+            self.presets.append(Preset(**preset))
 
     def on_app_init_complete(self):
         for m in sorted(self.map_lookup.values(), key=lambda m: m.name.lower()):
