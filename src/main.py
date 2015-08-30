@@ -21,7 +21,7 @@ def configureLogging():
         logging.basicConfig(level=logging.WARNING, handlers=[QtHandler()])
 
 
-def startApp():
+def startApp(callback=None):
     app = Application(sys.argv)
     settings.init(app)
 
@@ -37,10 +37,19 @@ def startApp():
 
     with loop:
         app.start()
+        if callback:
+            callback(app)
         sys.exit(loop.run_forever())
 
     return app
 
 
+def startAlfred(app):
+    import alfred.widgets
+    helper = alfred.widgets.MainWindow(app)
+    helper.show()
+
+
 if __name__ == '__main__':
-    startApp()
+    debug = '--debug' in sys.argv
+    startApp(startAlfred if debug else None)
