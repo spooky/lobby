@@ -15,7 +15,6 @@ from view_models.chrome import MainWindowViewModel, LoginViewModel
 from session.Client import Client
 
 # TODO: clean up/utilize the relative imports in qml files
-# TODO: work on conventions
 
 
 class Application(QGuiApplication):
