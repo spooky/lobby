@@ -4,6 +4,18 @@ from PyQt5.QtCore import QObject, QUrl
 from PyQt5.QtQml import QQmlApplicationEngine
 
 
+# ################################## TODO ################################### #
+#                                                                             #
+# TODO: featured mods                                                         #
+# TODO: maps                                                                  #
+# TODO: mods                                                                  #
+# TODO: login, logout                                                         #
+# TODO: host game, join game                                                  #
+# TODO: logging console                                                       #
+#                                                                             #
+# ########################################################################### #
+
+
 class MainWindow(QObject):
 
     def __init__(self, parent=None):
