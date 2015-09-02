@@ -98,7 +98,7 @@ class LoginViewModel(NotifyablePropertyObject):
     def on_logout(self):
         try:
             self.log.info('logging out...')
-            self.logged_in = not (yield from self.client.logout())
+            self.logged_in = not (yield from self.client.logout(self.user))
 
             self.log.debug('logout successful? {}'.format(not self.logged_in))
 

@@ -3,13 +3,16 @@ import logging
 from PyQt5.QtCore import QObject, QUrl
 from PyQt5.QtQml import QQmlApplicationEngine
 
+from relays import *
+from .auth import auth_view_model
+
 
 # ################################## TODO ################################### #
 #                                                                             #
+# TODO: login, logout                                                         #
 # TODO: featured mods                                                         #
 # TODO: maps                                                                  #
 # TODO: mods                                                                  #
-# TODO: login, logout                                                         #
 # TODO: host game, join game                                                  #
 # TODO: logging console                                                       #
 #                                                                             #
@@ -24,6 +27,9 @@ class MainWindow(QObject):
 
         self.engine = QQmlApplicationEngine(self)
         self.engine.quit.connect(parent.quit)
+
+        self.engine.rootContext().setContextProperty('auth', auth_view_model)
+
         self.engine.load(QUrl.fromLocalFile('alfred/views/MainWindow.qml'))
 
         self.window = self.engine.rootObjects()[0]

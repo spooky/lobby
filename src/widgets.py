@@ -10,9 +10,9 @@ from PyQt5.QtQuick import QQuickItem
 
 import settings
 import factories
+import relays.auth
 from utils.async import async_slot
 from view_models.chrome import MainWindowViewModel, LoginViewModel
-from session.Client import Client
 
 # TODO: clean up/utilize the relative imports in qml files
 
@@ -83,12 +83,11 @@ class MainWindow(QObject):
         self.log = logging.getLogger(__name__)
 
         app = Application.instance()
-        self.client = Client(app, parent=self)
 
         self.windowModel = MainWindowViewModel(parent=self)
         self.windowModel.switchView.connect(self._on_switchView)
 
-        self.loginModel = LoginViewModel(self.client, parent=self)
+        self.loginModel = LoginViewModel(relays.auth.create_auth_client(), parent=self)
         self.loginModel.read_credentials()
         self.loginModel.panel_visible = not self.loginModel.remember
         if self.loginModel.remember:
