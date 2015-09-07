@@ -36,4 +36,4 @@ class SampleViewModel(NotifyablePropertyObject):
     @pyqtSlot()
     def on_doingThings(self):
         self.log.debug('doing things...')
-        Application.instance().report_indefinite(QCoreApplication.translate('SampleViewModel', 'doing things'))
+        Application.instance().report_indefinite(self, QCoreApplication.translate('SampleViewModel', 'doing things'))

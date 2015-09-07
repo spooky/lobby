@@ -194,7 +194,7 @@ class GamesViewModel(NotifyablePropertyObject):
             self.maps.selected(),
             [m.uid for m in self.mods.selected()]))
 
-        Application.instance().report_indefinite(QCoreApplication.translate('GamesViewModel', 'hosting game'))
+        Application.instance().report_indefinite(self, QCoreApplication.translate('GamesViewModel', 'hosting game'))
         session = QCoreApplication.instance().session
         if not session:
             # TODO: display 'not logged in' error
@@ -204,7 +204,7 @@ class GamesViewModel(NotifyablePropertyObject):
     @pyqtSlot(int)
     def on_joinGame(self, id):
         self.log.debug('joining: {}'.format(id))
-        Application.instance().report_indefinite(QCoreApplication.translate('GamesViewModel', 'joining game'))
+        Application.instance().report_indefinite(self, QCoreApplication.translate('GamesViewModel', 'joining game'))
 
     def on_opened(self, args):
         g = GameViewModel(args, self.map_lookup, self.mod_lookup)

@@ -1,5 +1,5 @@
 import logging
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QVariant
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QVariant, QCoreApplication
 
 import settings
 from utils.async import async_slot
@@ -53,12 +53,13 @@ class LoginViewModel(NotifyablePropertyObject):
     login = pyqtSignal(str, str, bool)
     logout = pyqtSignal()
 
-    def __init__(self, client, user=None, password=None, remember=None, parent=None):
+    def __init__(self, app, client, user=None, password=None, remember=None, parent=None):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
 
         self.login.connect(self.on_login)
         self.logout.connect(self.on_logout)
+        self.app = app
         self.client = client
         self.user = user
         self.password = password
@@ -70,40 +71,47 @@ class LoginViewModel(NotifyablePropertyObject):
     def autologin(self):
         try:
             self.log.info('logging in (auto)...')
+            self.app.report_indefinite(self, QCoreApplication.translate('LoginViewModel', 'logging in'))
             self.logged_in = yield from self.client.login(self.user, self.password)
             self.log.debug('autologin result: {}'.format(self.logged_in))
         except Exception as e:
             self.log.error('autologin failed. {}'.format(e))
+        finally:
+            self.app.end_report(self)
 
     @async_slot
     @pyqtSlot(str, str, bool)
     def on_login(self, user, password, remember):
         try:
+            self.log.info('logging in...')
+            self.app.report_indefinite(self, QCoreApplication.translate('LoginViewModel', 'logging in'))
             import hashlib
             pass_hash = hashlib.sha256(password.encode()).hexdigest()
 
-            self.log.info('logging in...')
             self.logged_in = yield from self.client.login(user, pass_hash)
             self.panel_visible = not self.logged_in
 
             self.store_credentials(user, pass_hash, remember)
 
             self.log.debug('login successful? {}'.format(self.logged_in))
-
         except Exception as ex:
             self.log.warn('login failed: {}'.format(ex))
+        finally:
+            self.app.end_report(self)
 
     @async_slot
     @pyqtSlot()
     def on_logout(self):
         try:
             self.log.info('logging out...')
+            self.app.report_indefinite(self, QCoreApplication.translate('LoginViewModel', 'logging out'))
             self.logged_in = not (yield from self.client.logout(self.user))
 
             self.log.debug('logout successful? {}'.format(not self.logged_in))
-
         except Exception as ex:
             self.log.warn('logout failed: {}'.format(ex))
+        finally:
+            self.app.end_report(self)
 
     def store_credentials(self, user, password, remember):
         s = settings.get()

@@ -32,6 +32,7 @@ class Application(QGuiApplication):
         self.session = None
         self.map_lookup = {}
         self.mod_lookup = {}
+        self.tasks = OrderedDict()
 
     @asyncio.coroutine
     def __init_map_lookup(self):
@@ -43,6 +44,18 @@ class Application(QGuiApplication):
         local = yield from factories.local_mod_lookup(settings.get_mod_dirs())
         self.mod_lookup.update(local)
 
+    def __refresh_task_status(self):
+        tasks_len = len(self.tasks)
+
+        if tasks_len == 0:
+            self.mainWindow.windowModel.clearTaskStatus()
+        elif tasks_len == 1:
+            key, value = next(iter(self.tasks.items()))
+            msg, progress = value
+            self.mainWindow.windowModel.setTaskStatus(msg, progress or 0.0, progress is None)
+        else:
+            self.mainWindow.windowModel.setTaskStatus(QCoreApplication.translate('Application', '{} tasks'.format(len(self.tasks))), False)
+
     @async_slot
     def start(self):
         logger = logging.getLogger(__name__)
@@ -53,27 +66,33 @@ class Application(QGuiApplication):
             logger.critical('Error during init: {}'.format(e))
             self.quit()
         else:
-            self.report_indefinite(QCoreApplication.translate('Application', 'loading maps'))
+            self.report_indefinite(self, QCoreApplication.translate('Application', 'loading maps'))
             yield from self.__init_map_lookup()
-            self.report_indefinite(QCoreApplication.translate('Application', 'loading mods'))
+            self.report_indefinite(self, QCoreApplication.translate('Application', 'loading mods'))
             yield from self.__init_mod_lookup()
         finally:
             logger.debug('Init complete')
             self.init_complete.emit()
-            self.end_report()
+            self.end_report(self)
 
     # Required for QtHandler to propagate log messages to client 'console'
     def log(self, msg):
         self.log_changed.emit(msg)
 
-    def report(self, msg, progress=0.0):
-        self.mainWindow.windowModel.setTaskStatus(msg, progress, False)
+    def report(self, task, msg, progress=0.0):
+        self.tasks[task] = (msg, progress)
+        self.__refresh_task_status()
+        # self.mainWindow.windowModel.setTaskStatus(msg, progress, False)
 
-    def report_indefinite(self, msg):
-        self.mainWindow.windowModel.setTaskStatus(msg, indefinite=True)
+    def report_indefinite(self, task, msg):
+        self.tasks[task] = (msg, None)
+        self.__refresh_task_status()
+        # self.mainWindow.windowModel.setTaskStatus(msg, indefinite=True)
 
-    def end_report(self):
-        self.mainWindow.windowModel.clearTaskStatus()
+    def end_report(self, task):
+        self.tasks.pop(task)
+        self.__refresh_task_status()
+        # self.mainWindow.windowModel.clearTaskStatus()
 
 
 class MainWindow(QObject):
@@ -87,7 +106,7 @@ class MainWindow(QObject):
         self.windowModel = MainWindowViewModel(parent=self)
         self.windowModel.switchView.connect(self._on_switchView)
 
-        self.loginModel = LoginViewModel(relays.auth.create_auth_client(), parent=self)
+        self.loginModel = LoginViewModel(app, relays.auth.create_auth_client(), parent=self)
         self.loginModel.read_credentials()
         self.loginModel.panel_visible = not self.loginModel.remember
         if self.loginModel.remember:
@@ -159,7 +178,7 @@ class ViewManager(QObject):
         n = self._convert_name(name)
         vm_name = '{}ViewModel'.format(n)
         # equivalent of from <name>.view_models import <vm_name>
-        vm = __import__(name+'.view_models', globals(), locals(), [vm_name], 0)
+        vm = __import__(name + '.view_models', globals(), locals(), [vm_name], 0)
         self._views[name] = (n, (getattr(vm, vm_name))(*args, parent=self, **kwargs))
 
     def get_view(self, name):
