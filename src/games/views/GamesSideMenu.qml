@@ -64,7 +64,6 @@ Item {
 
                 editable: false
                 model: contentModel.presets
-
             }
 
             Faf.ActionIcon {

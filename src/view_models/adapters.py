@@ -59,10 +59,10 @@ def ListModelFor(klass):
 
 class notifyableProperty:
 
-    """
+    '''
         Just a placeholder, it gets replaced with pyqtProperty
         when creating the object. Used to customise signal name.
-    """
+    '''
 
     def __init__(self, property_type, signal_name=None):
         self.property_type = property_type
@@ -76,7 +76,7 @@ class notifyablePropertyWrapperType(pyqtWrapperType):
     def __new__(meta, name, bases, dct):
 
         def notifyable_property(prop_name, prop_type, notify, notify_name):
-            """
+            '''
                 Create pyqtProperty object with value captured in the closure
                 and a 'notify' signal attached.
 
@@ -84,7 +84,7 @@ class notifyablePropertyWrapperType(pyqtWrapperType):
                     - unbound signal, because pyqtProperty needs it
                     - signal name to allow setter to find the *bound* signal
                       and emit it.
-            """
+            '''
 
             def getter(self):
                 return getattr(self, '__' + prop_name)

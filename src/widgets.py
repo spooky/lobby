@@ -12,7 +12,7 @@ import settings
 import factories
 import relays.auth
 from utils.async import async_slot
-from view_models.chrome import MainWindowViewModel, LoginViewModel
+from view_models.chrome import MainWindowViewModel, LoginViewModel, TaskStatusViewModel
 
 # TODO: clean up/utilize the relative imports in qml files
 
@@ -32,7 +32,6 @@ class Application(QGuiApplication):
         self.session = None
         self.map_lookup = {}
         self.mod_lookup = {}
-        self.tasks = OrderedDict()
 
     @asyncio.coroutine
     def __init_map_lookup(self):
@@ -44,17 +43,10 @@ class Application(QGuiApplication):
         local = yield from factories.local_mod_lookup(settings.get_mod_dirs())
         self.mod_lookup.update(local)
 
-    def __refresh_task_status(self):
-        tasks_len = len(self.tasks)
-
-        if tasks_len == 0:
-            self.mainWindow.windowModel.clearTaskStatus()
-        elif tasks_len == 1:
-            key, value = next(iter(self.tasks.items()))
-            msg, progress = value
-            self.mainWindow.windowModel.setTaskStatus(msg, progress or 0.0, progress is None)
-        else:
-            self.mainWindow.windowModel.setTaskStatus(QCoreApplication.translate('Application', '{} tasks'.format(len(self.tasks))), False)
+    @asyncio.coroutine
+    def __queue_task(self, async_coroutine, text='', indefinite=True, progress=0.0, running=False):
+        with self.report(text, indefinite, progress, running):
+            yield from async_coroutine()
 
     @async_slot
     def start(self):
@@ -66,33 +58,28 @@ class Application(QGuiApplication):
             logger.critical('Error during init: {}'.format(e))
             self.quit()
         else:
-            self.report_indefinite(self, QCoreApplication.translate('Application', 'loading maps'))
-            yield from self.__init_map_lookup()
-            self.report_indefinite(self, QCoreApplication.translate('Application', 'loading mods'))
-            yield from self.__init_mod_lookup()
+            try:
+                logger.info('Loading maps')
+                yield from self.__queue_task(self.__init_map_lookup, QCoreApplication.translate('Application', 'loading maps'))
+                logger.info('Loading mods')
+                yield from self.__queue_task(self.__init_mod_lookup, QCoreApplication.translate('Application', 'loading mods'))
+            except Exception as e:
+                logger.error(e)
         finally:
             logger.debug('Init complete')
             self.init_complete.emit()
-            self.end_report(self)
 
     # Required for QtHandler to propagate log messages to client 'console'
     def log(self, msg):
         self.log_changed.emit(msg)
 
-    def report(self, task, msg, progress=0.0):
-        self.tasks[task] = (msg, progress)
-        self.__refresh_task_status()
-        # self.mainWindow.windowModel.setTaskStatus(msg, progress, False)
+    def report(self, text='', indefinite=True, progress=0.0, running=False):
+        status = TaskStatusViewModel(text, indefinite, progress, running)
+        # TODO: figure out why running .start() after appending to list doesn't propagate to UI
+        status.start()
+        self.mainWindow.windowModel.task_list.append(status)
 
-    def report_indefinite(self, task, msg):
-        self.tasks[task] = (msg, None)
-        self.__refresh_task_status()
-        # self.mainWindow.windowModel.setTaskStatus(msg, indefinite=True)
-
-    def end_report(self, task):
-        self.tasks.pop(task)
-        self.__refresh_task_status()
-        # self.mainWindow.windowModel.clearTaskStatus()
+        return status
 
 
 class MainWindow(QObject):

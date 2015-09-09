@@ -420,48 +420,21 @@ Window {
             anchors.leftMargin: 2*5
         }
 
-        Row {
-            id: status
-            visible: windowModel.taskRunning
+        TaskItem {
             anchors.right: resizer.left
             anchors.bottom: parent.bottom
             anchors.rightMargin: 2*5
-            width: childrenRect.width
-            spacing: 5
 
-            BusyIndicator {
-                visible: windowModel.taskStatusIsIndefinite
-                running: windowModel.taskRunning
-                implicitHeight: parent.height
-                implicitWidth: implicitHeight
-            }
+            text: windowModel.task_summary.text
+            indefinite: windowModel.task_summary.indefinite
+            progress: windowModel.task_summary.progress
+            running: windowModel.task_summary.running
+        }
 
-            Label {
-                id: actionLabel
-                text: windowModel.taskStatusText
-                color: root.textColor
-            }
-
-            ProgressBar {
-                visible: !windowModel.taskStatusIsIndefinite
-                width: visible ? 128 : 0
-                height: actionLabel.height / 2
-                anchors.verticalCenter: parent.verticalCenter
-                value: windowModel.taskStatusProgress
-                style: ProgressBarStyle {
-                    background: Rectangle {
-                        color: "transparent"
-                        border.color: root.textColor
-                        border.width: 1
-                        implicitWidth: 200
-                        implicitHeight: 24
-                    }
-                    progress: Rectangle {
-                        color: root.textColor
-                        border.color: root.textColor
-                    }
-                }
-            }
+        TaskList {
+            anchors.right: parent.right
+            anchors.bottom: parent.top
+            anchors.margins: 5
         }
 
         Image {

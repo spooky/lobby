@@ -1,19 +1,105 @@
 import logging
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QVariant, QCoreApplication
+from PyQt5.QtQml import qmlRegisterType
 
 import settings
 from utils.async import async_slot
-from .adapters import NotifyablePropertyObject, notifyableProperty
+from .adapters import NotifyablePropertyObject, ListModelFor, notifyableProperty
+
+
+class TaskStatusViewModel(NotifyablePropertyObject):
+
+    ''' View model for reporting a running task '''
+
+    running = notifyableProperty(bool)
+    text = notifyableProperty(str)
+    indefinite = notifyableProperty(bool)
+    progress = notifyableProperty(float)
+    success = notifyableProperty(bool)
+
+    def __init__(self, text='', indefinite=True, progress=0.0, running=False):
+        super().__init__()
+
+        self.text = text
+        self.indefinite = indefinite
+        self.progress = progress
+        self.running = running
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type:
+            self.cancel()
+        else:
+            self.done()
+
+    def start(self):
+        self.running = True
+        self.progress = 0.0
+
+    def done(self):
+        self.running = False
+        self.success = True
+
+    def cancel(self):
+        self.running = False
+        self.success = False
+
+    def update(self, progress):
+        self.progress = progress
+
+qmlRegisterType(TaskStatusViewModel)
+
+
+class TaskListModel(ListModelFor(TaskStatusViewModel)):
+
+    ''' View model for a list of running tasks '''
+
+    summary = notifyableProperty(TaskStatusViewModel)
+
+    def __init__(self):
+        super().__init__()
+        self.summary = TaskStatusViewModel()
+
+    def _update_summary(self):
+        if len(self._items) == 1:
+            only = self._items[0]
+            self.summary.text = only.text
+            self.summary.indefinite = only.indefinite
+            self.summary.progress = only.progress
+        else:
+            self.summary.text = QCoreApplication.translate('TaskListModel', '{} tasks'.format(len(self._items)))
+            self.summary.indefinite = True
+
+        self.summary.running = len(self._items) > 0
+
+    def append(self, item):
+        super().append(item)
+
+        def on_running_changed(running):
+            if not running:
+                item.running_changed.disconnect(on_running_changed)
+                self.remove(item)
+
+        item.running_changed.connect(on_running_changed)
+
+        self._update_summary()
+
+    def remove(self, item):
+        super().remove(item)
+        self._update_summary()
+
+qmlRegisterType(TaskListModel)
 
 
 class MainWindowViewModel(NotifyablePropertyObject):
     label = notifyableProperty(str)
-    taskRunning = notifyableProperty(bool)
-    taskStatusText = notifyableProperty(str)
-    taskStatusIsIndefinite = notifyableProperty(bool)
-    taskStatusProgress = notifyableProperty(float)
     registeredViews = notifyableProperty(QVariant)
     currentView = notifyableProperty(str)
+    task_list = notifyableProperty(TaskListModel)
+    task_summary = notifyableProperty(TaskStatusViewModel)
 
     switchView = pyqtSignal(str)
 
@@ -21,26 +107,14 @@ class MainWindowViewModel(NotifyablePropertyObject):
         super().__init__(parent)
 
         self.label = settings.VERSION
-
-        self.taskRunning = False  # wether to show the task indicator
-        self.taskStatusText = None  # text to show while task is running
-        self.taskStatusIsIndefinite = True  # wether to hide the progress bar progress bar progress value - makes sense only if taskStatusIsIndefinite == True
-        self.taskStatusProgress = 0
-
         self.registeredViews = list()
         self.currentView = None
+        self.task_list = TaskListModel()
 
-    def setTaskStatus(self, text, progress=0.0, indefinite=True):
-        self.taskStatusText = text
-        self.taskStatusProgress = progress
-        self.taskStatusIsIndefinite = indefinite
-        self.taskRunning = True
-
-    def clearTaskStatus(self):
-        self.taskRunning = False
-        self.taskStatusIsIndefinite = True
-        self.taskStatusText = None
-        self.taskStatusProgress = 0.0
+        # This is a workaround for QT nested view model problem.
+        # Other option would be to wire up property change signals
+        # to all emit also an 'object' signal but that's more code and seems lest robust
+        self.task_summary = self.task_list.summary
 
 
 class LoginViewModel(NotifyablePropertyObject):
@@ -59,6 +133,7 @@ class LoginViewModel(NotifyablePropertyObject):
 
         self.login.connect(self.on_login)
         self.logout.connect(self.on_logout)
+
         self.app = app
         self.client = client
         self.user = user
@@ -71,47 +146,43 @@ class LoginViewModel(NotifyablePropertyObject):
     def autologin(self):
         try:
             self.log.info('logging in (auto)...')
-            self.app.report_indefinite(self, QCoreApplication.translate('LoginViewModel', 'logging in'))
-            self.logged_in = yield from self.client.login(self.user, self.password)
+            with self.app.report(QCoreApplication.translate('LoginViewModel', 'logging in')):
+                self.logged_in = yield from self.client.login(self.user, self.password)
+
             self.log.debug('autologin result: {}'.format(self.logged_in))
         except Exception as e:
             self.log.error('autologin failed. {}'.format(e))
-        finally:
-            self.app.end_report(self)
 
     @async_slot
     @pyqtSlot(str, str, bool)
     def on_login(self, user, password, remember):
         try:
             self.log.info('logging in...')
-            self.app.report_indefinite(self, QCoreApplication.translate('LoginViewModel', 'logging in'))
-            import hashlib
-            pass_hash = hashlib.sha256(password.encode()).hexdigest()
+            with self.app.report(QCoreApplication.translate('LoginViewModel', 'logging in')):
 
-            self.logged_in = yield from self.client.login(user, pass_hash)
-            self.panel_visible = not self.logged_in
+                import hashlib
+                pass_hash = hashlib.sha256(password.encode()).hexdigest()
 
-            self.store_credentials(user, pass_hash, remember)
+                self.logged_in = yield from self.client.login(user, pass_hash)
+                self.panel_visible = not self.logged_in
+
+                self.store_credentials(user, pass_hash, remember)
 
             self.log.debug('login successful? {}'.format(self.logged_in))
         except Exception as ex:
             self.log.warn('login failed: {}'.format(ex))
-        finally:
-            self.app.end_report(self)
 
     @async_slot
     @pyqtSlot()
     def on_logout(self):
         try:
             self.log.info('logging out...')
-            self.app.report_indefinite(self, QCoreApplication.translate('LoginViewModel', 'logging out'))
-            self.logged_in = not (yield from self.client.logout(self.user))
+            with self.app.report(QCoreApplication.translate('LoginViewModel', 'logging out')):
+                self.logged_in = not (yield from self.client.logout(self.user))
 
             self.log.debug('logout successful? {}'.format(not self.logged_in))
         except Exception as ex:
             self.log.warn('logout failed: {}'.format(ex))
-        finally:
-            self.app.end_report(self)
 
     def store_credentials(self, user, password, remember):
         s = settings.get()
