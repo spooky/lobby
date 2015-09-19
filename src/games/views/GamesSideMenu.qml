@@ -119,7 +119,7 @@ Item {
                 Layout.column: 1
                 Layout.fillWidth: true
 
-                id: map_code
+                id: mapCode
                 editable: true
                 model: contentModel.maps
                 textRole: 'name'
@@ -139,7 +139,7 @@ Item {
                     delegate: Faf.CheckBox {
                         checked: model.item.selected
                         text: model.item.name
-                        onClicked: model.item.toggle_selected()
+                        onClicked: model.item.toggleSelected()
                     }
                 }
             }

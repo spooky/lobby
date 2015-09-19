@@ -26,7 +26,7 @@ Rectangle {
         x: 5
 
         Text {
-            text: loginModel.logged_in ? loginModel.user : "log in"
+            text: loginModel.loggedin ? loginModel.user : "log in"
             anchors.verticalCenter: parent.verticalCenter
             color: "#969696"
         }

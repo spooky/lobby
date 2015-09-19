@@ -3,12 +3,12 @@ from PyQt5.QtCore import QObject
 
 class Preset(QObject):
 
-    def __init__(self, title=None, featured_uid=None, map_code=None, mods=None, private=False, parent=None):
+    def __init__(self, title=None, featuredUid=None, mapCode=None, mods=None, private=False, parent=None):
         super().__init__(parent)
 
         self.title = title
-        self.featured_uid = featured_uid
-        self.map_code = map_code
+        self.featuredUid = featuredUid
+        self.mapCode = mapCode
         self.mods = mods
         self.private = private
 

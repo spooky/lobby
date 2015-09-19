@@ -130,8 +130,8 @@ Window {
                 anchors.right: windowControls.left
                 background: root.highlightColor
                 hover: root.altHighlightColor
-                state: loginModel.panel_visible ? "open" : "closed"
-                onClicked: loginModel.panel_visible = !loginModel.panel_visible
+                state: loginModel.panelVisible ? "open" : "closed"
+                onClicked: loginModel.panelVisible = !loginModel.panelVisible
         }
 
         Row {
@@ -225,7 +225,7 @@ Window {
 
     Item {
         id: userPanel
-        visible: loginModel.panel_visible
+        visible: loginModel.panelVisible
         x: user.mapFromItem(user, user.x, 0).x - (width - user.width) + borderResizeHook.border.width // absolute positioning to user control's right
         y: user.mapFromItem(user, 0, user.y).y + user.height + borderResizeHook.border.width // absolute positioning to user control's bottom
         z: 500
@@ -233,13 +233,13 @@ Window {
         height: childrenRect.height
 
         LogIn {
-            visible: !loginModel.logged_in
+            visible: !loginModel.loggedin
             background: root.highlightColor
             textColor: root.textColor
         }
 
         UserPanel {
-            visible: loginModel.logged_in
+            visible: loginModel.loggedin
             background: root.highlightColor
             textColor: root.textColor
         }
@@ -425,10 +425,10 @@ Window {
             anchors.bottom: parent.bottom
             anchors.rightMargin: 2*5
 
-            text: windowModel.task_summary.text
-            indefinite: windowModel.task_summary.indefinite
-            progress: windowModel.task_summary.progress
-            running: windowModel.task_summary.running
+            text: windowModel.taskSummary.text
+            indefinite: windowModel.taskSummary.indefinite
+            progress: windowModel.taskSummary.progress
+            running: windowModel.taskSummary.running
         }
 
         TaskList {

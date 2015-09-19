@@ -14,7 +14,7 @@ Rectangle {
     width: childrenRect.width + 2*padding
     height: childrenRect.height + 2*padding
     Keys.onReturnPressed: login()
-    Keys.onEscapePressed: loginModel.panel_visible = false
+    Keys.onEscapePressed: loginModel.panelVisible = false
 
     Column {
         spacing: padding

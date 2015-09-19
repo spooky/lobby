@@ -83,14 +83,14 @@ def get():
     return QSettings(ORGANIZATION_NAME, APPLICATION_NAME)
 
 
-def get_map_dirs():
+def getMapDirs():
     stock = os.path.join(FA_DIR, 'maps')
     downloaded = os.path.join(PERSONAL_DIR, 'My Games', 'Gas Powered Games', 'Supreme Commander Forged Alliance', 'Maps')
 
     return [stock, downloaded]
 
 
-def get_mod_dirs():
+def getModDirs():
     stock = os.path.join(FA_DIR, 'mods')
     downloaded = os.path.join(PERSONAL_DIR, 'My Games', 'Gas Powered Games', 'Supreme Commander Forged Alliance', 'Mods')
 

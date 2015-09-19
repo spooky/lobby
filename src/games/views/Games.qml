@@ -21,17 +21,17 @@ Flow {
 
         GameTile {
             id: item
-            gameTitle: title
-            gameHost: host
-            mapPreviewSmall: map_preview_small
-            mapPreviewBig: map_preview_big
-            mapName: map_name
-            featuredModName: featured_mod
-            modNames: mods
-            slotsTaken: player_count
-            slotsTotal: slots
-            teams: teams_arrangement
-            gameBalance: balance
+            gameTitle: model.title
+            gameHost: model.host
+            mapPreviewSmall: model.mapPreviewSmall
+            mapPreviewBig: model.mapPreviewBig
+            mapName: model.mapName
+            featuredModName: model.featuredMod
+            modNames: model.mods
+            slotsTaken: model.playerCount
+            slotsTotal: model.slots
+            teams: model.teamsArrangement
+            gameBalance: model.balance
             container: flow.parent
 
             onDoubleClicked: contentModel.joinGame(id)

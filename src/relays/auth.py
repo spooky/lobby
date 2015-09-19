@@ -1,5 +1,4 @@
 import asyncio
-from models import Session
 
 
 class AuthServer(object):
@@ -22,7 +21,6 @@ class AuthServer(object):
 
     @asyncio.coroutine
     def login(self, user, password, success=None):
-        # Session(user, self._user_id(user), '{}@example.org'.format(user), self._session_id() if success else None)
         future = asyncio.Future()
         future.set_result(success is True)
         return future

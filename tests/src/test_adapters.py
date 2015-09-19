@@ -3,7 +3,7 @@ def test_notifyableProperty():
 
     class TestSubject(NotifyablePropertyObject):
         name = notifyableProperty(str)
-        code = notifyableProperty(str, signal_name='kung_foo')
+        code = notifyableProperty(str, signalName='kung_foo')
 
         def __init__(self, name=None, code=None, parent=None):
             super().__init__(parent)

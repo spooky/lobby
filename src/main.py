@@ -13,7 +13,7 @@ except ImportError:
     pass
 
 
-def configureLogging():
+def configure_logging():
     try:
         logging.config.dictConfig(settings.LOGGING)
     except:
@@ -21,11 +21,11 @@ def configureLogging():
         logging.basicConfig(level=logging.WARNING, handlers=[QtHandler()])
 
 
-def startApp(callback=None):
+def start_app(callback=None):
     app = Application(sys.argv)
     settings.init(app)
 
-    configureLogging()
+    configure_logging()
     log = logging.getLogger(__name__)
     log.info('starting app')
 
@@ -44,7 +44,7 @@ def startApp(callback=None):
     return app
 
 
-def startAlfred(app):
+def start_alfred(app):
     import alfred.widgets
     helper = alfred.widgets.MainWindow(app)
     helper.show()
@@ -52,4 +52,4 @@ def startAlfred(app):
 
 if __name__ == '__main__':
     debug = '--debug' in sys.argv
-    startApp(startAlfred if debug else None)
+    start_app(start_alfred if debug else None)

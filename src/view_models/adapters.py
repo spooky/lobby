@@ -64,9 +64,9 @@ class notifyableProperty:
         when creating the object. Used to customise signal name.
     '''
 
-    def __init__(self, property_type, signal_name=None):
-        self.property_type = property_type
-        self.signal_name = signal_name
+    def __init__(self, propertyType, signalName=None):
+        self.propertyType = propertyType
+        self.signalName = signalName
 
 
 class notifyablePropertyWrapperType(pyqtWrapperType):
@@ -75,7 +75,7 @@ class notifyablePropertyWrapperType(pyqtWrapperType):
 
     def __new__(meta, name, bases, dct):
 
-        def notifyable_property(prop_name, prop_type, notify, notify_name):
+        def createNotifyableProperty(propName, propType, notify, notifyName):
             '''
                 Create pyqtProperty object with value captured in the closure
                 and a 'notify' signal attached.
@@ -87,13 +87,13 @@ class notifyablePropertyWrapperType(pyqtWrapperType):
             '''
 
             def getter(self):
-                return getattr(self, '__' + prop_name)
+                return getattr(self, '__' + propName)
 
             def setter(self, value):
-                setattr(self, '__' + prop_name, value)
-                getattr(self, notify_name).emit(value)
+                setattr(self, '__' + propName, value)
+                getattr(self, notifyName).emit(value)
 
-            return pyqtProperty(type=prop_type, fget=getter, fset=setter, notify=notify)
+            return pyqtProperty(type=propType, fget=getter, fset=setter, notify=notify)
 
         # don't touch attributes other than notifyableProperties
         properties = list(
@@ -103,18 +103,18 @@ class notifyablePropertyWrapperType(pyqtWrapperType):
             )
         )
 
-        for property_name, p in properties:
-            signal_name = p.signal_name or property_name + '_changed'
-            signal = pyqtSignal(p.property_type, name=signal_name)
+        for propertyName, p in properties:
+            signalName = p.signalName or propertyName + '_changed'
+            signal = pyqtSignal(p.propertyType, name=signalName)
 
             # create dedicated signal for each property
-            dct[signal_name] = signal
+            dct[signalName] = signal
 
             # create property backing field
-            dct['__' + property_name] = None
+            dct['__' + propertyName] = None
 
             # substitute notifyableProperty placeholder with real pyqtProperty
-            dct[property_name] = notifyable_property(property_name, p.property_type, signal, signal_name)
+            dct[propertyName] = createNotifyableProperty(propertyName, p.propertyType, signal, signalName)
 
         return super().__new__(meta, name, bases, dct)
 
@@ -131,17 +131,17 @@ class Selectable(NotifyablePropertyObject):
     name = notifyableProperty(str)
     selected = notifyableProperty(bool)
 
-    def __init__(self, item, name_extractor=None):
+    def __init__(self, item, nameExtractor=None):
         super().__init__()
         self._item = item
         self.selected = False
-        self.name = (name_extractor or (lambda x: str(x)))(item)
+        self.name = (nameExtractor or (lambda x: str(x)))(item)
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and self.name == other.name
 
     @pyqtSlot()
-    def toggle_selected(self):
+    def toggleSelected(self):
         self.selected = not self.selected
 
 
@@ -149,12 +149,12 @@ class SelectionList(QAbstractListModel, NotifyablePropertyObject):
 
     currentIndex = notifyableProperty(int)
 
-    def __init__(self, items=None, multiple=False, item_name_extractor=None, parent=None):
+    def __init__(self, items=None, multiple=False, itemNameExtractor=None, parent=None):
         super().__init__()
         self.currentIndex = -1
         self.multiple = multiple
-        self._items = [Selectable(i, self._name_extractor) for i in (items or [])]
-        self._name_extractor = item_name_extractor
+        self._items = [Selectable(i, self._nameExtractor) for i in (items or [])]
+        self._nameExtractor = itemNameExtractor
 
     def roleNames(self):
         return {0: b'item', 1: b'name'}
@@ -173,14 +173,14 @@ class SelectionList(QAbstractListModel, NotifyablePropertyObject):
         index = len(self._items)
         self.beginInsertRows(QModelIndex(), index, index)
 
-        e = Selectable(item, self._name_extractor)
+        e = Selectable(item, self._nameExtractor)
         e.selected = selected
         self._items.append(e)
 
         self.endInsertRows()
 
     def remove(self, item):
-        e = Selectable(item, self._name_extractor)
+        e = Selectable(item, self._nameExtractor)
 
         index = self._items.index(e)
         self.beginRemoveRows(QModelIndex(), index, index)

@@ -16,7 +16,7 @@ Rectangle {
         anchors.top: parent.top
 
         Repeater {
-            model: windowModel.task_list
+            model: windowModel.taskList
 
             Rectangle {
                 color: itemColor

@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, QVariant, QCoreApplication
 from PyQt5.QtQml import qmlRegisterType
 
 import settings
-from utils.async import async_slot
+from utils.async import asyncSlot
 from .adapters import NotifyablePropertyObject, ListModelFor, notifyableProperty
 
 
@@ -29,8 +29,8 @@ class TaskStatusViewModel(NotifyablePropertyObject):
         self.start()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_type:
+    def __exit__(self, exctype, excval, exctb):
+        if exctype:
             self.cancel()
         else:
             self.done()
@@ -63,7 +63,7 @@ class TaskListModel(ListModelFor(TaskStatusViewModel)):
         super().__init__()
         self.summary = TaskStatusViewModel()
 
-    def _update_summary(self):
+    def __updateSummary(self):
         if len(self._items) == 1:
             only = self._items[0]
             self.summary.text = only.text
@@ -78,18 +78,18 @@ class TaskListModel(ListModelFor(TaskStatusViewModel)):
     def append(self, item):
         super().append(item)
 
-        def on_running_changed(running):
+        def onRunningChanged(running):
             if not running:
-                item.running_changed.disconnect(on_running_changed)
+                item.running_changed.disconnect(onRunningChanged)
                 self.remove(item)
 
-        item.running_changed.connect(on_running_changed)
+        item.running_changed.connect(onRunningChanged)
 
-        self._update_summary()
+        self.__updateSummary()
 
     def remove(self, item):
         super().remove(item)
-        self._update_summary()
+        self.__updateSummary()
 
 qmlRegisterType(TaskListModel)
 
@@ -98,8 +98,8 @@ class MainWindowViewModel(NotifyablePropertyObject):
     label = notifyableProperty(str)
     registeredViews = notifyableProperty(QVariant)
     currentView = notifyableProperty(str)
-    task_list = notifyableProperty(TaskListModel)
-    task_summary = notifyableProperty(TaskStatusViewModel)
+    taskList = notifyableProperty(TaskListModel)
+    taskSummary = notifyableProperty(TaskStatusViewModel)
 
     switchView = pyqtSignal(str)
 
@@ -109,20 +109,20 @@ class MainWindowViewModel(NotifyablePropertyObject):
         self.label = settings.VERSION
         self.registeredViews = list()
         self.currentView = None
-        self.task_list = TaskListModel()
+        self.taskList = TaskListModel()
 
         # This is a workaround for QT nested view model problem.
         # Other option would be to wire up property change signals
         # to all emit also an 'object' signal but that's more code and seems lest robust
-        self.task_summary = self.task_list.summary
+        self.taskSummary = self.taskList.summary
 
 
 class LoginViewModel(NotifyablePropertyObject):
     user = notifyableProperty(str)
     password = notifyableProperty(str)
     remember = notifyableProperty(bool)
-    logged_in = notifyableProperty(bool)
-    panel_visible = notifyableProperty(bool)
+    loggedin = notifyableProperty(bool)
+    panelVisible = notifyableProperty(bool)
 
     login = pyqtSignal(str, str, bool)
     logout = pyqtSignal()
@@ -131,31 +131,31 @@ class LoginViewModel(NotifyablePropertyObject):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
 
-        self.login.connect(self.on_login)
-        self.logout.connect(self.on_logout)
+        self.login.connect(self.onLogin)
+        self.logout.connect(self.onLogout)
 
         self.app = app
         self.client = client
         self.user = user
         self.password = password
         self.remember = remember or False
-        self.logged_in = False
-        self.panel_visible = False
+        self.loggedin = False
+        self.panelVisible = False
 
-    @async_slot
+    @asyncSlot
     def autologin(self):
         try:
             self.log.info('logging in (auto)...')
             with self.app.report(QCoreApplication.translate('LoginViewModel', 'logging in')):
-                self.logged_in = yield from self.client.login(self.user, self.password)
+                self.loggedin = yield from self.client.login(self.user, self.password)
 
-            self.log.debug('autologin result: {}'.format(self.logged_in))
+            self.log.debug('autologin result: {}'.format(self.loggedin))
         except Exception as e:
             self.log.error('autologin failed. {}'.format(e))
 
-    @async_slot
+    @asyncSlot
     @pyqtSlot(str, str, bool)
-    def on_login(self, user, password, remember):
+    def onLogin(self, user, password, remember):
         try:
             self.log.info('logging in...')
             with self.app.report(QCoreApplication.translate('LoginViewModel', 'logging in')):
@@ -163,28 +163,28 @@ class LoginViewModel(NotifyablePropertyObject):
                 import hashlib
                 pass_hash = hashlib.sha256(password.encode()).hexdigest()
 
-                self.logged_in = yield from self.client.login(user, pass_hash)
-                self.panel_visible = not self.logged_in
+                self.loggedin = yield from self.client.login(user, pass_hash)
+                self.panelVisible = not self.loggedin
 
-                self.store_credentials(user, pass_hash, remember)
+                self.storeCredentials(user, pass_hash, remember)
 
-            self.log.debug('login successful? {}'.format(self.logged_in))
+            self.log.debug('login successful? {}'.format(self.loggedin))
         except Exception as ex:
             self.log.warn('login failed: {}'.format(ex))
 
-    @async_slot
+    @asyncSlot
     @pyqtSlot()
-    def on_logout(self):
+    def onLogout(self):
         try:
             self.log.info('logging out...')
             with self.app.report(QCoreApplication.translate('LoginViewModel', 'logging out')):
-                self.logged_in = not (yield from self.client.logout(self.user))
+                self.loggedin = not (yield from self.client.logout(self.user))
 
-            self.log.debug('logout successful? {}'.format(not self.logged_in))
+            self.log.debug('logout successful? {}'.format(not self.loggedin))
         except Exception as ex:
             self.log.warn('logout failed: {}'.format(ex))
 
-    def store_credentials(self, user, password, remember):
+    def storeCredentials(self, user, password, remember):
         s = settings.get()
         s.beginGroup('login')
 
@@ -194,7 +194,7 @@ class LoginViewModel(NotifyablePropertyObject):
 
         s.endGroup()
 
-    def read_credentials(self):
+    def readCredentials(self):
         stored = settings.get()
         stored.beginGroup('login')
 

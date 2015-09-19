@@ -16,12 +16,12 @@ def loop(request):
     return loop
 
 
-def test_create_local_map(loop):
-    from factories import create_local_map
+def test_createLocalMap(loop):
+    from factories import createLocalMap
 
     code = 'sample_map'
     path = os.path.join(os.path.dirname(__file__), code)
-    m = loop.run_until_complete(create_local_map(code, path))
+    m = loop.run_until_complete(createLocalMap(code, path))
 
     assert m.code == 'sample_map'
     assert m.name == '2V2 Sand Box'
@@ -29,16 +29,16 @@ def test_create_local_map(loop):
     assert m.version == '66'
     assert m.slots == 4
     assert m.size == (512, 510)
-    assert m.preview_small == QUrl.fromLocalFile(os.path.join(path, 'sample_map.png'))
-    assert m.preview_big is None
+    assert m.previewSmall == QUrl.fromLocalFile(os.path.join(path, 'sample_map.png'))
+    assert m.previewBig is None
 
 
-def test_create_local_map_with_screwed_up_versioning(loop):
-    from factories import create_local_map
+def test_createLocalMap_with_screwed_up_versioning(loop):
+    from factories import createLocalMap
 
     code = 'sample_map.v002'
     path = os.path.join(os.path.dirname(__file__), code)
-    m = loop.run_until_complete(create_local_map(code, path))
+    m = loop.run_until_complete(createLocalMap(code, path))
 
     assert m.code == 'sample_map.v002'
     assert m.name == '2V2 Sand Box'
@@ -46,16 +46,16 @@ def test_create_local_map_with_screwed_up_versioning(loop):
     assert m.version == '66'
     assert m.slots == 4
     assert m.size == (512, 510)
-    assert m.preview_small == QUrl.fromLocalFile(os.path.join(path, 'sample_map.v002.png'))
-    assert m.preview_big is None
+    assert m.previewSmall == QUrl.fromLocalFile(os.path.join(path, 'sample_map.v002.png'))
+    assert m.previewBig is None
 
 
-def test_create_local_mod(loop):
-    from factories import create_local_mod
+def test_createLocalMod(loop):
+    from factories import createLocalMod
 
     name = 'sample_mod'
     path = os.path.join(os.path.dirname(__file__), name)
-    m = loop.run_until_complete(create_local_mod(name, path))
+    m = loop.run_until_complete(createLocalMod(name, path))
 
     assert m.uid == '78613f40-3428-44be-8fca-e4f6967c1bb3'
     assert m.name == 'sample_mod'
@@ -63,5 +63,5 @@ def test_create_local_mod(loop):
     assert m.author == 'spooky'
     assert m.version == '33'
     assert m.icon == QUrl.fromLocalFile(os.path.join(path, 'mod_icon.png'))
-    assert m.ui_only is True
+    assert m.uiOnly is True
     assert m.conflicts == ['8f3031ed-41fc-46e8-b409-d2820ae4b0b5']

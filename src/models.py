@@ -1,23 +1,9 @@
 from PyQt5.QtCore import QObject
 
 
-class Session(QObject):
-
-    def __init__(self, user=None, user_id=None, email=None, id=None, parent=None):
-        super().__init__(parent)
-
-        self.user = user
-        self.user_id = user_id
-        self.email = email
-        self.id = id
-
-    def __str__(self):
-        return self.__dict__.__str__()
-
-
 class Map(QObject):
 
-    def __init__(self, code=None, name=None, description=None, version=None, slots=0, size=[0, 0], preview_small=None, preview_big=None, parent=None):
+    def __init__(self, code=None, name=None, description=None, version=None, slots=0, size=[0, 0], previewSmall=None, previewBig=None, parent=None):
         super().__init__(parent)
 
         self.code = code
@@ -26,8 +12,8 @@ class Map(QObject):
         self.version = version
         self.slots = slots
         self.size = size
-        self.preview_small = preview_small
-        self.preview_big = preview_big
+        self.previewSmall = previewSmall
+        self.previewBig = previewBig
 
     def __str__(self):
         return {'code': self.code, 'version': self.version}.__str__()
@@ -39,7 +25,7 @@ class Map(QObject):
 class Mod(QObject):
     FEATURED = []
 
-    def __init__(self, uid=None, name=None, description=None, author=None, version=None, icon=None, ui_only=False, conflicts=None, parent=None):
+    def __init__(self, uid=None, name=None, description=None, author=None, version=None, icon=None, uiOnly=False, conflicts=None, parent=None):
         super().__init__(parent)
 
         self.uid = uid
@@ -48,7 +34,7 @@ class Mod(QObject):
         self.author = author
         self.version = version
         self.icon = icon
-        self.ui_only = ui_only
+        self.uiOnly = uiOnly
         self.conflicts = conflicts or []
 
     def __str__(self):
@@ -57,5 +43,5 @@ class Mod(QObject):
     def __le__(self, other):
         return self.name <= other.name
 
-    def conflicts_with(self, other):
+    def conflictsWith(self, other):
         return len(set(self.conflicts).intersection(other)) > 0

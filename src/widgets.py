@@ -11,15 +11,15 @@ from PyQt5.QtQuick import QQuickItem
 import settings
 import factories
 import relays.auth
-from utils.async import async_slot
+from utils.async import asyncSlot
 from view_models.chrome import MainWindowViewModel, LoginViewModel, TaskStatusViewModel
 
 # TODO: clean up/utilize the relative imports in qml files
 
 
 class Application(QGuiApplication):
-    log_changed = pyqtSignal(str)
-    init_complete = pyqtSignal()
+    logChanged = pyqtSignal(str)
+    initComplete = pyqtSignal()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -29,26 +29,25 @@ class Application(QGuiApplication):
         except AttributeError:  # setWindowIcon is available on windows only
             pass
 
-        self.session = None
-        self.map_lookup = {}
-        self.mod_lookup = {}
+        self.mapLookup = {}
+        self.modLookup = {}
 
     @asyncio.coroutine
-    def __init_map_lookup(self):
-        local = yield from factories.local_map_lookup(settings.get_map_dirs())
-        self.map_lookup.update(local)
+    def __initMapLookup(self):
+        local = yield from factories.localMapLookup(settings.getMapDirs())
+        self.mapLookup.update(local)
 
     @asyncio.coroutine
-    def __init_mod_lookup(self):
-        local = yield from factories.local_mod_lookup(settings.get_mod_dirs())
-        self.mod_lookup.update(local)
+    def __initModLookup(self):
+        local = yield from factories.localModLookup(settings.getModDirs())
+        self.modLookup.update(local)
 
     @asyncio.coroutine
-    def __queue_task(self, async_coroutine, text='', indefinite=True, progress=0.0, running=False):
+    def __queueTask(self, asyncCoroutine, text='', indefinite=True, progress=0.0, running=False):
         with self.report(text, indefinite, progress, running):
-            yield from async_coroutine()
+            yield from asyncCoroutine()
 
-    @async_slot
+    @asyncSlot
     def start(self):
         logger = logging.getLogger(__name__)
         try:
@@ -60,24 +59,24 @@ class Application(QGuiApplication):
         else:
             try:
                 logger.info('Loading maps')
-                yield from self.__queue_task(self.__init_map_lookup, QCoreApplication.translate('Application', 'loading maps'))
+                yield from self.__queueTask(self.__initMapLookup, QCoreApplication.translate('Application', 'loading maps'))
                 logger.info('Loading mods')
-                yield from self.__queue_task(self.__init_mod_lookup, QCoreApplication.translate('Application', 'loading mods'))
+                yield from self.__queueTask(self.__initModLookup, QCoreApplication.translate('Application', 'loading mods'))
             except Exception as e:
                 logger.error(e)
         finally:
             logger.debug('Init complete')
-            self.init_complete.emit()
+            self.initComplete.emit()
 
     # Required for QtHandler to propagate log messages to client 'console'
     def log(self, msg):
-        self.log_changed.emit(msg)
+        self.logChanged.emit(msg)
 
     def report(self, text='', indefinite=True, progress=0.0, running=False):
         status = TaskStatusViewModel(text, indefinite, progress, running)
         # TODO: figure out why running .start() after appending to list doesn't propagate to UI
         status.start()
-        self.mainWindow.windowModel.task_list.append(status)
+        self.mainWindow.windowModel.taskList.append(status)
 
         return status
 
@@ -88,14 +87,14 @@ class MainWindow(QObject):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
 
-        app = Application.instance()
+        self.app = Application.instance()
 
         self.windowModel = MainWindowViewModel(parent=self)
-        self.windowModel.switchView.connect(self._on_switchView)
+        self.windowModel.switchView.connect(self._onSwitchView)
 
-        self.loginModel = LoginViewModel(app, relays.auth.create_auth_client(), parent=self)
-        self.loginModel.read_credentials()
-        self.loginModel.panel_visible = not self.loginModel.remember
+        self.loginModel = LoginViewModel(self.app, relays.auth.create_auth_client(), parent=self)
+        self.loginModel.readCredentials()
+        self.loginModel.panelVisible = not self.loginModel.remember
         if self.loginModel.remember:
             self.loginModel.autologin()
 
@@ -105,15 +104,15 @@ class MainWindow(QObject):
         self.engine.quit.connect(parent.quit)
         self.engine.load(QUrl.fromLocalFile('ui/Chrome.qml'))
 
-        self.view_manager = ViewManager(self.engine.rootContext(), self.windowModel, parent=self)
-        first = self._register_views(settings.MODULES, app)
-        self.view_manager.load_view(first)
+        self.viewManager = ViewManager(self.engine.rootContext(), self.windowModel, parent=self)
+        first = self._registerViews(settings.MODULES, self.app)
+        self.viewManager.loadView(first)
 
         self.window = self.engine.rootObjects()[0]
 
         # wire up logging console
         self.console = self.window.findChild(QQuickItem, 'console')
-        parent.log_changed.connect(self._on_log_changed)
+        parent.logChanged.connect(self._onLogChanged)
 
     def show(self):
         if not self.windowModel.currentView:
@@ -122,21 +121,21 @@ class MainWindow(QObject):
         self.window.show()
         self.log.debug('Client up')
 
-    def _register_views(self, views, app):
+    def _registerViews(self, views, app):
         for view in views:
-            self.view_manager.register_view(view)
+            self.viewManager.registerView(view)
 
         # TODO need nicer solution - would be nice if the list was notifyable
-        self.windowModel.registeredViews = list(self.view_manager.get_views())
+        self.windowModel.registeredViews = list(self.viewManager.views)
 
         return views[0]
 
     @pyqtSlot(str)
-    def _on_switchView(self, name):
-        self.view_manager.load_view(name)
+    def _onSwitchView(self, name):
+        self.viewManager.loadView(name)
 
     @pyqtSlot(str)
-    def _on_log_changed(self, msg):
+    def _onLogChanged(self, msg):
         # replace with collections.deque binding(ish)?
         if self.console.property('lineCount') == settings.LOG_BUFFER_SIZE:
             line_end = self.console.property('text').find('\n') + 1
@@ -153,7 +152,7 @@ class ViewManager(QObject):
         self._window = windowViewModel
         self._views = OrderedDict()
 
-    def register_view(self, name, *args, **kwargs):
+    def registerView(self, name, *args, **kwargs):
         '''
         Works on a convention. The view requires 2 thins:
         1) the ui file which should be the camel cased .qml file in the ui directory. Path should be relative to Chrome.qml
@@ -162,22 +161,23 @@ class ViewManager(QObject):
         if self._views.get(name):
             raise Exception('{} already registered'.format(name))
 
-        n = self._convert_name(name)
+        n = self._convertName(name)
         vm_name = '{}ViewModel'.format(n)
         # equivalent of from <name>.view_models import <vm_name>
         vm = __import__(name + '.view_models', globals(), locals(), [vm_name], 0)
         self._views[name] = (n, (getattr(vm, vm_name))(*args, parent=self, **kwargs))
 
-    def get_view(self, name):
+    def getView(self, name):
         return self._views[name]
 
-    def load_view(self, name):
-        view_name, view_model = self.get_view(name)
-        self._context.setContextProperty('contentModel', view_model)
-        self._window.currentView = os.path.join('..', name, 'views', view_name)
+    def loadView(self, name):
+        viewName, viewModel = self.getView(name)
+        self._context.setContextProperty('contentModel', viewModel)
+        self._window.currentView = os.path.join('..', name, 'views', viewName)
 
-    def get_views(self):
+    @property
+    def views(self):
         return self._views
 
-    def _convert_name(self, name):
+    def _convertName(self, name):
         return re.sub('([_\s]?)([A-Z]?[a-z]+)', lambda m: m.group(2).title(), name)

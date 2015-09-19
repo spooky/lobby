@@ -4,11 +4,11 @@ import itertools
 import os
 from PyQt5.QtCore import QUrl
 
+import utils.lua
 from models import Map, Mod
-from utils.lua import get_lua_runtime
 
 
-def __run_chain(handlers, *args, **kwargs):
+def __runChain(handlers, *args, **kwargs):
     for h in handlers:
         result = h(*args, **kwargs)
         if result:
@@ -16,7 +16,7 @@ def __run_chain(handlers, *args, **kwargs):
 
 
 @asyncio.coroutine
-def __local_lookup(paths, factory_method):
+def __localLookup(paths, factory_method):
     dirs = [(n, os.path.join(p, n)) for p in paths for n in os.listdir(p)]
 
     tasks = itertools.starmap(factory_method, dirs)
@@ -25,12 +25,12 @@ def __local_lookup(paths, factory_method):
     return filter(lambda x: not isinstance(x, Exception), results)
 
 
-def __execute_lua(path):
+def __executeLua(path):
     log = logging.getLogger(__name__)
 
     with open(path) as f:
         try:
-            lua = get_lua_runtime()
+            lua = utils.lua.runtime()
             lua.execute(f.read())
             return lua.globals()
         except Exception as e:
@@ -38,13 +38,13 @@ def __execute_lua(path):
 
 
 @asyncio.coroutine
-def local_map_lookup(paths):
-    maps = yield from __local_lookup(paths, create_local_map)
+def localMapLookup(paths):
+    maps = yield from __localLookup(paths, createLocalMap)
     return {m.code: m for m in maps}
 
 
 @asyncio.coroutine
-def create_local_map(code, path):
+def createLocalMap(code, path):
 
     def preview(code, path, suffix=''):
         file_name = '{}{}.png'.format(code, suffix)
@@ -52,14 +52,14 @@ def create_local_map(code, path):
         if os.path.exists(os.path.join(path, file_name)):
             return QUrl.fromLocalFile(os.path.join(path, file_name))
 
-    def preview_small(code, path):
+    def previewSmall(code, path):
         return preview(code, path, suffix='.small')
 
     def preview_large(code, path):
         return preview(code, path, suffix='.large')
 
-    small = __run_chain([preview_small, preview], code, path)
-    big = __run_chain([preview_large], code, path)
+    small = __runChain([previewSmall, preview], code, path)
+    big = __runChain([preview_large], code, path)
 
     # strips the screwed up .vXYZ suffix that are sometimes used in map dir names
     dot_index = code.rfind('.')
@@ -68,7 +68,7 @@ def create_local_map(code, path):
     scenario = os.path.join(path, '{}_scenario.lua'.format(stripped_code))
 
     def read():
-        si = __execute_lua(scenario).ScenarioInfo
+        si = __executeLua(scenario).ScenarioInfo
         return dict(
             name=si.name,
             description=si.description,
@@ -77,21 +77,21 @@ def create_local_map(code, path):
             slots=len(si.Configurations.standard.teams[1].armies)
         )
 
-    map_info = yield from asyncio.get_event_loop().run_in_executor(None, read)
-    map_info['preview_small'] = small
-    map_info['preview_big'] = big
+    mapInfo = yield from asyncio.get_event_loop().run_in_executor(None, read)
+    mapInfo['previewSmall'] = small
+    mapInfo['previewBig'] = big
 
-    return Map(code, **map_info)
+    return Map(code, **mapInfo)
 
 
 @asyncio.coroutine
-def local_mod_lookup(paths):
-    mods = yield from __local_lookup(paths, create_local_mod)
+def localModLookup(paths):
+    mods = yield from __localLookup(paths, createLocalMod)
     return {m.uid: m for m in mods}
 
 
 @asyncio.coroutine
-def create_local_mod(name, path):
+def createLocalMod(name, path):
 
     def icon(file_name, path):
         if os.path.exists(os.path.join(path, file_name)):
@@ -100,12 +100,21 @@ def create_local_mod(name, path):
     info = os.path.join(path, 'mod_info.lua')
 
     def read():
-        g = __execute_lua(info)
-        return {p: g[p] for p in ['uid', 'name', 'description', 'author', 'version', 'icon', 'ui_only', 'conflicts']}
+        mi = __executeLua(info)
+        return dict(
+            uid=mi.uid,
+            name=mi.name,
+            description=mi.description,
+            author=mi.author,
+            version=mi.version,
+            icon=mi.icon,
+            uiOnly=mi.ui_only,
+            conflicts=mi.conflicts
+        )
 
-    mod_info = yield from asyncio.get_event_loop().run_in_executor(None, read)  # None means run in default executor
-    mod_info['version'] = str(mod_info['version'])
-    mod_info['conflicts'] = list(mod_info['conflicts'].values()) if mod_info['conflicts'] is not None else None
-    mod_info['icon'] = icon(mod_info['icon'].split('/').pop(), path) if mod_info['icon'] is not None else None
+    modInfo = yield from asyncio.get_event_loop().run_in_executor(None, read)  # None means run in default executor
+    modInfo['version'] = str(modInfo['version'])
+    modInfo['conflicts'] = list(modInfo['conflicts'].values()) if modInfo['conflicts'] is not None else None
+    modInfo['icon'] = icon(modInfo['icon'].split('/').pop(), path) if modInfo['icon'] is not None else None
 
-    return Mod(**mod_info)
+    return Mod(**modInfo)

@@ -1,7 +1,7 @@
 from lupa import LuaRuntime
 
 
-def get_lua_runtime():
+def runtime():
     lua = LuaRuntime(unpack_returned_tuples=True)
     # https://www.youtube.com/watch?v=9ogQ0uge06o
     # extracted from lua/dataInit.lua
