@@ -136,12 +136,9 @@ class GamesViewModel(NotifyablePropertyObject):
         self.title = None
         self.private = False
 
-        def getName(x):
-            return x.name
-
-        self.featured = SelectionList(itemNameExtractor=getName)
-        self.maps = SelectionList(itemNameExtractor=getName)
-        self.mods = SelectionList(multiple=True, itemNameExtractor=getName)
+        self.featured = SelectionList()
+        self.maps = SelectionList()
+        self.mods = SelectionList(multiple=True)
 
         self.app.initComplete.connect(self.onAppInitComplete)
 

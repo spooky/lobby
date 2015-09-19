@@ -154,7 +154,10 @@ class SelectionList(QAbstractListModel, NotifyablePropertyObject):
         self.currentIndex = -1
         self.multiple = multiple
         self._items = [Selectable(i, self._nameExtractor) for i in (items or [])]
-        self._nameExtractor = itemNameExtractor
+        self._nameExtractor = itemNameExtractor or self.__defaultNameExtractor
+
+    def __defaultNameExtractor(self, x):
+        return x.name if hasattr(x, 'name') else x.__str__()
 
     def roleNames(self):
         return {0: b'item', 1: b'name'}
