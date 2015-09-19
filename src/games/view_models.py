@@ -1,9 +1,11 @@
-import logging
+import asyncio
 import json
+import logging
 from itertools import groupby
 from PyQt5.QtCore import QVariant, QUrl, QCoreApplication, pyqtSignal, pyqtSlot
 
 from models import Map, Mod
+from utils.async import asyncSlot
 from widgets import Application
 from view_models.adapters import ListModelFor, SelectionList, NotifyablePropertyObject, notifyableProperty
 
@@ -185,6 +187,7 @@ class GamesViewModel(NotifyablePropertyObject):
         except Exception as e:
             self.log.error(e)
 
+    @asyncSlot
     @pyqtSlot()
     def onHostGame(self):
         self.log.debug('hosting with options: {}, {}, {}, {}, mods: {}'.format(
@@ -194,14 +197,17 @@ class GamesViewModel(NotifyablePropertyObject):
             self.maps.selected(),
             [m.uid for m in self.mods.selected()]))
 
-        # TODO: report QCoreApplication.translate('GamesViewModel', 'hosting game')
-        # TODO: add game starting logic
+        with self.app.report(QCoreApplication.translate('GamesViewModel', 'hosting game')):
+            # TODO: add game starting logic
+            yield from asyncio.sleep(5)
 
+    @asyncSlot
     @pyqtSlot(int)
     def onJoinGame(self, id):
         self.log.debug('joining: {}'.format(id))
-        # TODO: report QCoreApplication.translate('GamesViewModel', 'joining game')
-        # TODO: add game joining logic
+        with self.app.report(QCoreApplication.translate('GamesViewModel', 'joining game')):
+            # TODO: add game joining logic
+            yield from asyncio.sleep(5)
 
     def onOpened(self, args):
         g = GameViewModel(args, self.mapLookup, self.modLookup)
