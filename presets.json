@@ -1,13 +1,13 @@
 [
     {
-        "title": "preset 1",
+        "name": "preset 1",
         "featuredUid": "uid-faf",
         "mapCode": "3v3 Sand Box v2a",
         "mods": [],
         "private": false
     },
     {
-        "title": "preset 2",
+        "name": "preset 2",
         "featuredUid": "uid-nomads",
         "mapCode": "ozone islands v3",
         "mods": ["26778D4E-BA75-5CC2-CBA8-63795BDE74AA"],

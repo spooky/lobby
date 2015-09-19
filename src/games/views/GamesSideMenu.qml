@@ -64,6 +64,9 @@ Item {
 
                 editable: false
                 model: contentModel.presets
+                textRole: 'name'
+                currentIndex: model.currentIndex
+                onActivated: model.setSelected(index)
             }
 
             Faf.ActionIcon {

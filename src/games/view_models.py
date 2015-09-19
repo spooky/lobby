@@ -130,7 +130,7 @@ class GamesViewModel(NotifyablePropertyObject):
 
         self.games = GameListModel()
 
-        self.presets = SelectionList(itemNameExtractor=lambda p: p.title)
+        self.presets = SelectionList()
         self.__restorePresets()
 
         self.title = None
