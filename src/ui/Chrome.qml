@@ -420,7 +420,7 @@ Window {
             anchors.leftMargin: 2*5
         }
 
-        TaskItem {
+        TaskStatus {
             anchors.right: resizer.left
             anchors.bottom: parent.bottom
             anchors.rightMargin: 2*5

@@ -24,7 +24,7 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.minimumWidth: childrenRect.width + 2*itemPadding
 
-                TaskItem {
+                TaskStatus {
                     anchors.top: parent.top
                     anchors.left: parent.left
                     anchors.margins: itemPadding
