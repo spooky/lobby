@@ -16,6 +16,8 @@ Item {
         Faf.ActionIcon {
             source: "../sample/views/icon.svg"
             anchors.horizontalCenter: parent.horizontalCenter
+
+            onClicked: contentModel.doingThings()
         }
     }
 }

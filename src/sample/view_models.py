@@ -1,6 +1,8 @@
+import asyncio
 import logging
 from PyQt5.QtCore import QCoreApplication, pyqtSignal, pyqtSlot
 
+from utils.async import asyncSlot
 from widgets import Application
 from view_models.adapters import ListModelFor, NotifyablePropertyObject, notifyableProperty
 
@@ -33,7 +35,9 @@ class SampleViewModel(NotifyablePropertyObject):
 
         self.doingThings.connect(self.on_doingThings)
 
+    @asyncSlot
     @pyqtSlot()
     def on_doingThings(self):
         self.log.debug('doing things...')
-        Application.instance().report_indefinite(self, QCoreApplication.translate('SampleViewModel', 'doing things'))
+        with Application.instance().report(QCoreApplication.translate('SampleViewModel', 'doing things')):
+            yield from asyncio.sleep(5)
