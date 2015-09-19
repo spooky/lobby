@@ -47,7 +47,7 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
-        'simple': {'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'}
+        'simple': {'format': '{asctime} {levelname:>5}:{name:<20} {message}', 'style': '{'}
     },
     'handlers': {
         'console': {

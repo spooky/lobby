@@ -35,4 +35,4 @@ class MainWindow(QObject):
 
     def show(self):
         self.window.show()
-        self.log.debug('Alfred up')
+        self.log.debug('alfred up')

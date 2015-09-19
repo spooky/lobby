@@ -54,18 +54,18 @@ class Application(QGuiApplication):
             self.mainWindow = MainWindow(self)
             self.mainWindow.show()
         except Exception as e:
-            logger.critical('Error during init: {}'.format(e))
+            logger.critical('error during init: {}'.format(e))
             self.quit()
         else:
             try:
-                logger.info('Loading maps')
+                logger.info('loading maps')
                 yield from self.__queueTask(self.__initMapLookup, QCoreApplication.translate('Application', 'loading maps'))
-                logger.info('Loading mods')
+                logger.info('loading mods')
                 yield from self.__queueTask(self.__initModLookup, QCoreApplication.translate('Application', 'loading mods'))
             except Exception as e:
                 logger.error(e)
         finally:
-            logger.debug('Init complete')
+            logger.debug('init complete')
             self.initComplete.emit()
 
     # Required for QtHandler to propagate log messages to client 'console'
@@ -119,7 +119,7 @@ class MainWindow(QObject):
             raise Exception('currentView not set')
 
         self.window.show()
-        self.log.debug('Client up')
+        self.log.debug('client up')
 
     def _registerViews(self, views, app):
         for view in views:
