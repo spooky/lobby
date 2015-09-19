@@ -195,12 +195,13 @@ class GamesViewModel(NotifyablePropertyObject):
             [m.uid for m in self.mods.selected()]))
 
         # TODO: report QCoreApplication.translate('GamesViewModel', 'hosting game')
-        # TODO: add game starting logic here
+        # TODO: add game starting logic
 
     @pyqtSlot(int)
     def onJoinGame(self, id):
         self.log.debug('joining: {}'.format(id))
         # TODO: report QCoreApplication.translate('GamesViewModel', 'joining game')
+        # TODO: add game joining logic
 
     def onOpened(self, args):
         g = GameViewModel(args, self.mapLookup, self.modLookup)

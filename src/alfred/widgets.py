@@ -9,7 +9,6 @@ from .auth import auth_view_model
 
 # ################################## TODO ################################### #
 #                                                                             #
-# TODO: login, logout                                                         #
 # TODO: featured mods                                                         #
 # TODO: maps                                                                  #
 # TODO: mods                                                                  #
