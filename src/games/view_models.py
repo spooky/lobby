@@ -151,9 +151,12 @@ class GamesViewModel(NotifyablePropertyObject):
     # TODO: async
     def __restorePresets(self):
         # TODO: path... should either have a fixed dir or search up until a point
-        presets = json.load(open('../presets.json'))
-        for preset in presets:
-            self.presets.append(Preset(**preset))
+        try:
+            presets = json.load(open('../presets.json'))
+            for preset in presets:
+                self.presets.append(Preset(**preset))
+        except FileNotFoundError:
+            pass
 
     def onAppInitComplete(self):
         for m in sorted(self.mapLookup.values(), key=lambda m: m.name.lower()):
