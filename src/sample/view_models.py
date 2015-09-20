@@ -39,5 +39,7 @@ class SampleViewModel(NotifyablePropertyObject):
     @pyqtSlot()
     def on_doingThings(self):
         self.log.debug('doing things...')
-        with Application.instance().report(QCoreApplication.translate('SampleViewModel', 'doing things')):
-            yield from asyncio.sleep(5)
+        with Application.instance().report(QCoreApplication.translate('SampleViewModel', 'doing things'), False) as s:
+            for i in range(10):
+                s.update(i/10)
+                yield from asyncio.sleep(1)
