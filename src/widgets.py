@@ -74,10 +74,7 @@ class Application(QGuiApplication):
 
     def report(self, text='', indefinite=True, progress=0.0, running=False):
         status = TaskStatusViewModel(text, indefinite, progress, running)
-        # TODO: figure out why running .start() after appending to list doesn't propagate to UI
-        status.start()
         self.mainWindow.windowModel.taskList.append(status)
-
         return status
 
 

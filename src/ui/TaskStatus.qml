@@ -24,7 +24,6 @@ RowLayout {
 
     ProgressBar {
         visible: item.running && !item.indefinite
-        width: visible ? 64 : 0
         height: item.h / 2
         anchors.verticalCenter: parent.verticalCenter
         value: item.progress
@@ -33,7 +32,7 @@ RowLayout {
                 color: "transparent"
                 border.color: root.textColor
                 border.width: 1
-                implicitWidth: 200
+                implicitWidth: 96
                 implicitHeight: item.h / 2
             }
             progress: Rectangle {

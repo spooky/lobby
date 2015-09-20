@@ -11,10 +11,10 @@ class TaskStatusViewModel(NotifyablePropertyObject):
 
     ''' View model for reporting a running task '''
 
-    running = notifyableProperty(bool)
     text = notifyableProperty(str)
     indefinite = notifyableProperty(bool)
     progress = notifyableProperty(float)
+    running = notifyableProperty(bool)
     success = notifyableProperty(bool)
 
     def __init__(self, text='', indefinite=True, progress=0.0, running=False):
@@ -75,6 +75,19 @@ class TaskListModel(ListModelFor(TaskStatusViewModel)):
 
         self.summary.running = len(self._items) > 0
 
+    def __bubbleChangeEvents(self, item):
+        idx = self._items.index(item)
+
+        def emitDataChanged():
+            self.dataChanged.emit(self.index(idx), self.index(idx))
+            self.__updateSummary()
+
+        item.running_changed.connect(emitDataChanged)
+        item.text_changed.connect(emitDataChanged)
+        item.indefinite_changed.connect(emitDataChanged)
+        item.progress_changed.connect(emitDataChanged)
+        item.success_changed.connect(emitDataChanged)
+
     def append(self, item):
         super().append(item)
 
@@ -84,7 +97,7 @@ class TaskListModel(ListModelFor(TaskStatusViewModel)):
                 self.remove(item)
 
         item.running_changed.connect(onRunningChanged)
-
+        self.__bubbleChangeEvents(item)
         self.__updateSummary()
 
     def remove(self, item):
