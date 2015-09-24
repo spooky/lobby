@@ -9,10 +9,10 @@ from .auth import auth_view_model
 
 # ################################## TODO ################################### #
 #                                                                             #
-# TODO: featured mods                                                         #
-# TODO: maps                                                                  #
-# TODO: mods                                                                  #
 # TODO: host game, join game                                                  #
+# TODO: featured mods                                                         #
+# TODO: mods                                                                  #
+# TODO: maps                                                                  #
 # TODO: logging console                                                       #
 #                                                                             #
 # ########################################################################### #

@@ -1,7 +1,7 @@
 import QtQuick 2.3
 import QtQuick.Layouts 1.1
 
-import "../../ui" as Faf
+import "../../views" as Faf
 
 Item {
     anchors.horizontalCenter: parent.horizontalCenter

@@ -44,7 +44,7 @@ Rectangle {
     }
 
     GameTooltip {
-        parent: container // HACK to force qml z indexing for custom tooltips to work as expected 
+        parent: container // HACK to force qml z indexing for custom tooltips to work as expected
         x: getX(wrapper.x, wrapper.width, width, container.width, padding)
         y: getY(wrapper.y, wrapper.height, height, centralWidget.height, padding)
         z: 100
@@ -115,7 +115,7 @@ Rectangle {
 
                 Image {
                     fillMode: Image.PreserveAspectCrop
-                    source: "../../ui/icons/faf.svg" // TODO
+                    source: "../../views/icons/faf.svg" // TODO
                     sourceSize: Qt.size(16, 16)
                     smooth: true
                 }

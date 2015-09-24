@@ -42,7 +42,7 @@ options = {
 }
 
 executables = [
-    Executable('main.py', base=base, targetName='FAForever.exe', icon='ui/icons/faf.ico')
+    Executable('main.py', base=base, targetName='FAForever.exe', icon='views/icons/faf.ico')
 ]
 
 setup(

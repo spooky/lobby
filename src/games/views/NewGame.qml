@@ -1,6 +1,6 @@
 import QtQuick 2.3
 
-import "../../ui" as Faf
+import "../../views" as Faf
 
 Item {
     property string textColor: root.textColor

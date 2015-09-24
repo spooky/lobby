@@ -1,7 +1,7 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
-import "../../ui" as Faf
+import "../../views" as Faf
 
 Item {
     property int spacing: 5
