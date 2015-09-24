@@ -420,18 +420,27 @@ Window {
             anchors.leftMargin: 2*5
         }
 
-        TaskStatus {
+        MouseArea {
             anchors.right: resizer.left
             anchors.bottom: parent.bottom
             anchors.rightMargin: 2*5
+            width: childrenRect.width
+            height: childrenRect.height
+            cursorShape: Qt.PointingHandCursor
 
-            text: windowModel.taskSummary.text
-            indefinite: windowModel.taskSummary.indefinite
-            progress: windowModel.taskSummary.progress
-            running: windowModel.taskSummary.running
+            onClicked: taskList.visible = !taskList.visible
+
+            TaskStatus {
+                text: windowModel.taskSummary.text
+                indefinite: windowModel.taskSummary.indefinite
+                progress: windowModel.taskSummary.progress
+                running: windowModel.taskSummary.running
+            }
         }
 
         TaskList {
+            id: taskList
+            visible: false
             anchors.right: parent.right
             anchors.bottom: parent.top
             anchors.margins: 5
