@@ -4,8 +4,8 @@ from PyQt5.QtCore import QAbstractItemModel, QAbstractListModel, QModelIndex, QO
 def ListModelFor(klass):
     class ListModel(QAbstractItemModel):
 
-        def __init__(self):
-            super().__init__()
+        def __init__(self, parent=None):
+            super().__init__(parent)
             self._items = []
 
             meta = klass().metaObject()
