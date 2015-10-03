@@ -53,7 +53,7 @@ class GameViewModel(GameServer, NotifyablePropertyObject):
         game.host = game.host or 'that guy'
         game.players = game.players or 1
         game.teams = game.teams or [[{'name': game.host, 'cc': 'pl', 'skill': 1000}]]
-        game.balance = game.balance or 0.7
+        game.balance = game.balance or 70
 
 
 # yyy... ehh...
