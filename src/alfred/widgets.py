@@ -4,7 +4,8 @@ from PyQt5.QtCore import QObject, QUrl
 from PyQt5.QtQml import QQmlApplicationEngine
 
 from relays import *
-from .auth import auth_view_model
+from .auth import authViewModel
+from .game import gameViewModel
 
 
 # ################################## TODO ################################### #
@@ -27,7 +28,8 @@ class MainWindow(QObject):
         self.engine = QQmlApplicationEngine(self)
         self.engine.quit.connect(parent.quit)
 
-        self.engine.rootContext().setContextProperty('auth', auth_view_model)
+        self.engine.rootContext().setContextProperty('auth', authViewModel)
+        self.engine.rootContext().setContextProperty('game', gameViewModel)
 
         self.engine.load(QUrl.fromLocalFile('alfred/views/MainWindow.qml'))
 

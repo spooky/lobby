@@ -1,71 +1,39 @@
 import asyncio
 
 
-class AuthServer(object):
+class AuthClient(object):
 
     def __init__(self):
         super().__init__()
-        self._session = 0
-
-    def _user_id(self, user):
-        if not user:
-            return None
-
-        import hashlib
-        return hashlib.sha1(user.encode()).hexdigest()
-
-    def _session_id(self):
-        id = self._session
-        self._session += 1
-        return id
-
-    @asyncio.coroutine
-    def login(self, user, password, success=None):
-        future = asyncio.Future()
-        future.set_result(success is True)
-        return future
-
-    @asyncio.coroutine
-    def logout(self, user, success=None):
-        future = asyncio.Future()
-        future.set_result(success is True)
-        return future
-
-
-class AuthMediator(object):
-
-    def __init__(self):
-        self.client = None
-        self.server = None
+        self.server = server_factory()
 
     @asyncio.coroutine
     def login(self, user, password):
-        return (yield from self.server.login(user, password, success=True))
+        result = yield from self.server.request_login(user, password)
+        return result
 
     @asyncio.coroutine
     def logout(self, user):
-        return (yield from self.server.logout(user, success=True))
+        result = yield from self.server.request_logout(user)
+        return result
 
 
-class AuthClient(object):
-
-    def __init__(self, mediator):
-        self.mediator = mediator
+class AuthServer(object):
 
     @asyncio.coroutine
-    def login(self, user, password):
-        return (yield from self.mediator.login(user, password))
+    def request_login(self, user, password):
+        future = asyncio.Future()
+        future.set_result(True)
+        return future
 
     @asyncio.coroutine
-    def logout(self, user):
-        return (yield from self.mediator.logout(user))
+    def request_logout(self, user):
+        future = asyncio.Future()
+        future.set_result(True)
+        return future
 
 
-def create_auth_client():
-    # mediator = AuthMediator()
+def server_factory():
+    # return AuthServer()
     import alfred.auth
-    mediator = alfred.auth.auth_view_model
-    mediator.server = AuthServer()
-    mediator.client = AuthClient(mediator)
-
-    return mediator.client
+    return alfred.auth.authViewModel

@@ -4,6 +4,7 @@ import logging
 from itertools import groupby
 from PyQt5.QtCore import QVariant, QUrl, QCoreApplication, pyqtSignal, pyqtSlot
 
+import relays.game
 from models import Map, Mod
 from utils.async import asyncSlot
 from widgets import Application
@@ -25,8 +26,8 @@ class GameViewModel(NotifyablePropertyObject):
     featuredMod = notifyableProperty(str)
     mods = notifyableProperty(QVariant)
     slots = notifyableProperty(int)
-    playerCount = notifyableProperty(int)
-    teamsArrangement = notifyableProperty(QVariant)
+    players = notifyableProperty(int)
+    teams = notifyableProperty(QVariant)
     balance = notifyableProperty(int)
 
     def __init__(self, source=None, mapLookup=None, modLookup=None, parent=None):
@@ -37,18 +38,16 @@ class GameViewModel(NotifyablePropertyObject):
         if not source:
             return
 
-        self.id = source.get('id')
-        gameMap = self.getMap(source)
+        for attr in ['id', 'title', 'host', 'slots', 'players', 'teams', 'balance']:
+            setattr(self, attr, getattr(source, attr))
+
+        gameMap = self.__getMap(source.mapCode)
         self.mapPreviewSmall = QUrl(gameMap.previewSmall)
         self.mapPreviewBig = QUrl(gameMap.previewBig)
         self.mapName = gameMap.name
-        self.title = source.get('Title')
-        self.host = source['host'].get('username') if 'host' in source.keys() else None
-        self.featuredMod, self.mods = self.getMods(source.get('GameMods') or [])
-        self.slots = source['GameOption'].get('Slots', 0) if 'GameOption' in source.keys() else 0
-        self.playerCount = len(source.get('PlayerOption') or [])
-        self.teamsArrangement = self.getTeamsArrangement(source)
-        self.balance = 0
+
+        self.featuredMod = self.__getModName(source.featuredMod)
+        self.mods = sorted([self.__getModName(m) for m in source.mods]) if source.mods else []
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and other.id == self.id
@@ -56,37 +55,17 @@ class GameViewModel(NotifyablePropertyObject):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def getMap(self, source):
+    def __getMap(self, mapCode):
         try:
-            scenario = source['GameOption']['ScenarioFile']
-            return self._mapLookup[scenario.split('/')[2]]
+            return self._mapLookup[mapCode]
         except KeyError:
             return Map()
 
-    def getMods(self, mods):
-        names = []
-        for m in mods:
-            try:
-                names.append(self._modLookup[m].name)
-            except KeyError:
-                names.append(QCoreApplication.translate('GamesViewModel', 'unknown'))
-
-        return ('featured (todo)', sorted(names))  # (featured, other)
-
-    @staticmethod
-    def getTeamsArrangement(source):
-        if 'PlayerOption' not in source.keys():
-            return []
-
-        teams = []
-        players = source['PlayerOption']
-        for gkey, group in groupby(sorted(players.items(), key=lambda x: str(x[1]['Team']) + x[0]), key=lambda x: x[1]['Team']):
-            team = []
-            for k, v in group:
-                team.append({'name': v['PlayerName'], 'skill': v.get('MEAN'), 'cc': v['Country']})
-            teams.append(team)
-
-        return teams
+    def __getModName(self, mod):
+        try:
+            return self._modLookup[mod].name
+        except KeyError:
+            return QCoreApplication.translate('GamesViewModel', 'unknown')
 
 
 class GameListModel(ListModelFor(GameViewModel)):
@@ -120,6 +99,8 @@ class GamesViewModel(NotifyablePropertyObject):
         self.log = logging.getLogger(__name__)
 
         self.app = Application.instance()
+        self.client = relays.game.GameClient()
+        self.client.subscribeOnNewGame(self.__onNewGame)
 
         self.savePreset.connect(self.onSavePreset)
         self.hostGame.connect(self.onHostGame)
@@ -158,6 +139,14 @@ class GamesViewModel(NotifyablePropertyObject):
         except FileNotFoundError:
             pass
 
+    def __createGameViewModel(self, game):
+        return GameViewModel(game, self.mapLookup, self.modLookup)
+
+    def __onNewGame(self, game):
+        g = self.__createGameViewModel(game)
+        self.games.append(g)
+
+    @pyqtSlot()
     def onAppInitComplete(self):
         for m in sorted(self.mapLookup.values(), key=lambda m: m.name.lower()):
             self.maps.append(m)
@@ -167,12 +156,7 @@ class GamesViewModel(NotifyablePropertyObject):
             if not m.uiOnly:
                 self.mods.append(m)
 
-        # TODO: remove test data
-        import json
-        data = json.loads('{"id":93,"host":{"ip":"89.64.254.67","port":6112,"username":"spooky"},"GameOption":{"Timeouts":"3","NavalExpansionsAllowed":"4","Score":"no","LandExpansionsAllowed":"5","Victory":"demoralization","TeamLock":"locked","AutoTeams":"pvsi","CheatMult":"2.2","AllowObservers":0,"RankedGame":"Off","PrebuiltUnits":"Off","ScenarioFile":"/maps/3v3 Sand Box v2a/3v3 Sand Box v2a_scenario.lua","OmniCheat":"on","ShareUnitCap":"allies","RandomMap":"Off","FogOfWar":"explored","UnitCap":"1000","CivilianAlliance":"enemy","Slots":6,"TeamSpawn":"random","CheatsEnabled":"false","BuildMult":"2.0","Share":"yes","TMLRandom":"0","NoRushOption":"Off","GameSpeed":"adjustable"},"GameState":"Lobby","PlayerOption":{"1":{"PlayerName":"crunchy","RC":"ffffffff","DEV":0,"OwnerID":"3","Country":"pl","Team":0,"MEAN":1000,"NG":0,"Ready":0,"Civilian":0,"ArmyColor":3,"COUNTRY":"pl","Faction":3,"Human":1,"AIPersonality":"","PlayerColor":3,"StartSpot":1,"PL":1000},"2":{"PlayerName":"creamy","RC":"ffffffff","DEV":0,"OwnerID":"3","Country":"dk","Team":0,"MEAN":100,"NG":0,"Ready":0,"Civilian":0,"ArmyColor":3,"COUNTRY":"dk","Faction":3,"Human":1,"AIPersonality":"","PlayerColor":3,"StartSpot":1,"PL":1000},"3":{"PlayerName":"cookie","RC":"ffffffff","DEV":0,"OwnerID":"3","Country":"fi","Team":1,"MEAN":1500,"NG":0,"Ready":0,"Civilian":0,"ArmyColor":3,"COUNTRY":"fi","Faction":3,"Human":1,"AIPersonality":"","PlayerColor":3,"StartSpot":1,"PL":1000}},"Title":"test","GameMods":["921bdf63-c14a-1415-a758-42d1c231e4f4", "EEFFA8C6-96D9-11E4-9DA1-460D1D5D46B0"]}')
-        for i in range(1):
-            g = GameViewModel(data, self.mapLookup, self.modLookup)
-            self.games.append(g)
+        self.app.initComplete.disconnect(self.onAppInitComplete)
 
     # TODO: implement preset saving
     @pyqtSlot()
@@ -208,18 +192,3 @@ class GamesViewModel(NotifyablePropertyObject):
         with self.app.report(QCoreApplication.translate('GamesViewModel', 'joining game')):
             # TODO: add game joining logic
             yield from asyncio.sleep(5)
-
-    def onOpened(self, args):
-        g = GameViewModel(args, self.mapLookup, self.modLookup)
-        self.games.append(g)
-        self.log.debug('added game id: {}'.format(g.id))
-
-    def onUpdated(self, args):
-        g = GameViewModel(args, self.mapLookup, self.modLookup)
-        self.games.update(g)
-        self.log.debug('updated game id: {}'.format(g.id))
-
-    def onClosed(self, args):
-        g = GameViewModel(args, self.mapLookup, self.modLookup)
-        self.games.remove(g)
-        self.log.debug('closed game id: {}'.format(g.id))

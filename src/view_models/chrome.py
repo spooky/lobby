@@ -3,6 +3,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, QVariant, QCoreApplication
 from PyQt5.QtQml import qmlRegisterType
 
 import settings
+import relays.auth
 from utils.async import asyncSlot
 from .adapters import NotifyablePropertyObject, ListModelFor, notifyableProperty
 
@@ -140,7 +141,7 @@ class LoginViewModel(NotifyablePropertyObject):
     login = pyqtSignal(str, str, bool)
     logout = pyqtSignal()
 
-    def __init__(self, app, client, user=None, password=None, remember=None, parent=None):
+    def __init__(self, app, user=None, password=None, remember=None, parent=None):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
 
@@ -148,7 +149,7 @@ class LoginViewModel(NotifyablePropertyObject):
         self.logout.connect(self.onLogout)
 
         self.app = app
-        self.client = client
+        self.client = relays.auth.AuthClient()
         self.user = user
         self.password = password
         self.remember = remember or False

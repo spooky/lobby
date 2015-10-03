@@ -32,5 +32,10 @@ Window {
             anchors.left: parent.left
             anchors.right: parent.right
         }
+
+        Game {
+            anchors.left: parent.left
+            anchors.right: parent.right
+        }
     }
 }
