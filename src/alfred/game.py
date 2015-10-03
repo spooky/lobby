@@ -24,6 +24,8 @@ class GameViewModel(GameServer, NotifyablePropertyObject):
         self.create.connect(self.onCreate)
         self.generate.connect(self.onGenerate)
 
+        self.__games = 0
+
     @pyqtSlot(str)
     def onCreate(self, gameJson):
         if not gameJson:
@@ -41,6 +43,17 @@ class GameViewModel(GameServer, NotifyablePropertyObject):
         game = self.generateGame()
         self.gameJson = json.dumps(game.__dict__)
         self.newGame(game)
+
+    def __generateGameId(self):
+        self.__games += 1
+        return self.__games
+
+    def processGame(self, game):
+        game.id = game.id or self.__generateGameId()
+        game.host = game.host or 'that guy'
+        game.players = game.players or 1
+        game.teams = game.teams or [[{'name': game.host, 'cc': 'pl', 'skill': 1000}]]
+        game.balance = game.balance or 0.7
 
 
 # yyy... ehh...

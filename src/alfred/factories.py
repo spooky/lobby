@@ -23,6 +23,7 @@ def gameFactory():
         g.teams = [[{'name': 'crunchy', 'cc': 'pl', 'skill': 1000}, {'name': 'creamy', 'cc': 'dk', 'skill': 100}],
                    [{'name': 'cookie', 'cc': 'fi', 'skill': 1500}]]
         g.balance = 0.9
+        g.private = False
 
         return g
 

@@ -8,7 +8,7 @@ class GameClient(object):
         self.server = server_factory()
 
     def subscribeOnNewGame(self, callback):
-        self.server.onNewGame = callback
+        self.server.newGame = callback
 
     @asyncio.coroutine
     def host(self, game):
@@ -27,6 +27,10 @@ class GameServer(object):
     def requestHost(self, game):
         future = asyncio.Future()
         future.set_result(True)
+
+        self.processGame(game)
+        self.newGame(game)
+
         return future
 
     @asyncio.coroutine
@@ -35,11 +39,13 @@ class GameServer(object):
         future.set_result(True)
         return future
 
-    def onNewGame(self, game):
+    def newGame(self, game):
+        ''' A callback hook for the client to get notified about a new game '''
         pass
 
-    def newGame(self, game):
-        self.onNewGame(game)
+    def processGame(self, game):
+        ''' Verify if all game params are correct and calculate the ones that client can't '''
+        pass
 
 
 def server_factory():

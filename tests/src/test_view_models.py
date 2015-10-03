@@ -3,8 +3,8 @@ def test_test_GameViewModel_data():
     from games.models import Game
     from games.view_models import GameViewModel
 
-    mapLookup = {'scmp_009': Map(code='scmp_009', name="Seton's")}
-    game = Game(id=93, title='test', host='spooky', slots=8, players=1, balance=0, mapCode='scmp_009')
+    mapLookup = {'scmp_009': Map(code='scmp_009', name="Seton's", slots=8)}
+    game = Game(id=93, title='test', host='spooky', players=1, balance=0, mapCode='scmp_009')
     g = GameViewModel(game, mapLookup=mapLookup)
     assert g.id == 93
     assert g.mapName == "Seton's"

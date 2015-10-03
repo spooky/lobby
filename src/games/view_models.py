@@ -1,7 +1,6 @@
 import asyncio
 import json
 import logging
-from itertools import groupby
 from PyQt5.QtCore import QVariant, QUrl, QCoreApplication, pyqtSignal, pyqtSlot
 
 import relays.game
@@ -10,7 +9,7 @@ from utils.async import asyncSlot
 from widgets import Application
 from view_models.adapters import ListModelFor, SelectionList, NotifyablePropertyObject, notifyableProperty
 
-from .models import Preset
+from .models import Game, Preset
 
 
 class GameViewModel(NotifyablePropertyObject):
@@ -38,13 +37,15 @@ class GameViewModel(NotifyablePropertyObject):
         if not source:
             return
 
-        for attr in ['id', 'title', 'host', 'slots', 'players', 'teams', 'balance']:
+        # TODO: fix this .... seems that I need a ditc and not a class...
+        for attr in ['id', 'title', 'host', 'players', 'teams', 'balance', 'private']:
             setattr(self, attr, getattr(source, attr))
 
         gameMap = self.__getMap(source.mapCode)
         self.mapPreviewSmall = QUrl(gameMap.previewSmall)
         self.mapPreviewBig = QUrl(gameMap.previewBig)
         self.mapName = gameMap.name
+        self.slots = gameMap.slots
 
         self.featuredMod = self.__getModName(source.featuredMod)
         self.mods = sorted([self.__getModName(m) for m in source.mods]) if source.mods else []
@@ -143,6 +144,7 @@ class GamesViewModel(NotifyablePropertyObject):
         return GameViewModel(game, self.mapLookup, self.modLookup)
 
     def __onNewGame(self, game):
+        self.log.debug('new game: {}'.format(game))
         g = self.__createGameViewModel(game)
         self.games.append(g)
 
@@ -174,14 +176,16 @@ class GamesViewModel(NotifyablePropertyObject):
     @asyncSlot
     @pyqtSlot()
     def onHostGame(self):
-        self.log.debug('hosting with options: {}, {}, {}, {}, mods: {}'.format(
-            self.title,
-            'locked' if self.private else 'open',
-            self.featured.selected(),
-            self.maps.selected(),
-            [m.uid for m in self.mods.selected()]))
+        featuredMod = self.featured.selected()
+        mods = [m.uid for m in self.mods.selected()]
+        selectedMap = self.maps.selected()
+        newGame = Game(title=self.title, private=self.private, featuredMod=featuredMod.uid, mods=mods, mapCode=selectedMap.code)
+
+        self.log.debug('hosting game: {}'.format(newGame))
 
         with self.app.report(QCoreApplication.translate('GamesViewModel', 'hosting game')):
+            response = yield from self.client.host(newGame)
+            self.log.debug('server response for host: {}'.format(response))
             # TODO: add game starting logic
             yield from asyncio.sleep(5)
 
