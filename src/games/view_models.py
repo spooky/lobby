@@ -101,7 +101,7 @@ class GamesViewModel(NotifyablePropertyObject):
 
         self.app = Application.instance()
         self.client = relays.game.GameClient()
-        self.client.subscribeOnNewGame(self.__onNewGame)
+        self.client.subscribeForNewGame(self.__onNewGame)
 
         self.savePreset.connect(self.onSavePreset)
         self.hostGame.connect(self.onHostGame)
@@ -194,5 +194,7 @@ class GamesViewModel(NotifyablePropertyObject):
     def onJoinGame(self, id):
         self.log.debug('joining: {}'.format(id))
         with self.app.report(QCoreApplication.translate('GamesViewModel', 'joining game')):
+            response = yield from self.client.join(id)
+            self.log.debug('server response for join: {}'.format(response))
             # TODO: add game joining logic
             yield from asyncio.sleep(5)

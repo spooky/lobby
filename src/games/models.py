@@ -13,7 +13,7 @@ class Game(QObject):
         self.featuredMod = featuredMod
         self.mods = mods
         self.slots = slots
-        self.players = players
+        self.players = players  # TODO: remove, this info is stored indirectly in teams prop
         self.teams = teams
         self.balance = balance
         self.private = private

@@ -10,7 +10,6 @@ from .game import gameViewModel
 
 # ################################## TODO ################################### #
 #                                                                             #
-# TODO: host game, join game                                                  #
 # TODO: featured mods                                                         #
 # TODO: mods                                                                  #
 # TODO: maps                                                                  #

@@ -7,8 +7,11 @@ class GameClient(object):
         super().__init__()
         self.server = server_factory()
 
-    def subscribeOnNewGame(self, callback):
+    def subscribeForNewGame(self, callback):
         self.server.newGame = callback
+
+    def subscribeForGameUpdate(self, callback):
+        self.server.updateGame = callback
 
     @asyncio.coroutine
     def host(self, game):
@@ -16,8 +19,8 @@ class GameClient(object):
         return result
 
     @asyncio.coroutine
-    def join(self, game):
-        result = yield from self.server.requestJoin(game)
+    def join(self, id):
+        result = yield from self.server.requestJoin(id)
         return result
 
 
@@ -34,13 +37,21 @@ class GameServer(object):
         return future
 
     @asyncio.coroutine
-    def requestJoin(self, game):
+    def requestJoin(self, id):
         future = asyncio.Future()
         future.set_result(True)
+
+        # TODO: this should 'fetch' a game by id, update it's status (teams), then call
+        # self.updateGame(updatedGame)
+
         return future
 
     def newGame(self, game):
         ''' A callback hook for the client to get notified about a new game '''
+        pass
+
+    def updateGame(self, game):
+        ''' A callback hook for the client to get notified about a game state change '''
         pass
 
     def processGame(self, game):
