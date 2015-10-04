@@ -4,11 +4,11 @@ import logging
 from PyQt5.QtCore import QVariant, QUrl, QCoreApplication, pyqtSignal, pyqtSlot
 
 import relays.game
-from models import Map, Mod
+from models import Map
 from utils.async import asyncSlot
 from widgets import Application
 from view_models.adapters import ListModelFor, SelectionList, NotifyablePropertyObject, notifyableProperty
-
+from models import FeaturedMod
 from .models import Game, Preset
 
 
@@ -37,7 +37,7 @@ class GameViewModel(NotifyablePropertyObject):
         if not source:
             return
 
-        # TODO: fix this .... seems that I need a ditc and not a class...
+        # TODO: fix this .... seems that I need a dict and not a class...
         for attr in ['id', 'title', 'host', 'players', 'teams', 'balance', 'private']:
             setattr(self, attr, getattr(source, attr))
 
@@ -124,11 +124,8 @@ class GamesViewModel(NotifyablePropertyObject):
 
         self.app.initComplete.connect(self.onAppInitComplete)
 
-        # TODO: remove test data
-        self.featured.append(Mod('uid-faf', 'Forged Alliance Forever'), selected=True)
-        self.featured.append(Mod('uid-vanilla', 'Vanilla'))
-        self.featured.append(Mod('uid-phantom', 'Phantom X'))
-        self.featured.append(Mod('uid-nomads', 'The Nomads'))
+        for uid, f in FeaturedMod.ALL.items():
+            self.featured.append(f)
 
     # TODO: async
     def __restorePresets(self):

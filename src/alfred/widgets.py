@@ -10,7 +10,6 @@ from .game import gameViewModel
 
 # ################################## TODO ################################### #
 #                                                                             #
-# TODO: featured mods                                                         #
 # TODO: mods                                                                  #
 # TODO: maps                                                                  #
 # TODO: logging console                                                       #
