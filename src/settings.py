@@ -37,6 +37,7 @@ BIN_DIR = os.path.join(APPDATA_DIR, 'bin')
 LOG_DIR = os.path.join(APPDATA_DIR, 'logs')
 LOG_BUFFER_SIZE = 1000
 EXECUTOR_THREADS = 10
+PRESETS_PATH = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), './../presets.json'))
 
 MODULES = (
     'games',

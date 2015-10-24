@@ -156,6 +156,9 @@ class SelectionList(QAbstractListModel, NotifyablePropertyObject):
         self._items = [Selectable(i, self._nameExtractor) for i in (items or [])]
         self._nameExtractor = itemNameExtractor or self.__defaultNameExtractor
 
+    def __getitem__(self, key):
+        return self._items[key]
+
     def __defaultNameExtractor(self, x):
         return x.name if hasattr(x, 'name') else x.__str__()
 

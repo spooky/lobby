@@ -126,12 +126,15 @@ class GamesViewModel(NotifyablePropertyObject):
 
         for uid, f in FeaturedMod.ALL.items():
             self.featured.append(f)
+        # TODO
+        self.featured[0].selected = True
 
     # TODO: async
     def __restorePresets(self):
-        # TODO: path... should either have a fixed dir or search up until a point
+        import settings
+
         try:
-            presets = json.load(open('../presets.json'))
+            presets = json.load(open(settings.PRESETS_PATH))
             for preset in presets:
                 self.presets.append(Preset(**preset))
         except FileNotFoundError:
@@ -176,6 +179,7 @@ class GamesViewModel(NotifyablePropertyObject):
         featuredMod = self.featured.selected()
         mods = [m.uid for m in self.mods.selected()]
         selectedMap = self.maps.selected()
+
         newGame = Game(title=self.title, private=self.private, featuredMod=featuredMod.uid, mods=mods, mapCode=selectedMap.code)
 
         self.log.debug('hosting game: {}'.format(newGame))

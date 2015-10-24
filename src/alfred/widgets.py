@@ -8,15 +8,6 @@ from .auth import authViewModel
 from .game import gameViewModel
 
 
-# ################################## TODO ################################### #
-#                                                                             #
-# TODO: mods                                                                  #
-# TODO: maps                                                                  #
-# TODO: logging console                                                       #
-#                                                                             #
-# ########################################################################### #
-
-
 class MainWindow(QObject):
 
     def __init__(self, parent=None):

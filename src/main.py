@@ -6,6 +6,16 @@ import settings
 from widgets import Application
 from quamash import QEventLoop, QThreadExecutor
 
+
+# ################################## TODO ################################### #
+#                                                                             #
+# TODO: presets                                                               #
+# TODO: game tile z-index                                                     #
+# TODO: combo boxes                                                           #
+#                                                                             #
+# ########################################################################### #
+
+
 try:
     import signal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
