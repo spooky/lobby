@@ -22,7 +22,7 @@ class GameViewModel(NotifyablePropertyObject):
     mapName = notifyableProperty(str)
     title = notifyableProperty(str)
     host = notifyableProperty(str)
-    featuredMod = notifyableProperty(str)
+    featuredModName = notifyableProperty(str)
     mods = notifyableProperty(QVariant)
     slots = notifyableProperty(int)
     players = notifyableProperty(int)
@@ -37,7 +37,7 @@ class GameViewModel(NotifyablePropertyObject):
         if not source:
             return
 
-        # TODO: fix this .... seems that I need a dict and not a class...
+        # TODO: fix this .... seems that I need a dict or a named tuple, not a class...
         for attr in ['id', 'title', 'host', 'players', 'teams', 'balance', 'private']:
             setattr(self, attr, getattr(source, attr))
 
@@ -47,7 +47,7 @@ class GameViewModel(NotifyablePropertyObject):
         self.mapName = gameMap.name
         self.slots = gameMap.slots
 
-        self.featuredMod = self.__getModName(source.featuredMod)
+        self.featuredModName = self.__getFeaturedModName(source.featuredModUid)
         self.mods = sorted([self.__getModName(m) for m in source.mods]) if source.mods else []
 
     def __eq__(self, other):
@@ -62,9 +62,15 @@ class GameViewModel(NotifyablePropertyObject):
         except KeyError:
             return Map()
 
-    def __getModName(self, mod):
+    def __getFeaturedModName(self, uid):
         try:
-            return self._modLookup[mod].name
+            return FeaturedMod.ALL[uid].name
+        except KeyError:
+            return QCoreApplication.translate('GamesViewModel', 'unknown')
+
+    def __getModName(self, uid):
+        try:
+            return self._modLookup[uid].name
         except KeyError:
             return QCoreApplication.translate('GamesViewModel', 'unknown')
 
@@ -180,7 +186,7 @@ class GamesViewModel(NotifyablePropertyObject):
         mods = [m.uid for m in self.mods.selected()]
         selectedMap = self.maps.selected()
 
-        newGame = Game(title=self.title, private=self.private, featuredMod=featuredMod.uid, mods=mods, mapCode=selectedMap.code)
+        newGame = Game(title=self.title, private=self.private, featuredModUid=featuredMod.uid, mods=mods, mapCode=selectedMap.code)
 
         self.log.debug('hosting game: {}'.format(newGame))
 

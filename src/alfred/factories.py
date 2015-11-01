@@ -16,7 +16,7 @@ def gameFactory():
         g.mapCode = '3v3 Sand Box v2a'
         g.title = 'Test {}'.format(g.id)
         g.host = 'spooky'
-        g.featuredMod = 'uid-faf'
+        g.featuredModUid = 'BDEB63A2-C7A8-4AD0-B318-6BD5EDE8D429'
         g.mods = ['921bdf63-c14a-1415-a758-42d1c231e4f4', 'EEFFA8C6-96D9-11E4-9DA1-460D1D5D46B0']
         g.slots = 6
         g.players = 4

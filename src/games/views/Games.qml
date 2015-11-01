@@ -26,7 +26,7 @@ Flow {
             mapPreviewSmall: model.mapPreviewSmall
             mapPreviewBig: model.mapPreviewBig
             mapName: model.mapName
-            featuredModName: model.featuredMod
+            featuredModName: model.featuredModName
             modNames: model.mods
             slotsTaken: model.players
             slotsTotal: model.slots
