@@ -1,3 +1,6 @@
+import json
+import settings
+
 from PyQt5.QtCore import QObject
 
 
@@ -41,3 +44,17 @@ class Preset(GameOptions):
 
     def __str__(self):
         return self.__dict__.__str__()
+
+
+def load_presets():
+    try:
+        presets = json.load(open(settings.PRESETS_PATH))
+        for preset in presets:
+            yield Preset(**preset)
+    except FileNotFoundError:
+        pass
+
+
+def save_presets(presets):
+    with open(settings.PRESETS_PATH, 'w') as fp:
+        json.dump([p.__dict__ for p in presets if p is not None], fp, indent=2)

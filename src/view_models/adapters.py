@@ -144,6 +144,10 @@ class Selectable(NotifyablePropertyObject):
     def toggleSelected(self):
         self.selected = not self.selected
 
+    @property
+    def item(self):
+        return self._item
+
 
 class SelectionList(QAbstractListModel, NotifyablePropertyObject):
 
@@ -158,6 +162,9 @@ class SelectionList(QAbstractListModel, NotifyablePropertyObject):
 
     def __getitem__(self, key):
         return self._items[key]
+
+    def __len__(self):
+        return len(self._items)
 
     def __defaultNameExtractor(self, x):
         return x.name if hasattr(x, 'name') else x.__str__()
@@ -220,3 +227,7 @@ class SelectionList(QAbstractListModel, NotifyablePropertyObject):
         if len(self._items) > index:
             self._items[index].selected = selected
             self.currentIndex = index
+
+    @property
+    def items(self):
+        return [selectable.item for selectable in self._items]

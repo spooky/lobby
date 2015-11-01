@@ -62,7 +62,8 @@ Item {
                 Layout.column: 1
                 Layout.fillWidth: true
 
-                editable: false
+                id: presets
+                editable: true
                 model: contentModel.presets
                 textRole: 'name'
                 currentIndex: model.currentIndex
@@ -78,7 +79,7 @@ Item {
                 size: 26
                 source: "icons/save.svg"
                 transform: Translate { x: 1 } // align to the right edge
-                onClicked: contentModel.savePreset()
+                onClicked: contentModel.savePreset(presets.editText)
             }
 
             Faf.TextField {

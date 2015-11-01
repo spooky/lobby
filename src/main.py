@@ -9,7 +9,6 @@ from quamash import QEventLoop, QThreadExecutor
 
 # ################################## TODO ################################### #
 #                                                                             #
-# TODO: presets                                                               #
 # TODO: game tile z-index                                                     #
 # TODO: combo boxes                                                           #
 #                                                                             #

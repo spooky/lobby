@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 from PyQt5.QtCore import QVariant, QUrl, QCoreApplication, pyqtSignal, pyqtSlot
 
@@ -9,7 +8,7 @@ from utils.async import asyncSlot
 from widgets import Application
 from view_models.adapters import ListModelFor, SelectionList, NotifyablePropertyObject, notifyableProperty
 from models import FeaturedMod
-from .models import Game, Preset
+from .models import Game, Preset, load_presets, save_presets
 
 
 class GameViewModel(NotifyablePropertyObject):
@@ -95,9 +94,8 @@ class GamesViewModel(NotifyablePropertyObject):
     featured = notifyableProperty(SelectionList)
     maps = notifyableProperty(SelectionList)
     mods = notifyableProperty(SelectionList)
-    presets = notifyableProperty(SelectionList)
 
-    savePreset = pyqtSignal()
+    savePreset = pyqtSignal(str)
     hostGame = pyqtSignal()
     joinGame = pyqtSignal(int)
 
@@ -137,14 +135,9 @@ class GamesViewModel(NotifyablePropertyObject):
 
     # TODO: async
     def __restorePresets(self):
-        import settings
-
-        try:
-            presets = json.load(open(settings.PRESETS_PATH))
-            for preset in presets:
-                self.presets.append(Preset(**preset))
-        except FileNotFoundError:
-            pass
+        self.presets.append(None)
+        for preset in load_presets():
+            self.presets.append(preset)
 
     def __createGameViewModel(self, game):
         return GameViewModel(game, self.mapLookup, self.modLookup)
@@ -166,16 +159,24 @@ class GamesViewModel(NotifyablePropertyObject):
 
         self.app.initComplete.disconnect(self.onAppInitComplete)
 
-    # TODO: implement preset saving
-    @pyqtSlot()
-    def onSavePreset(self):
+    @pyqtSlot(str)
+    def onSavePreset(self, name=None):
+        selected = self.presets.selected()
+        if selected is None:
+            preset = Preset(name=name)
+            self.presets.append(preset)
+        else:
+            preset = self.presets.selected()
+            preset.name = name
+
         try:
-            # TODO: remove test data
-            self.featured.setSelected(1)
-            self.maps.setSelected(7)
-            self.mods.setSelected(4)
-            self.mods.setSelected(8)
-            self.log.debug('changed settings')
+            preset.title = self.title
+            preset.featuredModUid = self.featured.selected().uid
+            preset.mapCode = self.maps.selected().code
+            preset.mods = [m.uid for m in self.mods.selected()]
+            preset.private = self.private
+
+            save_presets(self.presets.items)
         except Exception as e:
             self.log.error(e)
 
